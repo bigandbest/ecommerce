@@ -441,7 +441,7 @@ const Cart = () => {
 
                           {/* Quantity Controls - Fixed size & compact */}
                           <div
-                            className="flex-shrink-0 flex items-center border border-pink-400 rounded-md overflow-hidden"
+                            className="flex-shrink-0 flex items-center justify-center border border-pink-400 rounded-md overflow-hidden"
                             style={{ height: "26px", width: "70px" }} // fixed size of box
                           >
                             {/* Minus */}

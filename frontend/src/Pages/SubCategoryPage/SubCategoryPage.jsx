@@ -170,7 +170,7 @@ const SubCategoryPage = () => {
         {/* Fixed Subcategory Bar */}
         {/* Fixed Horizontal Bar (styled as requested) */}
         <div
-          className="fixed top-0 left-19 right-0 w-auto flex items-center h-[85px] justify-between px-5 py-3"
+          className="fixed top-0 left-19 right-0 w-auto flex items-center h-[92px] justify-between px-5 py-3"
           style={{
             background: "linear-gradient(90deg, #fff 30%, #76b3fa 100%)",
           }}
@@ -198,7 +198,7 @@ const SubCategoryPage = () => {
         {/* Scrollable Group Section */}
         <div
           ref={groupSectionRef}
-          className="flex-1 px-2 mt-9 pb-6 pt-3 scrollable-container overflow-y-auto"
+          className="flex-1 px-2 pb-6 pt-3 scrollable-container overflow-y-auto"
           onScroll={handleScroll}
         >
           {subcategories.map((sub, index) => (

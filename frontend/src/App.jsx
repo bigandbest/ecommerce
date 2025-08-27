@@ -50,6 +50,7 @@ import BbmPicks from "./components/BBM Picks/BbmPick.jsx";
 import Stores from "./components/BBM Picks/Stores.jsx";
 import Quickyfy from "./components/BBM Picks/Quickyfy.jsx";
 
+
 // Protected route component
 const ProtectedRoute = ({ children }) => {
   const { currentUser, loading } = useAuth();
@@ -124,6 +125,7 @@ function App() {
                 <StoreNav/>
                 <LocationModal />
                 <MobileBannerCarousel />
+                
                 <Stores title="BBM Picks" items={Seconddata} />
                 <BbmPicks title="Recommended Store" items={data} />
                 <Quickyfy title="Quickyfy" items={Thirddata} />

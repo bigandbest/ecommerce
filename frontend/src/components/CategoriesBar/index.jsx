@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BsShop } from "react-icons/bs";
-import { MapPinned } from "lucide-react";
+import { MapPinned, Heart } from "lucide-react";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
@@ -479,14 +479,10 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
       );
     }
     if (type === "home") navigate("/");
+    if (type === "wishlist") navigate("/wishlist");
+    if (type === "E-Partner") navigate("/BusinessPartner");
     if (type === "cart") navigate("/cart");
-    if (type === "Login") {
-      if (currentUser) {
-        navigate("/MobileAccount");
-      } else {
-        navigate("/login");
-      }
-    }
+    if (type === "Login") navigate("/login");
   };
 
   return (
@@ -1314,9 +1310,9 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
           <span style={{ fontSize: "11px" }}>Category</span>
         </button>
         <button
-          className="mobile-bottom-nav-btn mt-1"
-          aria-label="Cart"
-          onClick={() => handleBottomMenu("cart")}
+          className="mobile-bottom-nav-btn"
+          aria-label="wishlist"
+          onClick={() => handleBottomMenu("wishlist")}
           style={{
             background: "none",
             border: "none",
@@ -1327,17 +1323,18 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
             padding: 0,
           }}
         >
-          <StyledBadge badgeContent={cartCount} color="secondary">
+          {/* <StyledBadge badgeContent={cartCount} color="secondary">
             <MdOutlineShoppingCart size={22} />
-          </StyledBadge>
+          </StyledBadge> */}
+          <Heart />
 
-          <span style={{ fontSize: "11px" }}>Cart</span>
+          <span style={{ fontSize: "11px" }}>Wishlist</span>
         </button>
 
         <button
           className="mobile-bottom-nav-btn"
-          aria-label="Menu"
-          onClick={() => handleBottomMenu("Login")}
+          aria-label="E-Partner"
+          onClick={() => handleBottomMenu("E-Partner")}
           style={{
             background: "none",
             border: "none",
@@ -1349,7 +1346,7 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
           }}
         >
           <User size={22} />
-          <span style={{ fontSize: "11px" }}>Account</span>
+          <span style={{ fontSize: "11px" }}>E-Partner</span>
         </button>
       </div>
 

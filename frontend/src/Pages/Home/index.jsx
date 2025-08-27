@@ -12,6 +12,8 @@ import ProductsNew from "../LastMobileProducts/LastMobileProducts.jsx";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import HomeFestivalGrid from "../../components/BBM Picks/HomeFestivalsGrid.jsx";
+import FeaturedThisWeek from "../../components/BBM Picks/FeaturingSection.jsx";
 
 
 // Import Swiper styles
@@ -252,14 +254,14 @@ export const Home = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   // Search handler
-  const handleSearchSubmit = (e) => {
+  /* const handleSearchSubmit = (e) => {
     if (e) e.preventDefault();
     if (searchQuery.trim()) {
       navigate(
         `/productListing?search=${encodeURIComponent(searchQuery.trim())}`
       );
     }
-  };
+  }; */
 
   useEffect(() => {
     const handleResize = () => {
@@ -305,58 +307,10 @@ export const Home = () => {
 
       <HomeSlider />
       <FlashSale />
+      <HomeFestivalGrid />
+      <FeaturedThisWeek />
 
-      {/* Popular Products Section */}
-      <section className="bg-white sm:!py-10 !py-0 mt-0 md:flex md:justify-center">
-        <div className="px-2 md:container md:px-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex-1">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-1 mt-5">
-                Popular Products
-              </h2>
-            </div>
-            {/* <div className="w-full md:w-auto md:flex-1">
-              <ProductTabs />
-            </div> */}
-          </div>
-
-          {/* {console.log("Popular Products:", popularProducts)} */}
-          <ProductsSlider
-            products={popularProducts}
-            slidesPerViewMobile={2.5}
-            slidesPerViewTablet={2.5}
-            slidesPerViewDesktop={4}
-            slidesPerViewLarge={5}
-          />
-        </div>
-      </section>
-
-      {/* Latest Products Section */}
-      <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
-        <div className="px-2 md:container md:px-10">
-          <div className="flex items-center justify-between ">
-            <h2 className="text-xl sm:text-2xl font-semibold">
-              Latest Products
-            </h2>
-            <a
-              href="/productListing"
-              className="text-sm text-blue-600 items-center flex align-middle hover:underline"
-            >
-              View All
-            </a>
-          </div>
-
-          <ProductsSlider
-            products={newProducts}
-            slidesPerViewMobile={2.5}
-            slidesPerViewTablet={2.5}
-            slidesPerViewDesktop={4}
-            slidesPerViewLarge={5}
-          />
-        </div>
-      </section>
-
-      {/* ================== PROMOTIONAL BANNER ================== */}
+       {/* ================== PROMOTIONAL BANNER ================== */}
       {/* Desktop version (lg and up) */}
 
       <section className="!p-5 bg-white md:hidden md:justify-center">
@@ -404,7 +358,63 @@ export const Home = () => {
         )}
       </section>
 
+      <VideoBannerSlider />
 
+      {/* Popular Products Section */}
+      <section className="bg-white sm:!py-10 !py-0 mt-0 md:flex md:justify-center">
+        <div className="px-2 md:container md:px-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center justify-between ">
+              <h2 className="text-xl sm:text-2xl font-semibold mt-5">
+                Popular Products
+              </h2>
+              <a
+              href="/productListing"
+              className="text-sm text-blue-600 hover:underline mt-5 items-center flex align-middle"
+            >
+              View All
+            </a>
+            </div>
+            {/* <div className="w-full md:w-auto md:flex-1">
+              <ProductTabs />
+            </div> */}
+          </div>
+
+          {/* {console.log("Popular Products:", popularProducts)} */}
+          <ProductsSlider
+            products={popularProducts}
+            slidesPerViewMobile={2.5}
+            slidesPerViewTablet={2.5}
+            slidesPerViewDesktop={4}
+            slidesPerViewLarge={5}
+          />
+        </div>
+      </section>
+
+      {/* Latest Products Section */}
+      <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
+        <div className="px-2 md:container md:px-10">
+          <div className="flex items-center justify-between ">
+            <h2 className="text-xl sm:text-2xl font-semibold">
+              Latest Products
+            </h2>
+            <a
+              href="/productListing"
+              className="text-sm text-blue-600 items-center flex align-middle hover:underline"
+            >
+              View All
+            </a>
+          </div>
+
+          <ProductsSlider
+            products={newProducts}
+            slidesPerViewMobile={2.5}
+            slidesPerViewTablet={2.5}
+            slidesPerViewDesktop={4}
+            slidesPerViewLarge={5}
+          />
+        </div>
+      </section>
 
       {/* <section className="hidden md:block py-4 bg-white">
   <div className="container px-4">
@@ -466,7 +476,7 @@ export const Home = () => {
 
 
 
-      <VideoBannerSlider />
+      
 
       {/* Featured Products Section */}
       <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
