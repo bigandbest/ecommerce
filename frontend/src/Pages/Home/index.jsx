@@ -14,6 +14,8 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import HomeFestivalGrid from "../../components/BBM Picks/HomeFestivalsGrid.jsx";
 import FeaturedThisWeek from "../../components/BBM Picks/FeaturingSection.jsx";
+import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
+import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
 
 
 // Import Swiper styles
@@ -359,6 +361,8 @@ export const Home = () => {
       </section>
 
       <VideoBannerSlider />
+      <ProductGrid3X3/>
+      <EigthProductSection />
 
       {/* Popular Products Section */}
       <section className="bg-white sm:!py-10 !py-0 mt-0 md:flex md:justify-center">

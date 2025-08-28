@@ -1307,7 +1307,7 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
           }}
         >
           <MdCategory size={22} />
-          <span style={{ fontSize: "11px" }}>Category</span>
+          <span style={{ fontSize: "11px" }}>All</span>
         </button>
         <button
           className="mobile-bottom-nav-btn"
