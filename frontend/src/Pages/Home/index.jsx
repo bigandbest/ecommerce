@@ -16,7 +16,7 @@ import HomeFestivalGrid from "../../components/BBM Picks/HomeFestivalsGrid.jsx";
 import FeaturedThisWeek from "../../components/BBM Picks/FeaturingSection.jsx";
 import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
 import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
-
+import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
 
 // Import Swiper styles
 import "swiper/css";
@@ -296,6 +296,213 @@ export const Home = () => {
     };
   }, []);
 
+  const sectionData = [
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+  ];
+  const sectionData2 = [
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+  ];
+  const sectionData3 = [
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+  ];
+
   return (
     <>
       {/* Search Bar For mobile Screens */}
@@ -312,7 +519,7 @@ export const Home = () => {
       <HomeFestivalGrid />
       <FeaturedThisWeek />
 
-       {/* ================== PROMOTIONAL BANNER ================== */}
+      {/* ================== PROMOTIONAL BANNER ================== */}
       {/* Desktop version (lg and up) */}
 
       <section className="!p-5 bg-white md:hidden md:justify-center">
@@ -356,13 +563,36 @@ export const Home = () => {
             </Slider>
           </div>
         ) : (
-         <></>
+          <></>
         )}
       </section>
 
       <VideoBannerSlider />
-      <ProductGrid3X3/>
-      <EigthProductSection />
+      <ProductGrid3X3 />
+      <EigthProductSection sectionCount={2} startIndex={0} />
+      <div className="p-4 bg-white md:hidden">
+        {sectionData.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div>
+
+      <EigthProductSection sectionCount={4} startIndex={2} />
+
+      <div className="p-4 bg-white md:hidden">
+        {sectionData2.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div>
+
+      <EigthProductSection sectionCount={2} startIndex={6} />
 
       {/* Popular Products Section */}
       <section className="bg-white sm:!py-10 !py-0 mt-0 md:flex md:justify-center">
@@ -373,11 +603,11 @@ export const Home = () => {
                 Popular Products
               </h2>
               <a
-              href="/productListing"
-              className="text-sm text-blue-600 hover:underline mt-5 items-center flex align-middle"
-            >
-              View All
-            </a>
+                href="/productListing"
+                className="text-sm text-blue-600 hover:underline mt-5 items-center flex align-middle"
+              >
+                View All
+              </a>
             </div>
             {/* <div className="w-full md:w-auto md:flex-1">
               <ProductTabs />
@@ -419,6 +649,16 @@ export const Home = () => {
           />
         </div>
       </section>
+
+      <div className="p-4 bg-white md:hidden">
+        {sectionData3.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div>
 
       {/* <section className="hidden md:block py-4 bg-white">
   <div className="container px-4">
@@ -478,10 +718,6 @@ export const Home = () => {
 </section> */}
       {/* ========================================================= */}
 
-
-
-      
-
       {/* Featured Products Section */}
       <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
         <div className="px-2 md:container md:px-10">
@@ -507,7 +743,7 @@ export const Home = () => {
         </div>
       </section>
 
-      {dynamicSections.map(
+      {dynamicSections.slice(0, 4).map(
         ({ key, label, products }, index) =>
           products.length > 0 && (
             <React.Fragment key={key}>
@@ -534,41 +770,61 @@ export const Home = () => {
                   />
                 </div>
               </section>
-
-              {/* Insert PromoBanner every 2 sections */}
-
-              {/* <section className="py-4 bg-white">
-        <div className="container px-4">
-          <div className="shipping-banner w-full lg:w-[90%] mx-auto py-4 px-4 sm:px-6 border-2 border-red-200 rounded-lg shadow-sm bg-gradient-to-r from-red-50 to-white">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <FaShippingFast className="text-3xl sm:text-4xl text-red-500" />
-                <span className="text-base sm:text-lg font-semibold uppercase">
-                  {getPromoSetting("promo_shipping_title", "Free Shipping")}
-                </span>
-              </div>
-
-              <div className="text-center sm:text-left">
-                <p className="font-medium text-sm sm:text-base">
-                  {getPromoSetting(
-                    "promo_shipping_description",
-                    "Free delivery on your first order and over ₹500"
-                  )}
-                </p>
-              </div>
-
-              <p className="font-bold text-lg sm:text-xl text-red-600">
-                {getPromoSetting("promo_shipping_amount", "Only ₹500/-")}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section> */}
-
-              {/* {(index + 1) % 2 === 0 && <PromoBanner />} */}
             </React.Fragment>
           )
       )}
+
+      <div className="p-4 bg-white md:hidden">
+        {sectionData2.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div>
+
+      {dynamicSections.slice(4).map(
+        ({ key, label, products }, index) =>
+          products.length > 0 && (
+            <React.Fragment key={key}>
+              <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
+                <div className="px-2 md:container md:px-10">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl sm:text-2xl font-semibold">
+                      {label}
+                    </h2>
+                    <a
+                      href="/productListing"
+                      className="text-sm text-blue-600 hover:underline text-center flex items-center align-middle"
+                    >
+                      View All
+                    </a>
+                  </div>
+
+                  <ProductsSlider
+                    products={products}
+                    slidesPerViewMobile={2.5}
+                    slidesPerViewTablet={2.5}
+                    slidesPerViewDesktop={4}
+                    slidesPerViewLarge={5}
+                  />
+                </div>
+              </section>
+            </React.Fragment>
+          )
+      )}
+
+      <div className="p-4 bg-white md:hidden">
+        {sectionData2.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div>
+
       <ProductsNew />
     </>
   );
