@@ -17,6 +17,7 @@ import FeaturedThisWeek from "../../components/BBM Picks/FeaturingSection.jsx";
 import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
 import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
 import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
+import BannerImagesSlider from "../../components/NewSection/BannerImagesSlider.jsx";
 
 // Import Swiper styles
 import "swiper/css";
@@ -518,6 +519,10 @@ export const Home = () => {
       <FlashSale />
       <HomeFestivalGrid />
       <FeaturedThisWeek />
+      <BannerImagesSlider
+        count={3}
+        bannerUrl="https://i.postimg.cc/W4pL05Hw/Opening-Soon.png"
+      />
 
       {/* ================== PROMOTIONAL BANNER ================== */}
       {/* Desktop version (lg and up) */}
@@ -569,6 +574,10 @@ export const Home = () => {
 
       <VideoBannerSlider />
       <ProductGrid3X3 />
+      <BannerImagesSlider
+        count={2}
+        bannerUrl="https://i.postimg.cc/mrVcS62L/Untitled-design-1.png"
+      />
       <EigthProductSection sectionCount={2} startIndex={0} />
       <div className="p-4 bg-white md:hidden">
         {sectionData.map((section, idx) => (
