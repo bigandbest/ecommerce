@@ -18,6 +18,7 @@ import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
 import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
 import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
 import BannerImagesSlider from "../../components/NewSection/BannerImagesSlider.jsx";
+import ProductBannerSlider from "../../components/NewSection/ProductBannerSlider.jsx";
 
 // Import Swiper styles
 import "swiper/css";
@@ -588,8 +589,17 @@ export const Home = () => {
           />
         ))}
       </div>
+      <ProductBannerSlider
+        count={1}
+        bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
+      />
 
-      <EigthProductSection sectionCount={4} startIndex={2} />
+      <EigthProductSection sectionCount={3} startIndex={2} />
+      <ProductBannerSlider
+        count={1}
+        bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
+      />
+      <EigthProductSection sectionCount={1} startIndex={5} />
 
       <div className="p-4 bg-white md:hidden">
         {sectionData2.map((section, idx) => (
@@ -658,6 +668,10 @@ export const Home = () => {
           />
         </div>
       </section>
+      <ProductBannerSlider
+        count={1}
+        bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
+      />
 
       <div className="p-4 bg-white md:hidden">
         {sectionData3.map((section, idx) => (

@@ -49,6 +49,7 @@ import StoreNav from "./components/StoreNav/StoreNav.jsx";
 import BbmPicks from "./components/BBM Picks/BbmPick.jsx";
 import Stores from "./components/BBM Picks/Stores.jsx";
 import Quickyfy from "./components/BBM Picks/Quickyfy.jsx";
+import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
 
 
 // Protected route component
@@ -85,26 +86,26 @@ function App() {
   }, []);
 
   const data = [
-  { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
-  { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Packaging" },
-  { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Essentia" },
-  { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Plus" },
-  { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "More" },
-];
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Packaging" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Essentia" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Plus" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "More" },
+  ];
   const Seconddata = [
-  { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Office" },
-  { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
-  { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
-  { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
-  { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "More" },
-];
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Office" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "More" },
+  ];
   const Thirddata = [
-  { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
-  { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Packaging" },
-  { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Essentia" },
-  { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Plus" },
-  { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "More" },
-];
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Packaging" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Essentia" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Plus" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "More" },
+  ];
 
   return (
     <>
@@ -122,14 +123,19 @@ function App() {
                 <div className="!sticky top-0">
                   <MainSearchBar />
                 </div>
-                <StoreNav/>
+                <StoreNav />
                 <LocationModal />
                 <MobileBannerCarousel />
-                
+
                 <Stores title="BBM Picks" items={Seconddata} />
                 <BbmPicks title="Recommended Store" items={data} />
                 <Quickyfy title="Quickyfy" items={Thirddata} />
                 <MobileCategoriesBar />
+                <OfferBannerSlider
+                  count={1}
+                  bannerUrl="https://i.postimg.cc/rF7J75bL/Untitled-design-3.png"
+                />
+
                 <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
                   setMobileMenuOpen={setMobileMenuOpen} />
                 <Routes>
