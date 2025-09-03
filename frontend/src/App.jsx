@@ -50,6 +50,8 @@ import BbmPicks from "./components/BBM Picks/BbmPick.jsx";
 import Stores from "./components/BBM Picks/Stores.jsx";
 import Quickyfy from "./components/BBM Picks/Quickyfy.jsx";
 import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
+import CategoryOfferBanner from "./components/NewSection/CategoryOfferBanner.jsx";
+import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx";
 
 
 // Protected route component
@@ -135,6 +137,8 @@ function App() {
                   count={1}
                   bannerUrl="https://i.postimg.cc/rF7J75bL/Untitled-design-3.png"
                 />
+                <CategoryOfferBanner count={1} bannerUrl="https://i.postimg.cc/bNfdYphd/Untitled-design-5.png" />
+                {/* <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/qqwqqDyg/Untitled-design-6.png"/> */}
 
                 <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
                   setMobileMenuOpen={setMobileMenuOpen} />

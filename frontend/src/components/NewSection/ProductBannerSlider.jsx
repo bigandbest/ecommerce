@@ -49,43 +49,51 @@ const ProductBannerSlider = ({ count = 3, bannerUrl }) => {
               {productData.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-xl shadow p-3 flex-shrink-0 w-40 sm:w-56"
+                  className="bg-white rounded-xl shadow p-3 flex-shrink-0 w-40 sm:w-56 flex flex-col"
                 >
+                  {/* Product Image */}
                   <div>
                     <img
-                    src={product.img}
-                    alt={product.name}
-                    className="h-28 w-full object-contain mb-2"
-                  />
+                      src={product.img}
+                      alt={product.name}
+                      className="h-28 w-full object-contain mb-2"
+                    />
                   </div>
 
-                  <div className="flex items-center justify-self-start gap-x-1 mt-1">
+                  {/* Price */}
+                  <div className="flex items-center gap-x-1 mt-1">
                     <p className="text-sm font-bold">{product.price}</p>
                     <p className="text-xs line-through text-gray-400">
                       {product.oldPrice}
                     </p>
                   </div>
+
+                  {/* Quantity & Save */}
                   <div className="mt-0.5 text-xs">1pc</div>
-                  <div className="mt-0.5 text-green-600 text-xs">{product.save}</div>
-                  <h3 className="text-xs sm:text-sm font-medium line-clamp-2 mt-1 mb-2">
+                  <div className="mt-0.5 text-green-600 text-xs">
+                    {product.save}
+                  </div>
+
+                  {/* Name */}
+                  <h3 className="text-xs sm:text-sm font-medium line-clamp-2 mt-1 mb-2 flex-grow">
                     {product.name}
                   </h3>
-                  
-                  <button className="bg-pink-500 text-white text-xs px-3 py-1 rounded-lg w-full">
+
+                  {/* Button at same height */}
+                  <button className="bg-pink-500 text-white text-xs px-3 py-1 rounded-lg w-full mt-auto">
                     ADD
                   </button>
-                
                 </div>
               ))}
             </div>
-            <Link to={'/productListing'}>
-          <div className="bg-red-900 text-white w-[90%] mx-auto rounded-xl text-center py-2 mt-2 cursor-pointer hover:bg-purple-800">
-            See All →
-          </div>
-          </Link>
-          </div>
 
-          {/* See All Button */}
+            {/* See All Button */}
+            <Link to={"/productListing"}>
+              <div className="bg-red-900 text-white w-[90%] mx-auto rounded-xl text-center py-2 mt-2 cursor-pointer hover:bg-purple-800">
+                See All →
+              </div>
+            </Link>
+          </div>
         </div>
       ))}
     </div>

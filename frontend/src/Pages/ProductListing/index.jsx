@@ -19,6 +19,7 @@ import { MdSort } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useLocationContext } from "../../contexts/LocationContext.jsx";
+import { ChevronDown } from "lucide-react";
 
 import {
   getAllProducts,
@@ -221,7 +222,61 @@ const ProductListing = () => {
       </div> */}
       {/* this div is only for spacing between search bar and product list */}
       {/*  <div className="mt-5 h-12 md:hidden"></div> */}
-      <section className=" bg-gray-50 product-section">
+      <section className=" bg-gray-50 product-section !pt-2">
+        
+        <div className="w-full flex items-center justify-start gap-6 overflow-x-auto hide-scrollbar">
+          <div className="flex flex-col">
+            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
+            <p  className="text-[10px] text-center">Name</p>
+          </div>
+          <div className="flex flex-col">
+            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
+            <p  className="text-[10px] text-center">Name</p>
+          </div>
+          <div className="flex flex-col">
+            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
+            <p  className="text-[10px] text-center">Name</p>
+          </div>
+          <div className="flex flex-col">
+            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
+            <p  className="text-[10px] text-center">Name</p>
+          </div>
+          <div className="flex flex-col">
+            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
+            <p  className="text-[10px] text-center">Name</p>
+          </div>
+          <div className="flex flex-col">
+            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
+            <p  className="text-[10px] text-center">Name</p>
+          </div>
+  
+        </div>
+
+
+        {/* Mobile filter button - visible only on small screens */}
+            <div className="flex justify-between md:hidden w-20 py-2">
+              <Button
+                variant="outlined"
+                startIcon={<FaFilter />}
+                onClick={toggleSidebar}
+                fullWidth
+                className="!border-gray-300 !w-20 !text-gray-700"
+              >
+                Filters
+              </Button>
+
+            {/* Name is Category but it will be connected to sub catgories */}
+              <Button
+                variant="outlined"
+                onClick={toggleSidebar}
+                fullWidth
+                className="!border-gray-300 !w-30 !text-gray-700"
+              >
+                Category <ChevronDown />
+              </Button>
+            </div>
+
+
         <div className="w-full px-4">
           <Breadcrumbs aria-label="breadcrumb" className="text-sm flex-wrap">
             <Link
@@ -287,19 +342,6 @@ const ProductListing = () => {
 
         <div className="bg-white mt-4 shadow-sm product-listing-bg-white">
           <div className="w-full product-listing-main-wrapper">
-            {/* Mobile filter button - visible only on small screens */}
-            <div className="block md:hidden w-full mb-4">
-              <Button
-                variant="outlined"
-                startIcon={<FaFilter />}
-                onClick={toggleSidebar}
-                fullWidth
-                className="!border-gray-300 !text-gray-700"
-              >
-                Show Filters
-              </Button>
-            </div>
-
             <div className="product-listing-container">
               {/* Sidebar - hidden on mobile, shown as drawer */}
               <div className="hidden md:block product-listing-sidebar">

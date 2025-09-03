@@ -43,7 +43,7 @@ const OfferBannerSlider = ({ count = 2, bannerUrl }) => {
             }}
           >
             {/* Exactly 3 cards in a row */}
-            <div className="grid grid-cols-3 gap-2 w-full p-2">
+            <div className="grid grid-cols-3 gap-2 w-full p-1">
               {offerData.map((offer) => (
                 <div
                   key={offer.id}
@@ -58,7 +58,7 @@ const OfferBannerSlider = ({ count = 2, bannerUrl }) => {
             </div>
 
             {/* Footer (Bank Offers or Note) */}
-            <div className="bg-white w-[90%] mx-auto rounded-xl text-xs mb-2 sm:text-sm text-center py-2 border-t border-gray-200">
+            <div className="bg-white w-[96%] mx-auto rounded-xl text-xs mb-2 sm:text-sm text-center py-2 border-t border-gray-200">
               <span className="mr-4">10% off on ₹499 </span>
               <span className="font-bold text-blue-600">HDFC BANK</span>
               <span className="ml-4">₹200 off on ₹2,000</span>
