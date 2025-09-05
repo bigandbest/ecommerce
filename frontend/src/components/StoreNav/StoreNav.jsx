@@ -53,6 +53,7 @@ const categories = [
   },
 ];
 
+
 export default function StoreNav({ onClick }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -68,6 +69,9 @@ export default function StoreNav({ onClick }) {
   }, []);
 
   if (!isMobile) return null;
+  if (location.pathname == "/all") {
+    return null;
+  }
 
   return (
     <div className="flex overflow-x-auto whitespace-nowrap py-1 hide-scrollbar">

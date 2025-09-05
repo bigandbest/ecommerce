@@ -468,15 +468,16 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
 
   // Add handler for bottom nav menu
   const handleBottomMenu = (type) => {
-    if (type === "menu") {
+    /* if (type === "menu") {
       setMobileMenuOpen(true);
       setOpenSubmenu([]); // Collapse all categories when Menu is pressed
-    }
+    } */
     if (type === "category") {
-      setMobileMenuOpen(true);
+      /* setMobileMenuOpen(true);
       setOpenSubmenu((prev) =>
         prev.includes("shop-by-category") ? prev : [...prev, "shop-by-category"]
-      );
+      ); */
+      navigate("/all");
     }
     if (type === "home") navigate("/");
     if (type === "wishlist") navigate("/wishlist");

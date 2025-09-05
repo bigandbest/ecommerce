@@ -17,6 +17,9 @@ const MainSearchBar = () => {
 
     // If user is on mobile and on /subcategories page (any category), hide the search bar
     if (isMobile && location.pathname.startsWith("/subcategories")) return null;
+    if (location.pathname == "/all") {
+    return null;
+  }
 
     return (
         <div className="mobile-search-bar-container w-full px-2 py-1 ">

@@ -4,67 +4,65 @@ import { useLocation } from "react-router-dom";
 const GroupBannerSlider = ({ count = 2, bannerUrl }) => {
   const location = useLocation();
 
-  // Show only on Home route
   if (location.pathname !== "/") {
     return null;
   }
 
-  // Category data with text + image
   const categoryData = [
     {
       id: 1,
       title: "Tea, Coffee & More",
-      image: "https://i.postimg.cc/SN9xSrtV/bru-removebg-preview.png",
+      image:
+        "https://i.postimg.cc/cLZ5nN9D/BREWVIACOFFEE1-0a98abb2-338b-49fe-9bcf-12fa8e0c3a77-removebg-preview.png",
     },
     {
       id: 2,
-      title: "Noodles, Pasta & Soups",
-      image: "https://i.postimg.cc/Sx16n7qt/maggi-removebg-preview.png",
+      title: "Noodles, & Pasta",
+      image: "https://i.postimg.cc/hvLXYwFG/815w-Zb-Q5b-GL-UF894-1000-QL80-removebg-preview.png",
     },
     {
       id: 3,
       title: "Cleaning Essentials",
-      image: "https://i.postimg.cc/4y2P5J2D/cleaning-removebg-preview.png",
+      image: "https://i.postimg.cc/TY22Ghg0/8901396139102-7-removebg-preview.png",
     },
   ];
 
   return (
-    <div className="space-y-8 md:hidden">
+    <div className="md:hidden ">
       {Array.from({ length: count }).map((_, sectionIndex) => (
         <div
           key={sectionIndex}
-          className="relative rounded-xl shadow-md overflow-hidden p-2"
+          className="relative rounded-xl shadow-md overflow-hidden"
         >
           {/* Banner Background */}
           <div
-            className="h-[310px] bg-contain bg-center rounded-xl flex flex-col justify-end"
+            className="w-full bg-cover bg-center rounded-xl relative flex flex-col justify-end p-2"
             style={{
               backgroundImage: `url('${bannerUrl}')`,
+              minHeight: "220px", // ensure banner has breathing space
             }}
           >
-            {/* 3 Category Cards in a Row */}
-            <div className="grid grid-cols-3 gap-2 w-full p-2">
+            {/* Category Cards */}
+            <div className="grid grid-cols-3 gap-2 mb-2">
               {categoryData.map((cat) => (
                 <div
                   key={cat.id}
-                  className="bg-white rounded-xl shadow flex flex-col justify-start items-center text-center p-2"
+                  className="bg-white rounded-lg shadow flex flex-col items-center text-center p-1 sm:p-2"
                 >
-                  {/* Text at Top */}
-                  <p className="text-xs font-medium text-gray-700 mb-2">
+                  <p className="text-[9px] sm:text-xs font-medium text-gray-700 mb-1 leading-tight">
                     {cat.title}
                   </p>
-                  {/* Image Below */}
                   <img
                     src={cat.image}
                     alt={cat.title}
-                    className="w-16 h-16 object-contain"
+                    className="w-12 sm:w-16 object-contain"
                   />
                 </div>
               ))}
             </div>
 
-            {/* Footer (Bank Offers or Note) */}
-            <div className="bg-white w-[96%] mx-auto rounded-xl text-xs mb-2 sm:text-sm text-center py-2 font-semibold">
+            {/* Footer */}
+            <div className="bg-white w-[85%] mx-auto rounded-xl text-xs sm:text-sm text-center py-2 font-semibold">
               Rainy Deals Inside
             </div>
           </div>

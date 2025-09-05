@@ -1,27 +1,42 @@
-import React from 'react'
+import React from "react";
 import { useLocation } from "react-router-dom";
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from "lucide-react";
 
-function Stores({ title = "Recommended Store", items = [] }) {
+function Stores({ 
+  title = "Recommended Store", 
+  items = [], 
+  mode = "scroll",
+  forceShow = false // 👈 NEW PROP
+}) {
   const location = useLocation();
 
-  // Only show on home route
-  if (location.pathname !== "/") {
+  // Only show on home route (keep your existing check if needed)
+  if (!forceShow && location.pathname !== "/") {
     return null;
   }
+
+  // Conditional classNames
+  const containerClass =
+    mode === "grid"
+      ? "grid grid-cols-3 gap-3" // 👈 3x3 grid
+      : "flex overflow-x-auto hide-scrollbar snap-x"; // 👈 scroll
+
+  const itemClass =
+    mode === "grid"
+      ? "flex flex-col items-center" // grid item
+      : "flex flex-col items-center flex-shrink-0 w-[55%] mr-1 snap-start"; // scroll item
 
   return (
     <div className="w-full gap-4 p-3 md:hidden">
       {/* Section Title */}
-      <h2 className="flex text-sm font-semibold text-gray-900 mb-3">{title} <ChevronRight /></h2>
+      <h2 className="flex text-sm font-semibold text-gray-900 mb-3">
+        {title} <ChevronRight />
+      </h2>
 
-      {/* Horizontal Scrollable List */}
-      <div className="flex overflow-x-auto hide-scrollbar snap-x">
+      {/* Items */}
+      <div className={containerClass}>
         {items.map((item, index) => (
-          <div
-            key={index}
-            className="flex flex-col items-center flex-shrink-0 w-[55%] mr-1 snap-start"
-          >
+          <div key={index} className={itemClass}>
             {/* Card Style Image */}
             <div className="w-full rounded-md overflow-hidden border border-gray-200">
               <img
@@ -35,14 +50,14 @@ function Stores({ title = "Recommended Store", items = [] }) {
               />
             </div>
             {/* Label */}
-            <p className="mt-1 text-lg text-gray-700 text-center truncate w-full">
+            <p className="mt-1 text-sm text-gray-700 text-center truncate w-full">
               {item.label}
             </p>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default Stores
+export default Stores;

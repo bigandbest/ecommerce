@@ -52,6 +52,7 @@ import Quickyfy from "./components/BBM Picks/Quickyfy.jsx";
 import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
 import CategoryOfferBanner from "./components/NewSection/CategoryOfferBanner.jsx";
 import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx";
+import AllCategoriesPage from "./Pages/AllCategories/AllCategoriesPage.jsx";
 
 
 // Protected route component
@@ -129,7 +130,7 @@ function App() {
                 <LocationModal />
                 <MobileBannerCarousel />
 
-                <Stores title="BBM Picks" items={Seconddata} />
+                <Stores title="Recommended Store" items={Seconddata} />
                 <BbmPicks title="Recommended Store" items={data} />
                 <Quickyfy title="Quickyfy" items={Thirddata} />
                 <MobileCategoriesBar />
@@ -138,7 +139,7 @@ function App() {
                   bannerUrl="https://i.postimg.cc/rF7J75bL/Untitled-design-3.png"
                 />
                 <CategoryOfferBanner count={1} bannerUrl="https://i.postimg.cc/bNfdYphd/Untitled-design-5.png" />
-                {/* <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/qqwqqDyg/Untitled-design-6.png"/> */}
+                <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/TPcZN3S5/Untitled-design-7.png"/>
 
                 <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
                   setMobileMenuOpen={setMobileMenuOpen} />
@@ -165,6 +166,11 @@ function App() {
                     path={"/about-us"}
                     exact={true}
                     element={<AboutUs />}
+                  />
+                  <Route
+                    path={"/all"}
+                    exact={true}
+                    element={<AllCategoriesPage />}
                   />
                   <Route
                     path={"/contact-us"}

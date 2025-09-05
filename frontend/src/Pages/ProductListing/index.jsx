@@ -30,7 +30,9 @@ import {
   getDefaultUserAddress,
   gettingProductsByGroupName,
   gettingProductsByCategoryName,
-  gettingProductsBySubcategoryName
+  gettingProductsBySubcategoryName,
+  getAllGroups,
+  getAllSubcategories
 } from "../../utils/supabaseApi";
 
 const ProductListing = () => {
@@ -54,10 +56,76 @@ const ProductListing = () => {
   const group = queryParams.get("group");
   const search = queryParams.get("search")?.toLowerCase() || "";
 
+
   const { selectedAddress } = useLocationContext();
 
   const sortMenuOpen = Boolean(sortAnchorEl);
   const filterMenuOpen = Boolean(filterAnchorEl);
+
+  const params = new URLSearchParams(location.search);
+  const groupName = params.get("group");
+  const subcategoryName = params.get("subcategory");
+  const categoryName = params.get("category");
+  const initialGroupName = params.get("group");
+  const initialSubcategoryName = params.get("subcategory");
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const [subcategories, setSubcategories] = useState([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(initialSubcategoryName);
+  const [selectedGroup, setSelectedGroup] = useState(initialGroupName);
+
+  useEffect(() => {
+    const fetchSubs = async () => {
+      const { success, subcategories } = await getAllSubcategories();
+      if (success) {
+        // filter subcategories under the selected category
+        const filtered = subcategories.filter(
+          (sub) => sub.categories?.name === categoryName
+        );
+        setSubcategories(filtered);
+      }
+    };
+    if (categoryName) fetchSubs();
+  }, [categoryName]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const { success, groups } = await getAllGroups();
+      if (success) {
+        const filtered = groups.filter(
+          (g) => g.subcategories?.name === selectedSubcategory
+        );
+        setGroups(filtered);
+
+        // reset group selection if it doesn't belong
+        if (!filtered.find((g) => g.name === selectedGroup)) {
+          setSelectedGroup(filtered[0]?.name || null);
+        }
+      }
+    };
+    if (selectedSubcategory) fetchGroups();
+  }, [selectedSubcategory]);
+
+  const [groups, setGroups] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const { success, groups } = await getAllGroups();
+      if (success) {
+        // filter only groups under the current subcategory
+        const filtered = groups.filter(
+          (g) => g.subcategories?.name === subcategoryName
+        );
+        setGroups(filtered);
+      }
+    };
+    if (subcategoryName) fetchGroups();
+  }, [subcategoryName]);
+
 
   useEffect(() => {
     async function fetchProducts() {
@@ -223,58 +291,81 @@ const ProductListing = () => {
       {/* this div is only for spacing between search bar and product list */}
       {/*  <div className="mt-5 h-12 md:hidden"></div> */}
       <section className=" bg-gray-50 product-section !pt-2">
-        
-        <div className="w-full flex items-center justify-start gap-6 overflow-x-auto hide-scrollbar">
-          <div className="flex flex-col">
-            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
-            <p  className="text-[10px] text-center">Name</p>
-          </div>
-          <div className="flex flex-col">
-            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
-            <p  className="text-[10px] text-center">Name</p>
-          </div>
-          <div className="flex flex-col">
-            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
-            <p  className="text-[10px] text-center">Name</p>
-          </div>
-          <div className="flex flex-col">
-            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
-            <p  className="text-[10px] text-center">Name</p>
-          </div>
-          <div className="flex flex-col">
-            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
-            <p  className="text-[10px] text-center">Name</p>
-          </div>
-          <div className="flex flex-col">
-            <div className="h-16 w-16 rounded-full bg-blue-600"></div>
-            <p  className="text-[10px] text-center">Name</p>
-          </div>
-  
+
+        <div className="w-full flex items-center gap-4 overflow-x-auto hide-scrollbar mb-6">
+          {groups.map((grp) => (
+            <div
+              key={grp.id}
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => {
+                window.location.href = `/productListing?group=${encodeURIComponent(grp.name)}&subcategory=${encodeURIComponent(subcategoryName)}&category=${encodeURIComponent(categoryName)}`;
+              }}
+            >
+              <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                <img
+                  src={grp.image_url}
+                  alt={grp.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="text-[10px] text-center mt-1 line-clamp-1">{grp.name}</p>
+            </div>
+          ))}
         </div>
 
 
         {/* Mobile filter button - visible only on small screens */}
-            <div className="flex justify-between md:hidden w-20 py-2">
-              <Button
-                variant="outlined"
-                startIcon={<FaFilter />}
-                onClick={toggleSidebar}
-                fullWidth
-                className="!border-gray-300 !w-20 !text-gray-700"
-              >
-                Filters
-              </Button>
+        <div className="flex justify-between md:hidden w-20 py-2">
+          <Button
+            variant="outlined"
+            startIcon={<FaFilter />}
+            onClick={toggleSidebar}
+            fullWidth
+            className="!border-gray-300 !w-20 !max-h-[44px] !text-gray-700"
+          >
+            Filters
+          </Button>
 
-            {/* Name is Category but it will be connected to sub catgories */}
-              <Button
-                variant="outlined"
-                onClick={toggleSidebar}
-                fullWidth
-                className="!border-gray-300 !w-30 !text-gray-700"
-              >
-                Category <ChevronDown />
-              </Button>
-            </div>
+          {/* Name is Category but it will be connected to sub catgories */}
+          {/* Category / Subcategory Dropdown */}
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="outlined"
+              onClick={handleClick}
+              fullWidth
+              className="!border-gray-300 !rounded-full !px-4 !py-2 !text-gray-800 !bg-gradient-to-r !from-gray-50 !to-gray-100 !shadow-sm hover:!from-gray-100 hover:!to-gray-200 !flex justify-between transition-all duration-200"
+            >
+              <span className="truncate max-w-[160px] font-medium">
+                {selectedSubcategory || "✨ Select Subcategory"}
+              </span>
+              <ChevronDown className="ml-2 flex-shrink-0 text-gray-600" />
+            </Button>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              PaperProps={{
+                className:
+                  "!rounded-xl !shadow-lg !bg-white !p-1 transition-all duration-200 !max-h-[250px] !overflow-y-auto hide-scrollbar",
+              }}
+            >
+              {subcategories.map((sub) => (
+                <MenuItem
+                  key={sub.id}
+                  onClick={() => {
+                    setSelectedSubcategory(sub.name);
+                    handleClose();
+                  }}
+                  className="!rounded-lg !px-4 !py-2 hover:!bg-indigo-50 hover:!text-indigo-600 truncate max-w-[220px] text-sm font-medium transition-colors"
+                >
+                  {sub.name}
+                </MenuItem>
+              ))}
+            </Menu>
+          </div>
+
+        </div>
 
 
         <div className="w-full px-4">
@@ -390,8 +481,8 @@ const ProductListing = () => {
                     >
                       <ImMenu
                         className={`${itemView === "list"
-                            ? "text-blue-600"
-                            : "text-gray-600"
+                          ? "text-blue-600"
+                          : "text-gray-600"
                           }`}
                       />
                     </IconButton>
@@ -404,8 +495,8 @@ const ProductListing = () => {
                     >
                       <IoGrid
                         className={`${itemView === "grid"
-                            ? "text-blue-600"
-                            : "text-gray-600"
+                          ? "text-blue-600"
+                          : "text-gray-600"
                           }`}
                       />
                     </IconButton>

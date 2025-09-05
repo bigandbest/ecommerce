@@ -61,6 +61,9 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     }, []);
 
     if (isMobile && location.pathname.startsWith("/subcategories")) return null;
+    if (location.pathname == "/all") {
+    return null;
+  }
 
     return (
         <header className="bg-white header-container">
