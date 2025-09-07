@@ -130,7 +130,7 @@ function App() {
                 <LocationModal />
                 <MobileBannerCarousel />
 
-                <Stores title="Recommended Store" items={Seconddata} />
+                <Stores title="BBM Picks" items={Seconddata} />
                 <BbmPicks title="Recommended Store" items={data} />
                 <Quickyfy title="Quickyfy" items={Thirddata} />
                 <MobileCategoriesBar />

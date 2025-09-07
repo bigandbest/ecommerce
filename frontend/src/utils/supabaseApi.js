@@ -512,11 +512,11 @@ export async function getActiveCategories() {
   const { data, error } = await supabase
     .from("categories")
     .select()
-    .eq("active", true)
-    .order("sort_order", { ascending: true });
+    .eq("active", true); // no ordering
   if (error) return { success: false, error: error.message };
   return { success: true, categories: data };
 }
+
 
 export async function addCategory(category) {
   const { data, error } = await supabase

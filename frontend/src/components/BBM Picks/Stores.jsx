@@ -18,7 +18,12 @@ function Stores({
   // Conditional classNames
   const containerClass =
     mode === "grid"
-      ? "grid grid-cols-3 gap-3" // 👈 3x3 grid
+      ? "grid grid-cols-3 gap-2" // 👈 3x3 grid
+      : "flex overflow-x-auto hide-scrollbar snap-x"; // 👈 scroll
+
+  const imageClass =
+    mode === "grid"
+      ? "grid grid-cols-3 gap-2" // 👈 3x3 grid
       : "flex overflow-x-auto hide-scrollbar snap-x"; // 👈 scroll
 
   const itemClass =
@@ -27,7 +32,7 @@ function Stores({
       : "flex flex-col items-center flex-shrink-0 w-[55%] mr-1 snap-start"; // scroll item
 
   return (
-    <div className="w-full gap-4 p-3 md:hidden">
+    <div className="w-full gap-4 md:hidden p-3">
       {/* Section Title */}
       <h2 className="flex text-sm font-semibold text-gray-900 mb-3">
         {title} <ChevronRight />
@@ -38,7 +43,7 @@ function Stores({
         {items.map((item, index) => (
           <div key={index} className={itemClass}>
             {/* Card Style Image */}
-            <div className="w-full rounded-md overflow-hidden border border-gray-200">
+            <div className="w-full rounded-md overflow-hidden border">
               <img
                 src={item.image}
                 alt={item.label}

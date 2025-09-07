@@ -20,6 +20,11 @@ const BbmPicks = ({
     mode === "grid"
       ? "grid grid-cols-3 gap-3"
       : "flex overflow-x-auto hide-scrollbar";
+  
+  const imageWrapperClass =
+    mode === "grid"
+      ? " rounded-full overflow-hidden flex-shrink-1"
+      : "w-20 h-20 rounded-full overflow-hidden border border-gray-200 flex-shrink-0";
 
   const itemClass =
     mode === "grid"
@@ -38,7 +43,7 @@ const BbmPicks = ({
         {items.map((item, index) => (
           <div key={index} className={itemClass}>
             {/* Circle Image */}
-            <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+            <div className={imageWrapperClass}>
               <img
                 src={item.image}
                 alt={item.label}
