@@ -166,7 +166,7 @@ const SubCategoryPage = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="bg-white ml-19 w-full flex-1 flex flex-col">
+      <div className="bg-white ml-19 mt-12 w-full flex-1 flex flex-col">
         {/* Fixed Subcategory Bar */}
         {/* Fixed Horizontal Bar (styled as requested) */}
         <div

@@ -124,12 +124,12 @@ export default function StoreNav({ onClick }) {
   }, []);
 
   if (!isMobile) return null;
-  if (location.pathname === "/all") return null;
+  if (location.pathname !== "/all" && location.pathname !== "/") return null;
 
   return (
     <>
       {/* First horizontal bar with SVG icons */}
-      <div className="flex overflow-x-auto whitespace-nowrap py-1 hide-scrollbar">
+      {/* <div className="flex overflow-x-auto whitespace-nowrap py-1 hide-scrollbar">
         {categories.map((cat) => {
           const isActive = location.pathname === cat.path;
 
@@ -151,7 +151,7 @@ export default function StoreNav({ onClick }) {
             </button>
           );
         })}
-      </div>
+      </div> */}
 
       {/* Second horizontal bar with images */}
       <div className="flex overflow-x-auto whitespace-nowrap py-1 hide-scrollbar">
@@ -161,7 +161,7 @@ export default function StoreNav({ onClick }) {
           return (
             <button
               key={cat.label + "-img"}
-              className={`flex flex-col items-center w-[90px] px-3 py-2 rounded-lg font-medium shadow-sm transition-colors shrink-0
+              className={`flex flex-col items-center w-[90px]  py-1 rounded-lg font-medium shadow-sm transition-colors shrink-0
                 ${isActive ? cat.activeBg : "bg-gray-200"}
                 ${isActive ? "" : "hover:bg-gray-300"}
               `}
@@ -173,7 +173,7 @@ export default function StoreNav({ onClick }) {
               <img
                 src={cat.img}
                 alt={cat.label}
-                className="w-15 h-15 mb-1 rounded-md object-cover"
+                className="w-20 h-20 mb-1 rounded-md object-cover"
               />
               <span className="truncate text-center">{cat.label}</span>
             </button>

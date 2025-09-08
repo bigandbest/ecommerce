@@ -28,7 +28,7 @@ const GroupBannerSlider = ({ count = 2, bannerUrl }) => {
   ];
 
   return (
-    <div className="md:hidden ">
+    <div className="md:hidden p-2 ">
       {Array.from({ length: count }).map((_, sectionIndex) => (
         <div
           key={sectionIndex}

@@ -53,6 +53,7 @@ import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
 import CategoryOfferBanner from "./components/NewSection/CategoryOfferBanner.jsx";
 import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx";
 import AllCategoriesPage from "./Pages/AllCategories/AllCategoriesPage.jsx";
+import NewCategoryDivisionPage from "./Pages/New/NewCategoryDivisionPage.jsx";
 
 
 // Protected route component
@@ -139,7 +140,7 @@ function App() {
                   bannerUrl="https://i.postimg.cc/rF7J75bL/Untitled-design-3.png"
                 />
                 <CategoryOfferBanner count={1} bannerUrl="https://i.postimg.cc/bNfdYphd/Untitled-design-5.png" />
-                <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/TPcZN3S5/Untitled-design-7.png"/>
+                <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/TPcZN3S5/Untitled-design-7.png" />
 
                 <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
                   setMobileMenuOpen={setMobileMenuOpen} />
@@ -198,6 +199,7 @@ function App() {
                     exact={true}
                     element={<MyOrders />}
                   />
+                  <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} />
                   <Route
                     path={"/BusinessPartner"}
                     exact={true}

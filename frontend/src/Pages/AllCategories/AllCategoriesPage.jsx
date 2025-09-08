@@ -11,6 +11,7 @@ import BbmPicks from "../../components/BBM Picks/BbmPick";
 import Quickyfy from "../../components/BBM Picks/Quickyfy";
 import Stores from "../../components/BBM Picks/Stores";
 import { getActiveCategories } from "../../utils/supabaseApi.js"; // 👈 import API function
+import { useNavigate } from "react-router-dom";
 
 const menuItems = [
   {
@@ -103,6 +104,7 @@ const Thirddata = [
 ];
 
 export default function AllCategoriesPage() {
+  const navigate = useNavigate();
   const [active, setActive] = useState(null);
   const [linePos, setLinePos] = useState({ top: 0, height: 0 });
   const [showDrawer, setShowDrawer] = useState(false);
@@ -223,12 +225,13 @@ export default function AllCategoriesPage() {
               categories.map((cat) => (
                 <div
                   key={cat.id}
+                  onClick={() => navigate(`/category/${cat.id}/${cat.name}`)}
                   className="flex flex-col items-center p-3 bg-gray-50 rounded-lg shadow hover:bg-gray-100 transition"
                 >
                   <img
                     src={cat.image_url || "https://placehold.co/150x150?text=Category"}
                     alt={cat.name}
-                    className="w-20 h-20 rounded-md object-cover"
+                    className="w-40 h-40 rounded-md object-cover"
                   />
                   <span className="mt-2 text-sm font-medium text-black">
                     {cat.name}

@@ -617,7 +617,7 @@ export const Home = () => {
       <section className="bg-white sm:!py-10 !py-0 mt-0 md:flex md:justify-center">
         <div className="px-2 md:container md:px-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center justify-between ">
+            <div className="w-full flex items-center justify-between ">
               <h2 className="text-xl sm:text-2xl font-semibold mt-5">
                 Popular Products
               </h2>

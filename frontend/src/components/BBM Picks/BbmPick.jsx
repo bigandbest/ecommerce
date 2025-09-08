@@ -18,7 +18,7 @@ const BbmPicks = ({
   // Conditional container styles
   const containerClass =
     mode === "grid"
-      ? "grid grid-cols-3 gap-3"
+      ? "grid grid-cols-3 gap-1"
       : "flex overflow-x-auto hide-scrollbar";
   
   const imageWrapperClass =

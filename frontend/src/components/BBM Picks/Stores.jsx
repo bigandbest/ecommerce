@@ -18,7 +18,7 @@ function Stores({
   // Conditional classNames
   const containerClass =
     mode === "grid"
-      ? "grid grid-cols-3 gap-2" // 👈 3x3 grid
+      ? "grid grid-cols-3 gap-1" // 👈 3x3 grid
       : "flex overflow-x-auto hide-scrollbar snap-x"; // 👈 scroll
 
   const imageClass =
