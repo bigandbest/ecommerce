@@ -298,11 +298,11 @@ export async function getActiveShippingBanner() {
     .eq("active", true)
     .limit(1)
     .single();
-    
+
   if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is not an error here
     return { success: false, error: error.message };
   }
-  
+
   return { success: true, banner: data };
 }
 
@@ -526,6 +526,22 @@ export async function addCategory(category) {
     .single();
   if (error) return { success: false, error: error.message };
   return { success: true, category: data };
+}
+
+export async function getCategoryById(id) {
+  try {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) throw error;
+    return { success: true, category: data };
+  } catch (error) {
+    console.error("Error fetching category:", error.message);
+    return { success: false, error: error.message };
+  }
 }
 
 export async function updateCategory(id, category) {

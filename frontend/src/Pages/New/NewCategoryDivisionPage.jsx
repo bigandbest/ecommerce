@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { getSubcategoriesByCategory, getAllGroups } from "../../utils/supabaseApi.js";
+import { useParams, Link, useLocation } from "react-router-dom";
+import { getSubcategoriesByCategory, getAllGroups, getCategoryById } from "../../utils/supabaseApi.js";
 
 export default function NewCategoryDivisionPage() {
     const { id, name } = useParams(); // category id + name from route
     const [subcategories, setSubcategories] = useState([]);
+    const { state } = useLocation();
     const [groups, setGroups] = useState([]);
+    const [categoryImage, setCategoryImage] = useState(null);
 
     useEffect(() => {
         (async () => {
+            // 🔹 1. Fetch category by ID → to get image
+            const catRes = await getCategoryById(id);
+            if (catRes.success) setCategoryImage(catRes.category.image_url);
+
+            // 🔹 2. Fetch subcategories
             const subsRes = await getSubcategoriesByCategory(id);
             if (subsRes.success) setSubcategories(subsRes.subcategories);
 
+            // 🔹 3. Fetch groups
             const groupsRes = await getAllGroups();
             if (groupsRes.success) {
                 const subIds = subsRes.subcategories.map((s) => s.id);
@@ -24,10 +32,15 @@ export default function NewCategoryDivisionPage() {
     }, [id]);
 
     return (
-        <div className="min-h-screen mt-[-40px] bg-gray-50">
+        <div className="min-h-screen mt-[-43px] bg-gray-50">
             {/* Banner */}
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 py-8 text-center text-white">
-                <h1 className="text-2xl font-bold">{name}</h1>
+            <div className="flex justify-between align-middle bg-gradient-to-r px-5 from-gray-500 to-orange-400 py-8 text-center text-white">
+                <h1 className="text-2xl font-bold self-center">{name}</h1>
+                <img
+                    src={categoryImage || "https://placehold.co/100x100?text=Category"}
+                    alt={name}
+                    className="w-25 h-25"
+                />
             </div>
 
             <div className="px-4 py-6 space-y-8">
@@ -54,7 +67,7 @@ export default function NewCategoryDivisionPage() {
                                                 "https://placehold.co/150x150?text=Group"
                                             }
                                             alt={grp.name}
-                                            className="w-28 h-28 object-cover rounded-md"
+                                            className="w-34 h-34 object-cover rounded-md"
                                         />
                                         <span className="mt-2 text-sm font-medium text-gray-700">
                                             {grp.name}

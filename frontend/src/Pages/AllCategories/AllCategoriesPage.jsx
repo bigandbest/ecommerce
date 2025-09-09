@@ -168,10 +168,9 @@ export default function AllCategoriesPage() {
                   setShowDrawer(true);
                 }}
                 className={`relative flex flex-col items-center justify-center w-full py-1 !ml-0 transition transform active:scale-95
-                  ${
-                    active === item.name
-                      ? "text-blue-600"
-                      : "hover:bg-gray-100 text-gray-600"
+                  ${active === item.name
+                    ? "text-blue-600"
+                    : "hover:bg-gray-100 text-gray-600"
                   }
                 `}
               >
@@ -188,27 +187,19 @@ export default function AllCategoriesPage() {
       </div>
 
       {/* Main Content (Static) */}
-      <div className="flex-1 bg-gray-50 transition-all duration-300 overflow-y-auto min-h-[100%] hide-scrollbar">
+      <div className="flex-1 bg-gray-50 transition-all duration-300 overflow-y-auto min-h-[100%] hide-scrollbar pb-24">
         <Stores title="BBM Picks" items={Seconddata} mode="grid" forceShow />
         <BbmPicks title="Recommended Store" items={data} mode="grid" forceShow />
         <Quickyfy title="Quickyfy" items={Thirddata} mode="grid" forceShow className='mb-20' />
       </div>
 
-      {/* Overlay */}
-      {showDrawer && (
-        <div
-          onClick={() => setShowDrawer(false)}
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-        ></div>
-      )}
-
       {/* Bottom Drawer Modal */}
       <div
-        className={`fixed bottom-0 left-0 w-full flex flex-col flex-1 h-[90%] bg-white rounded-t-2xl shadow-lg transform transition-transform duration-300 ease-in-out z-50
-          ${showDrawer ? "translate-y-0" : "translate-y-full"}`}
+        className={`fixed inset-x-0 bottom-0 top-12 flex flex-col bg-white rounded-t-2xl shadow-lg transform transition-transform duration-300 ease-in-out z-50
+    ${showDrawer ? "translate-y-0" : "translate-y-full"}`}
       >
         {/* Drawer Header */}
-        <div className="flex justify-between items-center px-4 py-3 border-b">
+        <div className="flex justify-between items-center px-4 py-3 border-b shrink-0">
           <h2 className="text-lg font-semibold text-black">{active}</h2>
           <button
             onClick={() => setShowDrawer(false)}
@@ -218,14 +209,15 @@ export default function AllCategoriesPage() {
           </button>
         </div>
 
-        {/* Drawer Content - show fetched categories */}
-        <div className="px-4 pb-6 overflow-y-auto h-[calc(100%-3rem)]">
-          <div className="grid grid-cols-2 gap-4">
+        {/* Drawer Content */}
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <div className="grid grid-cols-2 gap-4 pb-8"> {/* 👈 extra padding-bottom so last row clears */}
             {categories.length > 0 ? (
               categories.map((cat) => (
                 <div
                   key={cat.id}
                   onClick={() => navigate(`/category/${cat.id}/${cat.name}`)}
+                  state={{ image: cat.image_url }}
                   className="flex flex-col items-center p-3 bg-gray-50 rounded-lg shadow hover:bg-gray-100 transition"
                 >
                   <img
@@ -233,7 +225,7 @@ export default function AllCategoriesPage() {
                     alt={cat.name}
                     className="w-40 h-40 rounded-md object-cover"
                   />
-                  <span className="mt-2 text-sm font-medium text-black">
+                  <span className="mt-2 text-sm font-medium text-black text-center">
                     {cat.name}
                   </span>
                 </div>
