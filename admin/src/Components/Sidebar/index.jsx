@@ -148,6 +148,11 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/warehouselist",
     },
     {
+      title: "Notifications",
+      icon: <RiSettings4Fill />,
+      path: "/notifications",
+    },
+    {
       title: "Settings",
       icon: <RiSettings4Fill />,
       path: "/settings",

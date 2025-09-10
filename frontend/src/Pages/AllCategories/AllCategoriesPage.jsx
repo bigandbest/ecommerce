@@ -11,7 +11,8 @@ import BbmPicks from "../../components/BBM Picks/BbmPick";
 import Quickyfy from "../../components/BBM Picks/Quickyfy";
 import Stores from "../../components/BBM Picks/Stores";
 import { getActiveCategories } from "../../utils/supabaseApi.js"; // 👈 import API function
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 
 const menuItems = [
   {
@@ -109,9 +110,20 @@ export default function AllCategoriesPage() {
   const [linePos, setLinePos] = useState({ top: 0, height: 0 });
   const [showDrawer, setShowDrawer] = useState(false);
   const [categories, setCategories] = useState([]); // 👈 state for fetched categories
+  const [activeSidebar, setActiveSidebar] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
 
   const buttonRefs = useRef([]);
   const menuContainerRef = useRef(null);
+
+  const { state } = useLocation();
+
+  useEffect(() => {
+    if (state?.fromAllCategories) {
+      setActive(state.active);       // restore sidebar highlight
+      setShowDrawer(state.showDrawer); // reopen drawer
+    }
+  }, [state]);
 
   useEffect(() => {
     const index = menuItems.findIndex((item) => item.name === active);
@@ -140,6 +152,22 @@ export default function AllCategoriesPage() {
     }
   }, [showDrawer]);
 
+  const handleSidebarClick = (button) => {
+    setActiveSidebar(button.name);   // drawer header
+    setActiveCategory(null);         // optional reset category
+  };
+
+  const handleCategoryClick = (category, parentButton) => {
+    setActiveCategory(category.name); // not mandatory
+    navigate(`/category/${category.id}/${category.name}`, {
+      state: {
+        fromAllCategories: true,
+        activeSidebar: parentButton.name, // always pass sidebar button name
+        showDrawer: true
+      }
+    });
+  };
+
   return (
     <div className="sm:hidden fixed top-0 left-0 h-full w-full flex z-40">
       {/* Sidebar (always open) */}
@@ -166,6 +194,7 @@ export default function AllCategoriesPage() {
                 onClick={() => {
                   setActive(item.name);
                   setShowDrawer(true);
+                  handleSidebarClick(item);
                 }}
                 className={`relative flex flex-col items-center justify-center w-full py-1 !ml-0 transition transform active:scale-95
                   ${active === item.name
@@ -211,25 +240,39 @@ export default function AllCategoriesPage() {
 
         {/* Drawer Content */}
         <div className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="grid grid-cols-2 gap-4 pb-8"> {/* 👈 extra padding-bottom so last row clears */}
+          <div className="grid grid-cols-2 gap-4 pb-8">
             {categories.length > 0 ? (
-              categories.map((cat) => (
-                <div
-                  key={cat.id}
-                  onClick={() => navigate(`/category/${cat.id}/${cat.name}`)}
-                  state={{ image: cat.image_url }}
-                  className="flex flex-col items-center p-3 bg-gray-50 rounded-lg shadow hover:bg-gray-100 transition"
-                >
-                  <img
-                    src={cat.image_url || "https://placehold.co/150x150?text=Category"}
-                    alt={cat.name}
-                    className="w-40 h-40 rounded-md object-cover"
-                  />
-                  <span className="mt-2 text-sm font-medium text-black text-center">
-                    {cat.name}
-                  </span>
-                </div>
-              ))
+              categories.map((cat) => {
+                // safely find the sidebar button
+                const parentButton = menuItems.find((item) => item.name === active);
+                return (
+                  <div
+                    key={cat.id}
+                    onClick={() => {
+                      setActiveCategory(cat.name); // category highlight (optional)
+                      setActive(parentButton?.name || "Menu"); // set drawer heading
+                      navigate(`/category/${cat.id}/${cat.name}`, {
+                        state: {
+                          fromAllCategories: true,
+                          activeSidebar: parentButton?.name || "Menu",
+                          showDrawer: true,
+                        },
+                      });
+                    }}
+                    className="flex flex-col items-center p-3 bg-gray-50 rounded-lg shadow hover:bg-gray-100 transition"
+                  >
+
+                    <img
+                      src={cat.image_url || "https://placehold.co/150x150?text=Category"}
+                      alt={cat.name}
+                      className="w-40 h-40 rounded-md object-cover"
+                    />
+                    <span className="mt-2 text-sm font-medium text-black text-center">
+                      {cat.name}
+                    </span>
+                  </div>
+                );
+              })
             ) : (
               <p className="text-gray-500 text-center w-full">Loading...</p>
             )}

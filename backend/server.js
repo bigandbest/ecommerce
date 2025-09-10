@@ -17,6 +17,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import orderItemsRoutes from "./routes/orderItemsRoutes.js"
 import checkCartAvailabilityRoute from './routes/checkCartAvailabilityRoute.js'
 import paymentRoutes from "./routes/paymentRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js"
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -70,5 +71,6 @@ app.use("/api/order", orderRoutes);
 app.use("/api/orderItems", orderItemsRoutes);
 app.use("/api/check", checkCartAvailabilityRoute);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

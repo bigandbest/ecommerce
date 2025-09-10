@@ -39,6 +39,7 @@ import WarehouseProducts from './Pages/WarehousePages/WarehouseProducts.jsx'
 import VideoBannerManagement from "./Pages/VideoBanners/VideoBannerManagement.jsx";
 import AdminOrders from "./Pages/Orders/index.jsx";
 import ShippingBanner from "./Pages/ShippingBanner/ShippingBanner.jsx";
+import Notification from "./Pages/Notifications/Notification.jsx";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -200,6 +201,10 @@ function App() {
         {
           path: "/ShippingBanner",
           element: <ShippingBanner />,
+        },
+        {
+          path: "/notifications",
+          element: <Notification />,
         },
       ],
     },
