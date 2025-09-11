@@ -21,6 +21,9 @@ const MainSearchBar = () => {
     if (location.pathname == "/all") {
     return null;
   }
+    if (location.pathname == "/Notifications") {
+    return null;
+  }
 
     return (
         <div className="mobile-search-bar-container w-full px-2 py-1 ">

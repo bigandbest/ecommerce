@@ -20,6 +20,7 @@ import SubCategoryPage from "./Pages/SubCategoryPage/SubCategoryPage.jsx";
 import Search from "./components/Search/index.jsx";
 import MobileBannerCarousel from './components/MobileBannerCarousel/MobileBannerCarousel.jsx';
 import MobileCategoriesBar from "./components/CategoriesBar/MobileCategoriesBar.jsx";
+import {NotificationProvider} from "./contexts/NotificationContext.jsx";
 
 import CustomPrinting from "./Pages/CustomPrinting/index.jsx";
 import MyOrders from "./Pages/MyOrders/MyOrders.jsx";
@@ -54,6 +55,7 @@ import CategoryOfferBanner from "./components/NewSection/CategoryOfferBanner.jsx
 import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx";
 import AllCategoriesPage from "./Pages/AllCategories/AllCategoriesPage.jsx";
 import NewCategoryDivisionPage from "./Pages/New/NewCategoryDivisionPage.jsx";
+import Notifications from "./Pages/Notifications/Notifications.jsx";
 
 
 // Protected route component
@@ -117,6 +119,7 @@ function App() {
         <LocationProvider>
           <SettingsProvider>
             <PromotionalProvider>
+              <NotificationProvider>
               <DynamicHead />
               <BrowserRouter>
                 <AnnouncementBar />
@@ -177,6 +180,11 @@ function App() {
                     path={"/contact-us"}
                     exact={true}
                     element={<ContactUs />}
+                  />
+                  <Route
+                    path={"/Notifications"}
+                    exact={true}
+                    element={<Notifications />}
                   />
                   <Route path={"/cart"} exact={true} element={<Cart />} />
                   <Route
@@ -275,6 +283,7 @@ function App() {
                 <WhatsAppWidget />
                 <Footer />
               </BrowserRouter>
+              </NotificationProvider>
             </PromotionalProvider>
           </SettingsProvider>
         </LocationProvider>

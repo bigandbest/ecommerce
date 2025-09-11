@@ -10,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import {
     getCartItems,
 } from "../../utils/supabaseApi";
+import { useNotifications } from "../../contexts/NotificationContext";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
     "& .MuiBadge-badge": {
@@ -31,6 +32,11 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     const { selectedAddress, setShowModal, setModalMode } = useLocationContext();
     const location = useLocation();
     const navigate = useNavigate();
+    const { unread, fetchNotifications } = useNotifications();
+
+    useEffect(()=>{
+        fetchNotifications();
+    })
 
     useEffect(() => {
         async function fetchCart() {
@@ -61,10 +67,13 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     }, []);
 
     if (isMobile && location.pathname.startsWith("/subcategories")) return null;
-    if(location.pathname.startsWith("/category")) return null;
+    if (location.pathname.startsWith("/category")) return null;
     if (location.pathname == "/all") {
-    return null;
-  }
+        return null;
+    }
+    if (location.pathname == "/Notifications") {
+        return null;
+    }
 
     return (
         <header className="bg-white header-container">
@@ -83,9 +92,16 @@ const MobileHeader = ({ toggleMobileMenu }) => {
 
                 {/* Right icons and button */}
                 <div className="flex items-center mr-1">
-                    <button className="p-2">
-                        <Bell size={27} />
-                    </button>
+                    <Link to='/Notifications'>
+                        <button className="p-2">
+                            <Bell size={27} />
+                            {unread.size > 0 && (
+                                <span className="absolute top-2 right-41 flex items-center justify-center align-middle w-[13px] h-[13px] bg-red-500 text-white text-xs font-bold rounded-full">
+                                    {unread.size}
+                                </span>
+                            )}
+                        </button>
+                    </Link>
                     <Link
                         to="/cart"
                         className="flex items-center  rounded-lg hover:bg-gray-100 transition-colors group"
