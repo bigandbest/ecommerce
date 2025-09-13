@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCartItems, updateCartItem, removeCartItem, clearCart, createEnquiry, placeOrderWithDetailedAddress } from '../../utils/supabaseApi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MdDelete } from 'react-icons/md';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
@@ -22,6 +22,7 @@ const Cart = () => {
   const [enquiryStatus, setEnquiryStatus] = useState(null); // success | error | null
   const [enquiryLoading, setEnquiryLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const navigate = useNavigate();
 
   /* console.log(currentUser) */
 
@@ -36,6 +37,16 @@ const Cart = () => {
     }
     fetchCart();
   }, [user_id]);
+
+
+  const handleProceedToCheckout = () => {
+    if (cartItems.length === 0) {
+      alert("Your cart is empty.");
+      return;
+    }
+    // Navigate to the map page
+    navigate('/checkout/select-location');
+  };
 
 
   /* console.log(cartItems) */
@@ -640,7 +651,7 @@ const Cart = () => {
 
                 <div className="space-y-4">
                   <button
-                    onClick={handleRazorpayPayment}
+                    onClick={handleProceedToCheckout}
                     className={`block w-full bg-primary text-white text-center py-3 px-4 rounded-md hover:bg-primary-dark transition duration-200 ${enquiryLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                     style={{ backgroundColor: "#3f51b5" }}
                     disabled={enquiryLoading}

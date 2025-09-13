@@ -56,6 +56,8 @@ import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx";
 import AllCategoriesPage from "./Pages/AllCategories/AllCategoriesPage.jsx";
 import NewCategoryDivisionPage from "./Pages/New/NewCategoryDivisionPage.jsx";
 import Notifications from "./Pages/Notifications/Notifications.jsx";
+import MapLocationPage from "./components/MapLocationPage/MapLocationPage .jsx";
+import AddressSelectionPage from "./components/AddressSelectionPage/AddressSelectionPage.jsx";
 
 
 // Protected route component
@@ -165,6 +167,16 @@ function App() {
                     path={"/reset-password"}
                     exact={true}
                     element={<ResetPassword />}
+                  />
+                  <Route
+                    path={"checkout/select-location"}
+                    exact={true}
+                    element={<MapLocationPage />}
+                  />
+                  <Route
+                    path={"/checkout/confirm-address"}
+                    exact={true}
+                    element={<AddressSelectionPage />}
                   />
                   <Route
                     path={"/about-us"}
