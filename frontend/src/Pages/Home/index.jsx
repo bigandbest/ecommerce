@@ -520,10 +520,10 @@ export const Home = () => {
       <FlashSale />
       <HomeFestivalGrid />
       <FeaturedThisWeek />
-      <BannerImagesSlider
+      {/* <BannerImagesSlider
         count={3}
         bannerUrl="https://i.postimg.cc/W4pL05Hw/Opening-Soon.png"
-      />
+      /> */}
 
       {/* ================== PROMOTIONAL BANNER ================== */}
       {/* Desktop version (lg and up) */}
@@ -575,12 +575,13 @@ export const Home = () => {
 
       <VideoBannerSlider />
       <ProductGrid3X3 />
-      <BannerImagesSlider
+      {/* <BannerImagesSlider
         count={2}
         bannerUrl="https://i.postimg.cc/mrVcS62L/Untitled-design-1.png"
-      />
-      <EigthProductSection sectionCount={2} startIndex={0} />
-      <div className="p-4 bg-white md:hidden">
+      /> */}
+
+      {/* <EigthProductSection sectionCount={2} startIndex={0} /> */}
+      {/* <div className="p-4 bg-white md:hidden">
         {sectionData.map((section, idx) => (
           <ProductGrid2X2
             key={idx}
@@ -588,20 +589,20 @@ export const Home = () => {
             products={section.products}
           />
         ))}
-      </div>
-      <ProductBannerSlider
+      </div> */}
+      {/* <ProductBannerSlider
         count={1}
         bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
-      />
+      /> */}
 
-      <EigthProductSection sectionCount={3} startIndex={2} />
-      <ProductBannerSlider
+      {/* <EigthProductSection sectionCount={3} startIndex={2} /> */}
+      {/* <ProductBannerSlider
         count={1}
         bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
-      />
-      <EigthProductSection sectionCount={1} startIndex={5} />
+      /> */}
+      {/* <EigthProductSection sectionCount={1} startIndex={5} /> */}
 
-      <div className="p-4 bg-white md:hidden">
+      {/* <div className="p-4 bg-white md:hidden">
         {sectionData2.map((section, idx) => (
           <ProductGrid2X2
             key={idx}
@@ -609,9 +610,9 @@ export const Home = () => {
             products={section.products}
           />
         ))}
-      </div>
+      </div> */}
 
-      <EigthProductSection sectionCount={2} startIndex={6} />
+      {/* <EigthProductSection sectionCount={2} startIndex={6} /> */}
 
       {/* Popular Products Section */}
       <section className="bg-white sm:!py-10 !py-0 mt-0 md:flex md:justify-center">
@@ -668,12 +669,12 @@ export const Home = () => {
           />
         </div>
       </section>
-      <ProductBannerSlider
+      {/* <ProductBannerSlider
         count={1}
         bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
-      />
+      /> */}
 
-      <div className="p-4 bg-white md:hidden">
+      {/* <div className="p-4 bg-white md:hidden">
         {sectionData3.map((section, idx) => (
           <ProductGrid2X2
             key={idx}
@@ -681,7 +682,7 @@ export const Home = () => {
             products={section.products}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* <section className="hidden md:block py-4 bg-white">
   <div className="container px-4">
@@ -797,7 +798,7 @@ export const Home = () => {
           )
       )}
 
-      <div className="p-4 bg-white md:hidden">
+      {/* <div className="p-4 bg-white md:hidden">
         {sectionData2.map((section, idx) => (
           <ProductGrid2X2
             key={idx}
@@ -805,7 +806,7 @@ export const Home = () => {
             products={section.products}
           />
         ))}
-      </div>
+      </div> */}
 
       {dynamicSections.slice(4).map(
         ({ key, label, products }, index) =>
@@ -838,7 +839,7 @@ export const Home = () => {
           )
       )}
 
-      <div className="p-4 bg-white md:hidden">
+      {/* <div className="p-4 bg-white md:hidden">
         {sectionData2.map((section, idx) => (
           <ProductGrid2X2
             key={idx}
@@ -846,7 +847,7 @@ export const Home = () => {
             products={section.products}
           />
         ))}
-      </div>
+      </div> */}
 
       <ProductsNew />
     </>
