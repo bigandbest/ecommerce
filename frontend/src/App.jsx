@@ -130,7 +130,7 @@ function App() {
                 <div className="!sticky top-0">
                   <MainSearchBar />
                 </div>
-                <StoreNav />
+                {/* <StoreNav /> */}
                 <LocationModal />
                 <MobileBannerCarousel />
 
@@ -138,12 +138,12 @@ function App() {
                 <BbmPicks title="Recommended Store" items={data} />
                 <Quickyfy title="Quickyfy" items={Thirddata} />
                 <MobileCategoriesBar />
-                <OfferBannerSlider
+                {/* <OfferBannerSlider
                   count={1}
                   bannerUrl="https://i.postimg.cc/rF7J75bL/Untitled-design-3.png"
                 />
                 <CategoryOfferBanner count={1} bannerUrl="https://i.postimg.cc/bNfdYphd/Untitled-design-5.png" />
-                <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/TPcZN3S5/Untitled-design-7.png" />
+                <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/TPcZN3S5/Untitled-design-7.png" /> */}
 
                 <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
                   setMobileMenuOpen={setMobileMenuOpen} />
