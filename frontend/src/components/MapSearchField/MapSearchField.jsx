@@ -1,26 +1,51 @@
-// src/components/MapSearch/MapSearchField.jsx
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
-import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
+import { GeoSearchControl } from 'leaflet-geosearch';
 import 'leaflet-geosearch/dist/geosearch.css';
+
+// Create a custom provider that calls your backend proxy
+class ProxyProvider {
+  async search({ query }) {
+    try {
+      // This URL must match the route you set up on your server
+      const response = await fetch(`http://localhost:8000/api/location/search?q=${query}`);
+      if (!response.ok) return []; // Handle server errors gracefully
+      
+      const results = await response.json();
+
+      // Format the results to what leaflet-geosearch expects
+      return results.map((result) => ({
+        x: result.lon, // longitude
+        y: result.lat, // latitude
+        label: result.display_name,
+        bounds: [
+          [parseFloat(result.boundingbox[0]), parseFloat(result.boundingbox[2])],
+          [parseFloat(result.boundingbox[1]), parseFloat(result.boundingbox[3])],
+        ],
+      }));
+    } catch (error) {
+      console.error("Search proxy error:", error);
+      return []; // Return empty array on network failure
+    }
+  }
+}
 
 const MapSearchField = ({ onLocationFound }) => {
   const map = useMap();
 
   useEffect(() => {
-    const provider = new OpenStreetMapProvider();
+    const provider = new ProxyProvider(); // Use the custom provider
 
     const searchControl = new GeoSearchControl({
       provider,
       style: 'bar',
-      showMarker: false, // We will handle the marker ourselves
+      showMarker: false,
       autoClose: true,
       keepResult: true,
     });
 
     map.addControl(searchControl);
 
-    // Listen for the search result event
     const onResult = (e) => {
       onLocationFound({ lat: e.location.y, lng: e.location.x });
     };
@@ -33,7 +58,7 @@ const MapSearchField = ({ onLocationFound }) => {
     };
   }, [map, onLocationFound]);
 
-  return null; // This component does not render anything itself
+  return null;
 };
 
 export default MapSearchField;

@@ -992,7 +992,7 @@ export async function addToCart(user_id, product_id, quantity = 1) {
 
 export const getCartItems = async (user_id) => {
   try {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/cart/${user_id}`);
+    const res = await axios.get(`http://localhost:8000/api/cart/${user_id}`);
     return { success: true, cartItems: res.data.cartItems };
   } catch (err) {
     console.error("Error fetching cart items:", err);
@@ -1002,7 +1002,7 @@ export const getCartItems = async (user_id) => {
 
 export const updateCartItem = async (cart_item_id, quantity) => {
   try {
-    const res = await axios.put(`https://ecommerce-8342.onrender.com/api/cart/update/${cart_item_id}`, { quantity });
+    const res = await axios.put(`http://localhost:8000/api/cart/update/${cart_item_id}`, { quantity });
     return { success: true, updated: res.data };
   } catch (err) {
     console.error("Error updating cart item:", err);
@@ -1012,7 +1012,7 @@ export const updateCartItem = async (cart_item_id, quantity) => {
 
 export const removeCartItem = async (cart_item_id) => {
   try {
-    const res = await axios.delete(`https://ecommerce-8342.onrender.com/api/cart/remove/${cart_item_id}`);
+    const res = await axios.delete(`http://localhost:8000/api/cart/remove/${cart_item_id}`);
     return { success: true, removed: res.data };
   } catch (err) {
     console.error("Error removing cart item:", err);
@@ -1022,7 +1022,7 @@ export const removeCartItem = async (cart_item_id) => {
 
 export const clearCart = async (user_id) => {
   try {
-    const res = await axios.delete(`https://ecommerce-8342.onrender.com/api/cart/clear/${user_id}`);
+    const res = await axios.delete(`http://localhost:8000/api/cart/clear/${user_id}`);
     return { success: true, cleared: res.data };
   } catch (err) {
     console.error("Error clearing cart:", err);
@@ -1151,21 +1151,26 @@ export async function placeOrderWithDetailedAddress(
   payment_method,
   razorpay_order_id,
   razorpay_payment_id,
-  razorpay_signature
+  razorpay_signature,
+  gpsLocation // 👈 1. Add the new parameter here
 ) {
   try {
-    const res = await axios.post(`${BASE_URL}/place-detailed`, {
-      user_id,
-      items,
-      subtotal,
-      shipping,
-      total,
-      detailedAddress,
-      payment_method,
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature
-    });
+    const res = await axios.post(
+      `https://ecommerce-8342.onrender.com/api/orders/place-detailed-order`, // Ensure this URL is correct
+      {
+        user_id,
+        items,
+        subtotal,
+        shipping,
+        total,
+        detailedAddress,
+        payment_method,
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        gpsLocation, // 👈 2. Add the data to the request body
+      }
+    );
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };

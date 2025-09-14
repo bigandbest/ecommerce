@@ -2,139 +2,197 @@
 import React, { useEffect, useState } from 'react';
 import { useLocationContext } from '../../contexts/LocationContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { getUserAddresses, placeOrderWithDetailedAddress } from '../../utils/supabaseApi'; // You will need to create addGeoAddress
+import { placeOrderWithDetailedAddress, getCartItems } from '../../utils/supabaseApi';
 import axios from 'axios';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 
 const AddressSelectionPage = () => {
   const { currentUser } = useAuth();
-  const { selectedAddress, setSelectedAddress, orderAddress, setOrderAddress } = useLocationContext();
-  const [savedAddresses, setSavedAddresses] = useState([]);
+  const { mapSelection, orderAddress, setOrderAddress, addresses } = useLocationContext();
+  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // You will move the payment and availability logic here from Cart/index.jsx
-  // For simplicity, I'm including the Razorpay logic directly.
-
+  // 1. Fetch cart items and set initial address
   useEffect(() => {
-    const fetchAddresses = async () => {
-      if (currentUser?.id) {
-        const { success, addresses } = await getUserAddresses(currentUser.id);
-        if (success) {
-          setSavedAddresses(addresses);
-        }
+    const fetchData = async () => {
+      if (!currentUser?.id) {
+        setLoading(false);
+        return;
       }
-      // The GPS-captured address is already in `selectedAddress` from the context
-      if (selectedAddress) {
-        setOrderAddress(selectedAddress); // Set it as the default for this page
+
+      // Fetch cart items
+      const cartRes = await getCartItems(currentUser.id);
+      if (cartRes.success) {
+        setCartItems(cartRes.cartItems);
       }
+      
+      // LOGIC CHANGE: Set the default order address ONLY from saved addresses.
+      // Do NOT use mapSelection as a selectable address.
+      if (addresses && addresses.length > 0) {
+        const defaultAddress = addresses.find(a => a.is_default) || addresses[0];
+        setOrderAddress(defaultAddress);
+      } else {
+        setOrderAddress(null); // Ensure no address is selected if none are saved
+      }
+
       setLoading(false);
     };
-    fetchAddresses();
-  }, [currentUser, selectedAddress, setOrderAddress]);
+    fetchData();
+  }, [currentUser, addresses, setOrderAddress]);
 
-  const handleSelectSavedAddress = (address) => {
-    setOrderAddress(address); // Update the final order address
+  // 2. Calculate order totals
+  const subtotal = cartItems.reduce((total, item) => total + ((item.price || 0) * (item.quantity || 1)), 0);
+  const shippingCost = subtotal > 1000 ? 0 : 50;
+  const grandTotal = subtotal + shippingCost;
+
+  // 3. Handle selecting a saved address
+  const handleSelectAddress = (address) => {
+    setOrderAddress(address);
   };
 
-  // 👇 THIS LOGIC IS MOVED FROM YOUR CART COMPONENT
+  // 4. Razorpay payment and order placement logic
   const handleRazorpayPayment = async () => {
-    // 1. Check product availability
-    try {
-      // You'll need to fetch cartItems here, maybe from context or a quick API call
-      // const { success, cartItems } = await getCartItems(currentUser.id);
-      // const isAvailable = await checkCartAvailability(cartItems, orderAddress);
-      // if (!isAvailable) return;
-    } catch (e) {
-      alert("Failed to check availability.");
+    // This check is now even more important. It ensures a manual address was selected.
+    if (!orderAddress || orderAddress.is_geolocation) {
+      alert("Please select a valid, saved delivery address to proceed.");
       return;
     }
+    
+    // Normalize the final selected *manual* address for the order payload
+    const detailedAddress = {
+      houseNumber: orderAddress.house_number || "",
+      streetAddress: orderAddress.street_address || "",
+      city: orderAddress.city || "",
+      state: orderAddress.state || "",
+      postalCode: orderAddress.postal_code || "",
+      country: orderAddress.country || "India",
+      landmark: orderAddress.landmark || "",
+    };
 
-    // 2. Normalize the selected `orderAddress`
-    const detailedAddress = orderAddress.is_geolocation
-      ? { /* Normalize GPS address */ }
-      : { /* Normalize saved address */
-          houseNumber: orderAddress.house_number,
-          streetAddress: orderAddress.street_address,
-          city: orderAddress.city,
-          state: orderAddress.state,
-          postalCode: orderAddress.postal_code,
-          country: orderAddress.country || 'India',
-        };
-
-    // 3. Create Razorpay Order
     try {
-      // const grandTotal = ... calculate total ...
-      const res = await axios.post("https://ecommerce-8342.onrender.com/api/payment/create-order", { amount: 100 /* Replace with grandTotal */ });
+      // Create Razorpay order
+      const res = await axios.post("https://ecommerce-8342.onrender.com/api/payment/create-order", {
+        amount: grandTotal
+      });
       const { order_id, amount } = res.data;
 
+      // Razorpay options
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
-        // ... all other razorpay options
+        currency: "INR",
+        name: "Big and Best Mart",
+        description: "Order Payment",
+        order_id,
         handler: async function (response) {
-          // ... verification and placeOrderWithDetailedAddress call
-        }
+          const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
+
+          const verification = await axios.post("https://ecommerce-8342.onrender.com/api/payment/verify-payment", {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+          });
+
+          if (!verification.data.success) {
+            alert("Payment verification failed. Please contact support.");
+            return;
+          }
+
+          // Place order, sending BOTH the manual address and the GPS data
+          const orderResponse = await placeOrderWithDetailedAddress(
+            currentUser.id, cartItems, subtotal, shippingCost, grandTotal,
+            detailedAddress,    // The final confirmed manual address
+            "razorpay", razorpay_order_id, razorpay_payment_id, razorpay_signature,
+            mapSelection        // The informational GPS data from the map
+          );
+
+          if (orderResponse.success) {
+            alert("Order placed successfully!");
+            navigate('/MyOrders');
+          } else {
+            alert("Failed to place order: " + (orderResponse.error || "Unknown error"));
+          }
+        },
+        prefill: {
+          name: currentUser.user_metadata?.name || currentUser.email,
+          email: currentUser.email,
+          contact: currentUser.user_metadata?.phone,
+        },
+        theme: { color: "#3f51b5" },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
       console.error("Razorpay error", err);
-      alert("Something went wrong with Razorpay.");
+      alert("An error occurred with the payment gateway. Please try again.");
     }
   };
 
-  if (loading) return <div>Loading addresses...</div>;
+  if (loading) return <div className="text-center p-10">Loading Your Details...</div>;
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Confirm Your Address</h1>
+    <div className="container mx-auto p-4 max-w-2xl">
+      <h1 className="text-2xl font-bold mb-6 text-center">Confirm Your Address & Pay</h1>
 
-      {/* GPS Location Display */}
-      {selectedAddress && selectedAddress.is_geolocation && (
-        <div className="border p-4 rounded-md mb-6 bg-blue-50">
-          <h2 className="font-semibold text-lg mb-2">Your Current Location</h2>
-          <p>{selectedAddress.formatted_address}</p>
-          <button
-            onClick={() => handleSelectSavedAddress(selectedAddress)}
-            className={`mt-2 py-1 px-3 rounded text-sm ${orderAddress?.formatted_address === selectedAddress.formatted_address ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
-          >
-            {orderAddress?.formatted_address === selectedAddress.formatted_address ? 'Selected' : 'Use this Address'}
-          </button>
+      {/* GPS Location Display (Informational Only) */}
+      {mapSelection && (
+        <div className="mb-6">
+          <h2 className="font-semibold text-lg mb-2">GPS Location Reference</h2>
+          <div className="border p-4 rounded-md bg-gray-100 text-gray-700">
+            <p>📍 {mapSelection.formatted_address}</p>
+          </div>
         </div>
       )}
 
-      {/* Saved Addresses */}
+      {/* Saved Addresses (Selection Required) */}
       <div className="mb-6">
-        <h2 className="font-semibold text-lg mb-2">Your Saved Addresses</h2>
-        {savedAddresses.length > 0 ? (
-          savedAddresses.map(addr => (
-            <div key={addr.id} className="border p-3 rounded mb-2">
-              <p className="font-bold">{addr.address_name}</p>
-              <p>{addr.street_address}, {addr.city}, {addr.state} - {addr.postal_code}</p>
-              <button
-                onClick={() => handleSelectSavedAddress(addr)}
-                className={`mt-2 py-1 px-3 rounded text-sm ${orderAddress?.id === addr.id ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
-              >
-                {orderAddress?.id === addr.id ? 'Selected' : 'Deliver Here'}
-              </button>
+        <h2 className="font-semibold text-lg mb-2">Select a Delivery Address</h2>
+        {addresses.length > 0 ? (
+          addresses.map(addr => (
+            <div key={addr.id} className="border p-4 rounded-md mb-2 cursor-pointer hover:border-blue-500" onClick={() => handleSelectAddress(addr)}>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id={`addr-${addr.id}`}
+                  name="deliveryAddress"
+                  checked={orderAddress?.id === addr.id}
+                  readOnly
+                  className="mr-3 h-4 w-4"
+                />
+                <label htmlFor={`addr-${addr.id}`} className="w-full">
+                  <p className="font-bold">{addr.address_name}</p>
+                  <p>{addr.street_address}, {addr.city}, {addr.state} - {addr.postal_code}</p>
+                </label>
+              </div>
             </div>
           ))
         ) : (
-          <p>You have no saved addresses.</p>
+          // NEW: Prompt to add an address if none are saved
+          <div className="text-center border-2 border-dashed p-8 rounded-md">
+            <p className="text-gray-600 mb-4">You have no saved addresses. Please add an address to continue.</p>
+            <Link to="/profile/addresses" className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+              Add a New Address
+            </Link>
+          </div>
         )}
       </div>
 
-      {/* Add New Address Form (conditionally render) */}
-      {/* You can add a button to toggle a form for adding a new address here */}
-
-      {/* Proceed to Payment Button */}
-      <div className="mt-8 text-center">
+      {/* Order Summary & Payment Button */}
+      <div className="border-t pt-6 mt-6">
+        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+        <div className="space-y-2 mb-4">
+          <div className="flex justify-between"><span>Subtotal:</span> <span>₹{subtotal.toFixed(2)}</span></div>
+          <div className="flex justify-between"><span>Shipping:</span> <span>₹{shippingCost.toFixed(2)}</span></div>
+          <div className="flex justify-between font-bold text-lg"><span>Total:</span> <span>₹{grandTotal.toFixed(2)}</span></div>
+        </div>
         <button
           onClick={handleRazorpayPayment}
-          disabled={!orderAddress}
-          className="bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition duration-200 disabled:bg-gray-400"
+          disabled={!orderAddress || cartItems.length === 0}
+          className="w-full bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Proceed to Payment
+          {!orderAddress ? 'Please Select a Saved Address' : (cartItems.length > 0 ? `Proceed to Pay ₹${grandTotal.toFixed(2)}` : 'Your Cart is Empty')}
         </button>
       </div>
     </div>

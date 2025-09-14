@@ -32,16 +32,26 @@ const Cart = () => {
       setLoading(true);
       const { success, cartItems, error } = await getCartItems(user_id);
       setCartItems(success && cartItems ? cartItems : []);
-      /* console.log(cartItems) */
       setLoading(false);
     }
-    fetchCart();
+    if (user_id) {
+      fetchCart();
+    } else {
+      setLoading(false);
+      setCartItems([]);
+    }
   }, [user_id]);
 
-
+  
   const handleProceedToCheckout = () => {
+    const hasOutOfStockItems = cartItems.some(item => !item.in_stock)
     if (cartItems.length === 0) {
       alert("Your cart is empty.");
+      return;
+    }
+    // ✅ Block navigation if out of stock items exist
+    if (hasOutOfStockItems) {
+      alert("Please remove out-of-stock items from your cart before proceeding.");
       return;
     }
     // Navigate to the map page
@@ -413,7 +423,7 @@ const Cart = () => {
 
                 <div className="divide-y">
                   {cartItems.map(item => (
-                    <div key={item.cart_item_id} className="p-3 sm:p-4 cart-item">
+                    <div key={item.cart_item_id} className={`p-3 sm:p-4 cart-item ${!item.in_stock ? 'opacity-60' : ''}`}>
                       {/* Mobile Layout */}
                       <div className="block sm:hidden">
                         {/* Mobile: Image, Details, Quantity, and Price in a single row */}
@@ -433,6 +443,11 @@ const Cart = () => {
                                 )}`;
                               }}
                             />
+                            {!item.in_stock && (
+                                <div className="out-of-stock-overlay">
+                                  <span>Out of Stock</span>
+                                </div>
+                              )}
                           </div>
 
                           {/* Product Details */}
@@ -460,7 +475,7 @@ const Cart = () => {
                               onClick={() =>
                                 updateQuantity(item.cart_item_id, item.quantity - 1)
                               }
-                              disabled={item.quantity <= 1}
+                              disabled={item.quantity <= 1 || !item.in_stock}
                               className="flex items-center justify-center text-pink-500 font-medium disabled:text-gray-300 disabled:cursor-not-allowed"
                               style={{
                                 width: "20px",
@@ -485,6 +500,7 @@ const Cart = () => {
                               onClick={() =>
                                 updateQuantity(item.cart_item_id, item.quantity + 1)
                               }
+                              disabled={!item.in_stock}
                               className="flex items-center justify-center text-pink-500 font-medium"
                               style={{
                                 width: "20px",
@@ -527,6 +543,11 @@ const Cart = () => {
                               e.target.src = `https://placehold.co/200x200/f0f0f0/666?text=${encodeURIComponent(item.name.charAt(0))}`;
                             }}
                           />
+                          {!item.in_stock && (
+                                <div className="out-of-stock-overlay">
+                                  <span>Out of Stock</span>
+                                </div>
+                              )}
                         </div>
 
                         {/* Product Details */}
@@ -544,7 +565,7 @@ const Cart = () => {
                           <button
                             onClick={() => updateQuantity(item.cart_item_id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                            disabled={item.quantity <= 1}
+                            disabled={item.quantity <= 1 || !item.in_stock}
                           >
                             -
                           </button>
@@ -560,6 +581,7 @@ const Cart = () => {
                           />
                           <button
                             onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
+                            disabled={!item.in_stock}
                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                           >
                             +
@@ -627,27 +649,6 @@ const Cart = () => {
                   </div>
                 </div>
 
-                {orderAddress && (
-                  <div className="border p-3 rounded mb-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold">Delivery Address</h3>
-                      <button
-                        className="text-blue-600 text-sm underline"
-                        onClick={() => {
-                          setModalMode("order");
-                          setShowModal(true);
-                        }}
-                      >
-                        Change Address
-                      </button>
-                    </div>
-                    <div className="text-sm mt-2">
-                      <p className="font-medium">{orderAddress.address_name}</p>
-                      <p>{orderAddress.street_address}</p>
-                      <p>{orderAddress.state} - {orderAddress.postal_code}</p>
-                    </div>
-                  </div>
-                )}
 
                 <div className="space-y-4">
                   <button
@@ -656,7 +657,7 @@ const Cart = () => {
                     style={{ backgroundColor: "#3f51b5" }}
                     disabled={enquiryLoading}
                   >
-                    Place an Order
+                    Select Delivery Address
                   </button>
 
 

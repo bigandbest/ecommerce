@@ -1,11 +1,10 @@
-// src/pages/Checkout/MapLocationPage.jsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom';
 import { useLocationContext } from '../../contexts/LocationContext';
-import MapSearchField from '../MapSearchField/MapSearchField'; // 👈 Import search
+import MapSearchField from '../MapSearchField/MapSearchField'; // Corrected path
 
 // Fix for default Leaflet icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -18,12 +17,11 @@ L.Icon.Default.mergeOptions({
 const MapLocationPage = () => {
   const [position, setPosition] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { setGpsAddress } = useLocationContext(); // Use the clearer name
+  const { setMapSelection } = useLocationContext(); // Corrected to use setMapSelection
   const navigate = useNavigate();
   const markerRef = useRef(null);
   const mapRef = useRef(null);
 
-  // 1. Get user's initial location
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -32,15 +30,13 @@ const MapLocationPage = () => {
         setLoading(false);
       },
       () => {
-        // Default to a central location if permission is denied
         setPosition([28.6139, 77.2090]); // Default to Delhi
         setLoading(false);
-        alert("Location access denied. Showing default location. Please search for your address.");
+        alert("Location access denied. Please search for your address.");
       }
     );
   }, []);
 
-  // 2. Handle marker dragging
   const eventHandlers = useMemo(
     () => ({
       dragend() {
@@ -53,55 +49,47 @@ const MapLocationPage = () => {
     [],
   );
 
-  // 3. Handle location found from search
   const handleLocationSearch = (coords) => {
-      setPosition([coords.lat, coords.lng]);
-      // Fly to the new location on the map
-      if (mapRef.current) {
-          mapRef.current.flyTo([coords.lat, coords.lng], 16);
-      }
+    setPosition([coords.lat, coords.lng]);
+    if (mapRef.current) {
+      mapRef.current.flyTo([coords.lat, coords.lng], 16);
+    }
   };
 
-  // 4. Final step: Use the location and reverse geocode
   const handleUseLocation = async () => {
-    if (!position) {
-      alert("Location not set. Please wait or search for a location.");
-      return;
-    }
+    if (!position) return alert("Location not set.");
     setLoading(true);
     try {
-        // Manually call the reverse geocoding API with the final marker position
-        const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${position[0]}+${position[1]}&key=f4a8c8f1a4c541f89f742dbc40672aea`);
-        const data = await response.json();
-        const result = data?.results?.[0];
+      const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${position[0]}+${position[1]}&key=f4a8c8f1a4c541f89f742dbc40672aea`);
+      const data = await response.json();
+      const result = data?.results?.[0];
 
-        if (result) {
-            const locationData = {
-                latitude: position[0],
-                longitude: position[1],
-                formatted_address: result.formatted,
-                is_geolocation: true, // Flag it as a map-derived address
-                // You can add more components if you need them
-                city: result.components.city || result.components.town,
-                state: result.components.state,
-                postal_code: result.components.postcode,
-                country: result.components.country,
-            };
-            setGpsAddress(locationData);
-            navigate('/checkout/confirm-address');
-        } else {
-            alert("Could not retrieve address details for this location. Please try a different spot.");
-        }
+      if (result) {
+        const locationData = {
+          latitude: position[0],
+          longitude: position[1],
+          formatted_address: result.formatted,
+          is_geolocation: true,
+          city: result.components.city || result.components.town || "",
+          state: result.components.state || "",
+          postal_code: result.components.postcode || "",
+          country: result.components.country || "",
+        };
+        setMapSelection(locationData); // Corrected to use setMapSelection
+        navigate('/checkout/confirm-address');
+      } else {
+        alert("Could not retrieve address details for this location.");
+      }
     } catch (error) {
-        console.error("Reverse geocoding failed", error);
-        alert("Failed to process location. Please check your connection and try again.");
+      console.error("Reverse geocoding failed", error);
+      alert("Failed to process location.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   if (loading && !position) {
-    return <div className="text-center py-10">Loading Map and Location...</div>;
+    return <div className="text-center py-10">Loading Map...</div>;
   }
 
   return (
