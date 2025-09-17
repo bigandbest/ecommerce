@@ -113,7 +113,7 @@ const PaymentPage = () => {
     else if (undeliverableItems.length > 0 && deliverableItems.length > 0) {
       const itemNamesToRemove = undeliverableItems.map(item => `- ${item.name}`).join('\n');
       const userConfirmed = window.confirm(
-        `The following items cannot be delivered and will be removed:\n\n${itemNamesToRemove}\n\nDo you want to continue with the remaining items?`
+        `The following items "cannot be delivered at your selected address" and will be removed:\n\n${itemNamesToRemove}\n\nDo you want to continue with the remaining items?`
       );
 
       if (userConfirmed) {

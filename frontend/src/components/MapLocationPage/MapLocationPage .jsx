@@ -99,7 +99,7 @@ const MapLocationPage = () => {
       <h1 className="text-2xl font-bold mb-4 text-center">Pinpoint Your Location</h1>
       
       {/* Button to fetch current location */}
-      <div className="text-center mb-4">
+      {/* <div className="text-center mb-4">
         <button
           onClick={fetchCurrentLocation}
           disabled={loading}
@@ -108,7 +108,7 @@ const MapLocationPage = () => {
           <LocateFixed size={18} className="mr-2" />
           Use My Current Location
         </button>
-      </div>
+      </div> */}
 
       <div style={{ height: '500px', width: '100%', position: 'relative' }}>
         {position ? (
@@ -126,7 +126,18 @@ const MapLocationPage = () => {
             <p>Loading Map...</p>
           </div>
         )}
+
+        {/* ✅ MOVED & STYLED: This button is now inside the map container */}
+        <button
+          onClick={fetchCurrentLocation}
+          disabled={loading}
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 z-[1000] bg-white text-gray-800 font-semibold py-2 px-4 rounded-full shadow-lg hover:bg-gray-100 transition duration-200 disabled:bg-gray-300 flex items-center justify-center whitespace-nowrap"
+        >
+          <LocateFixed size={18} className="mr-2 text-blue-600" />
+          Use My Current Location
+        </button>
       </div>
+
       <div className="text-center mt-6">
         <button
           onClick={handleConfirmLocation}
