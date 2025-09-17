@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCartItems, updateCartItem, removeCartItem, clearCart, createEnquiry, placeOrderWithDetailedAddress } from '../../utils/supabaseApi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MdDelete } from 'react-icons/md';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
@@ -22,6 +22,7 @@ const Cart = () => {
   const [enquiryStatus, setEnquiryStatus] = useState(null); // success | error | null
   const [enquiryLoading, setEnquiryLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const navigate = useNavigate();
 
   /* console.log(currentUser) */
 
@@ -31,11 +32,70 @@ const Cart = () => {
       setLoading(true);
       const { success, cartItems, error } = await getCartItems(user_id);
       setCartItems(success && cartItems ? cartItems : []);
-      /* console.log(cartItems) */
       setLoading(false);
     }
-    fetchCart();
+    if (user_id) {
+      fetchCart();
+    } else {
+      setLoading(false);
+      setCartItems([]);
+    }
   }, [user_id]);
+
+
+  // ✅ NEW: Updated checkout logic
+  const handleProceedToCheckout = async () => {
+    // Basic check for an empty cart
+    if (cartItems.length === 0) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    // Separate items into in-stock and out-of-stock
+    const inStockItems = cartItems.filter(item => item.in_stock);
+    const outOfStockItems = cartItems.filter(item => !item.in_stock);
+
+    // --- Case 1: All items are out of stock ---
+    if (inStockItems.length === 0 && outOfStockItems.length > 0) {
+      alert("All items in your cart are out of stock. Please add available products to proceed.");
+      return; // Stop the process
+    }
+
+    // --- Case 2: A mix of in-stock and out-of-stock items ---
+    if (inStockItems.length > 0 && outOfStockItems.length > 0) {
+      // Use window.confirm to give the user a choice
+      const userConfirmed = window.confirm(
+        "Some items in your cart are out of stock and will be removed automatically. Do you want to continue?"
+      );
+
+      if (userConfirmed) {
+        setLoading(true); // Show a loading state
+
+        // Create an array of promises, one for each item to be deleted
+        const deletionPromises = outOfStockItems.map(item =>
+          removeCartItem(item.cart_item_id)
+        );
+
+        // Use Promise.all to wait for all deletions to complete concurrently
+        await Promise.all(deletionPromises);
+
+        // Update the cart state locally to only show the in-stock items
+        setCartItems(inStockItems);
+        window.dispatchEvent(new Event('cartUpdated')); // Notify other components like the header
+
+        setLoading(false);
+        navigate('/checkout/select-location'); // Proceed to the next step
+      } else {
+        // User clicked "Cancel", so we do nothing and they stay on the cart page
+        return;
+      }
+    }
+
+    // --- Default Case: All items are in stock ---
+    if (outOfStockItems.length === 0) {
+      navigate('/checkout/select-location');
+    }
+  };
 
 
   /* console.log(cartItems) */
@@ -402,7 +462,7 @@ const Cart = () => {
 
                 <div className="divide-y">
                   {cartItems.map(item => (
-                    <div key={item.cart_item_id} className="p-3 sm:p-4 cart-item">
+                    <div key={item.cart_item_id} className={`p-3 sm:p-4 cart-item ${!item.in_stock ? 'opacity-60' : ''}`}>
                       {/* Mobile Layout */}
                       <div className="block sm:hidden">
                         {/* Mobile: Image, Details, Quantity, and Price in a single row */}
@@ -422,6 +482,11 @@ const Cart = () => {
                                 )}`;
                               }}
                             />
+                            {!item.in_stock && (
+                              <div className="out-of-stock-overlay">
+                                <span>Out of Stock</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Product Details */}
@@ -449,7 +514,7 @@ const Cart = () => {
                               onClick={() =>
                                 updateQuantity(item.cart_item_id, item.quantity - 1)
                               }
-                              disabled={item.quantity <= 1}
+                              disabled={item.quantity <= 1 || !item.in_stock}
                               className="flex items-center justify-center text-pink-500 font-medium disabled:text-gray-300 disabled:cursor-not-allowed"
                               style={{
                                 width: "20px",
@@ -474,6 +539,7 @@ const Cart = () => {
                               onClick={() =>
                                 updateQuantity(item.cart_item_id, item.quantity + 1)
                               }
+                              disabled={!item.in_stock}
                               className="flex items-center justify-center text-pink-500 font-medium"
                               style={{
                                 width: "20px",
@@ -516,6 +582,11 @@ const Cart = () => {
                               e.target.src = `https://placehold.co/200x200/f0f0f0/666?text=${encodeURIComponent(item.name.charAt(0))}`;
                             }}
                           />
+                          {!item.in_stock && (
+                            <div className="out-of-stock-overlay">
+                              <span>Out of Stock</span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Product Details */}
@@ -533,7 +604,7 @@ const Cart = () => {
                           <button
                             onClick={() => updateQuantity(item.cart_item_id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                            disabled={item.quantity <= 1}
+                            disabled={item.quantity <= 1 || !item.in_stock}
                           >
                             -
                           </button>
@@ -549,6 +620,7 @@ const Cart = () => {
                           />
                           <button
                             onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
+                            disabled={!item.in_stock}
                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                           >
                             +
@@ -616,36 +688,15 @@ const Cart = () => {
                   </div>
                 </div>
 
-                {orderAddress && (
-                  <div className="border p-3 rounded mb-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold">Delivery Address</h3>
-                      <button
-                        className="text-blue-600 text-sm underline"
-                        onClick={() => {
-                          setModalMode("order");
-                          setShowModal(true);
-                        }}
-                      >
-                        Change Address
-                      </button>
-                    </div>
-                    <div className="text-sm mt-2">
-                      <p className="font-medium">{orderAddress.address_name}</p>
-                      <p>{orderAddress.street_address}</p>
-                      <p>{orderAddress.state} - {orderAddress.postal_code}</p>
-                    </div>
-                  </div>
-                )}
 
                 <div className="space-y-4">
                   <button
-                    onClick={handleRazorpayPayment}
+                    onClick={handleProceedToCheckout}
                     className={`block w-full bg-primary text-white text-center py-3 px-4 rounded-md hover:bg-primary-dark transition duration-200 ${enquiryLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                     style={{ backgroundColor: "#3f51b5" }}
                     disabled={enquiryLoading}
                   >
-                    Place an Order
+                    Select Delivery Address
                   </button>
 
 

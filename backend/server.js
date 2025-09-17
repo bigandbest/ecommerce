@@ -9,7 +9,7 @@ dotenv.config();
 import authRoutes from './routes/authRoute.js';
 import geoAddressRoute from './routes/geoAddressRoute.js'
 import warehouseRoute from './routes/warehouseRoute.js'
-import productWarehouseRoute  from './routes/productWarehouseRoutes.js';
+import productWarehouseRoute from './routes/productWarehouseRoutes.js';
 import productsRoute from './routes/productRoutes.js'
 import locationRoute from './routes/locationRoutes.js'
 import cartRoutes from "./routes/cartRoutes.js";
@@ -32,15 +32,15 @@ const allowedOrigins = [
 
 
 const corsOptions = {
-      origin: function (origin, callback) {
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) { // Allow requests with no origin (like curl, etc.)
-          callback(null, true)
-        } else {
-          callback(new Error('Not allowed by CORS'))
-        }
-      },
-      credentials: true,
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) { // Allow requests with no origin (like curl, etc.)
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
     }
+  },
+  credentials: true,
+}
 /* app.use(cors({
    origin: function (origin, callback) {
     // allow requests with no origin like mobile apps or curl

@@ -20,7 +20,7 @@ const LocationModal = () => {
     orderAddress,
     setOrderAddress,
     clearLocationData,
-    setLocationcleared,
+    setLocationCleared,
   } = useLocationContext();
 
   const { currentUser } = useAuth();
@@ -35,7 +35,7 @@ const LocationModal = () => {
     try {
       setResetLoading(true)
       clearLocationData();
-      setLocationcleared(true)
+      setLocationCleared(true)
       setShowModal(false);
       alert("Location Reset")
     } catch (error) {
@@ -49,7 +49,7 @@ const LocationModal = () => {
     try {
       setLocationLoading(true);
       const result = await useCurrentLocation();
-      setLocationcleared(false);
+      setLocationCleared(false);
       alert("Location updated successfully!");
     } catch (err) {
       console.error("Failed to fetch current location:", err);
@@ -86,7 +86,7 @@ const LocationModal = () => {
 
       setSelectedAddress(newSelected);
       setCurrentLocationAddress(null);
-      setLocationcleared(false)
+      setLocationCleared(false)
       localStorage.setItem("selectedAddress", JSON.stringify(newSelected));
       setShowModal(false);
     } catch (err) {
@@ -141,7 +141,7 @@ const LocationModal = () => {
                       setSelectedAddress(addr);
                       setOrderAddress(addr);
                       setCurrentLocationAddress(null);
-                      setLocationcleared(false);
+                      setLocationCleared(false);
                       setShowModal(false);
                     }}
                     className={`min-w-[47%] border p-3 rounded-md cursor-pointer hover:bg-gray-100 transition shrink-0 ${isSelected ? "bg-gray-200 border-blue-600" : ""

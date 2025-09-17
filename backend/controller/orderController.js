@@ -71,7 +71,6 @@ export const placeOrder = async (req, res) => {
   return res.json({ success: true, order });
 };
 
-/** Place order with detailed structured address */
 export const placeOrderWithDetailedAddress = async (req, res) => {
   const {
     user_id,
@@ -79,20 +78,15 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     subtotal,
     shipping,
     total,
-    detailedAddress,
+    detailedAddress,    // The manually selected address
     payment_method,
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
+    mapSelection,        // 👈 The new GPS data from the map selection
   } = req.body;
 
-  /* console.log("Order Inserting With:", {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-  }); */
-
-
+  // This part remains the same, creating a string from the manual address
   const addressString = [
     detailedAddress.houseNumber && detailedAddress.streetAddress
       ? `${detailedAddress.houseNumber} ${detailedAddress.streetAddress}`
@@ -114,8 +108,9 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     subtotal,
     shipping,
     total,
-    address: addressString,
+    address: addressString, // The formatted manual address
     payment_method,
+    // Fields from the manually selected address
     shipping_house_number: detailedAddress.houseNumber,
     shipping_street_address: detailedAddress.streetAddress,
     shipping_suite_unit_floor: detailedAddress.suiteUnitFloor,
@@ -126,9 +121,14 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     shipping_postal_code: detailedAddress.postalCode,
     shipping_country: detailedAddress.country || "India",
     shipping_landmark: detailedAddress.landmark,
+    // Razorpay details
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
+    // 👇 New fields from the GPS map selection
+    shipping_latitude: mapSelection?.latitude || null,
+    shipping_longitude: mapSelection?.longitude || null,
+    shipping_gps_address: mapSelection?.formatted_address || null,
   };
 
   const { data: order, error: orderError } = await supabase
@@ -137,7 +137,10 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     .select()
     .single();
 
-  if (orderError) return res.status(500).json({ success: false, error: orderError.message });
+  if (orderError) {
+    console.error("Supabase order insert error:", orderError);
+    return res.status(500).json({ success: false, error: orderError.message });
+  }
 
   const orderItemsToInsert = items.map((item) => ({
     order_id: order.id,
@@ -150,8 +153,13 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     .from("order_items")
     .insert(orderItemsToInsert);
 
-  if (itemsError) return res.status(500).json({ success: false, error: itemsError.message });
+  if (itemsError) {
+    // Optional: You might want to delete the order if item insertion fails (rollback)
+    console.error("Supabase order items insert error:", itemsError);
+    return res.status(500).json({ success: false, error: itemsError.message });
+  }
 
+  // Clear the user's cart after successful order placement
   await supabase.from("cart_items").delete().eq("user_id", user_id);
 
   return res.json({ success: true, order });

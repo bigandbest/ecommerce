@@ -578,9 +578,9 @@ export const Home = () => {
       {/* <BannerImagesSlider
         count={2}
         bannerUrl="https://i.postimg.cc/mrVcS62L/Untitled-design-1.png"
-      /> */}
-      {/* <EigthProductSection sectionCount={2} startIndex={0} /> */}
-      {/* <div className="p-4 bg-white md:hidden">
+      />
+      <EigthProductSection sectionCount={2} startIndex={0} />
+      <div className="p-4 bg-white md:hidden">
         {sectionData.map((section, idx) => (
           <ProductGrid2X2
             key={idx}

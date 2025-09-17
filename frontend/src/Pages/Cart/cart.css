@@ -212,3 +212,42 @@
   background-color: transparent;
   border-color: #d1d5db;
 }
+
+
+/* cart.css */
+
+/* This container is essential for positioning the overlay correctly on top of the image. */
+.image-container {
+  position: relative;
+  display: block; /* Ensures it takes up the space of the image */
+  width: 50%;
+  height: 50%;
+}
+
+/* This is the overlay itself. It sits on top of the image. */
+.out-of-stock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7); /* A semi-transparent white background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b91c1c; /* A strong red color for the text */
+  font-weight: 700; /* Bold text */
+  font-size: 0.75rem; /* Adjust size as needed */
+  text-align: center;
+  border-radius: 0.375rem; /* This should match the image's border-radius */
+  pointer-events: none; /* Allows clicks to go "through" the overlay if needed */
+  
+  /* Adds a modern frosted-glass effect */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px); /* For Safari browser support */
+}
+
+/* A simple class to apply a grayscale filter to the image. */
+.grayscale {
+  filter: grayscale(100%);
+}

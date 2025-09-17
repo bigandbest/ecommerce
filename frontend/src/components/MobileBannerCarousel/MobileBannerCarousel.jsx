@@ -89,7 +89,7 @@ const MobileBannerCarousel = () => {
                   className="w-full h-[150px] object-cover object-center rounded-xl"
                   // ✅ First banner: eager + high priority
                   loading={index === 0 ? "eager" : "lazy"}
-                  fetchpriority={index === 0 ? "high" : "auto"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
                   onError={(e) => {
                     e.target.src =
                       "https://placehold.co/600x200?text=No+Image";

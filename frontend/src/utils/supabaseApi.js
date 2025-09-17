@@ -1151,21 +1151,26 @@ export async function placeOrderWithDetailedAddress(
   payment_method,
   razorpay_order_id,
   razorpay_payment_id,
-  razorpay_signature
+  razorpay_signature,
+  gpsLocation // 👈 1. Add the new parameter here
 ) {
   try {
-    const res = await axios.post(`${BASE_URL}/place-detailed`, {
-      user_id,
-      items,
-      subtotal,
-      shipping,
-      total,
-      detailedAddress,
-      payment_method,
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature
-    });
+    const res = await axios.post(
+      `https://ecommerce-8342.onrender.com/api/order/place-detailed`, // Ensure this URL is correct
+      {
+        user_id,
+        items,
+        subtotal,
+        shipping,
+        total,
+        detailedAddress,
+        payment_method,
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        gpsLocation, // 👈 2. Add the data to the request body
+      }
+    );
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
