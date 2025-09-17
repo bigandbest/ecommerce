@@ -8,7 +8,7 @@ class ProxyProvider {
   async search({ query }) {
     try {
       // This URL must match the route you set up on your server
-      const response = await fetch(`http://localhost:8000/api/location/search?q=${query}`);
+      const response = await fetch(`https://ecommerce-8342.onrender.com/api/location/search?q=${query}`);
       if (!response.ok) return []; // Handle server errors gracefully
       
       const results = await response.json();

@@ -1,6 +1,9 @@
+// src/contexts/LocationContext.jsx
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { getUserAddresses } from "../utils/supabaseApi.js";
+import axios from "axios";
 
 const LocationContext = createContext();
 
@@ -9,27 +12,49 @@ export const LocationProvider = ({ children }) => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("visibility");
 
-  // State for the address chosen from the map/search page
-  const [mapSelection, setMapSelection] = useState(() => {
-    const stored = localStorage.getItem("mapSelection");
-    return stored ? JSON.parse(stored) : null;
+  // RESTORED: State for tracking if the user manually cleared the location.
+  // Initializes from localStorage by comparing the string "true".
+  const [locationCleared, setLocationCleared] = useState(() => {
+    const stored = localStorage.getItem("locationCleared");
+    return stored === "true";
   });
 
-  // Final address chosen for placing the order
+  // This is the primary active location for the app (from saved, pincode, or GPS)
+  const [selectedAddress, setSelectedAddress] = useState(() => {
+    const stored = localStorage.getItem("selectedAddress");
+    return stored ? JSON.parse(stored) : null;
+  });
+  
+  // This is the specific address for placing an order (set during checkout)
   const [orderAddress, setOrderAddress] = useState(() => {
     const stored = localStorage.getItem("orderAddress");
     return stored ? JSON.parse(stored) : null;
   });
 
-  const [addresses, setAddresses] = useState([]);
+  // This is for the GPS location chosen from the map page
+  const [mapSelection, setMapSelection] = useState(() => {
+    const stored = localStorage.getItem("mapSelection");
+    return stored ? JSON.parse(stored) : null;
+  });
 
+  // Holds the user's list of saved addresses
+  const [addresses, setAddresses] = useState([]);
+  
+  // Holds the formatted string of a reverse-geocoded address
+  const [currentLocationAddress, setCurrentLocationAddress] = useState(null);
+  
+  // Tracks loading state for geolocation fetching
+  const [isLocationLoading, setLocationLoading] = useState(false);
+
+
+  // --- PERSISTENCE EFFECTS ---
   useEffect(() => {
-    if (mapSelection) {
-      localStorage.setItem("mapSelection", JSON.stringify(mapSelection));
+    if (selectedAddress) {
+      localStorage.setItem("selectedAddress", JSON.stringify(selectedAddress));
     } else {
-      localStorage.removeItem("mapSelection");
+      localStorage.removeItem("selectedAddress");
     }
-  }, [mapSelection]);
+  }, [selectedAddress]);
 
   useEffect(() => {
     if (orderAddress) {
@@ -39,25 +64,97 @@ export const LocationProvider = ({ children }) => {
     }
   }, [orderAddress]);
 
+  useEffect(() => {
+    if (mapSelection) {
+      localStorage.setItem("mapSelection", JSON.stringify(mapSelection));
+    } else {
+      localStorage.removeItem("mapSelection");
+    }
+  }, [mapSelection]);
+  
+  // RESTORED: Persists the locationCleared flag to localStorage.
+  useEffect(() => {
+    localStorage.setItem("locationCleared", locationCleared.toString());
+  }, [locationCleared]);
+
+
+  // --- DATA FETCHING & LOGIC ---
+
   // Fetch saved user addresses
   useEffect(() => {
     const fetchAddresses = async () => {
-      if (!currentUser?.id) return;
-      const { success, addresses, error } = await getUserAddresses(currentUser.id);
-      if (!success) {
-        console.error("Failed to fetch addresses:", error);
+      if (!currentUser?.id) {
+        setAddresses([]);
         return;
       }
-      setAddresses(addresses);
+      const { success, addresses } = await getUserAddresses(currentUser.id);
+      if (success) {
+        setAddresses(addresses);
+
+        // RESTORED: Smartly set default address only on initial load.
+        const defaultAddress = addresses.find((addr) => addr.is_default);
+        if (!selectedAddress && defaultAddress && !locationCleared) {
+          setSelectedAddress(defaultAddress);
+        }
+      }
     };
     fetchAddresses();
-  }, [currentUser]);
+  }, [currentUser, locationCleared]); // Depends on locationCleared now
 
+  // Centralized function to get and set the user's current GPS location
+  const useCurrentLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not supported."));
+        return;
+      }
+      setLocationLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const res = await axios.get(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${import.meta.env.VITE_OPENCAGE_API_KEY}`);
+            const result = res.data.results[0];
+            if (result) {
+              const locationData = {
+                address_name: "Current Location",
+                postal_code: result.components.postcode || "",
+                state: result.components.state || "",
+                city: result.components.city || result.components.town || "",
+                street_address: result.components.road || "",
+                latitude,
+                longitude,
+                formatted_address: result.formatted,
+                is_geolocation: true,
+              };
+              setSelectedAddress(locationData);
+              setCurrentLocationAddress(result.formatted);
+              setLocationCleared(false); // A new location is set, so it's no longer "cleared"
+              resolve(locationData);
+            } else {
+              reject(new Error("Could not retrieve address details."));
+            }
+          } catch (error) {
+            reject(error);
+          } finally {
+            setLocationLoading(false);
+          }
+        },
+        (error) => {
+          setLocationLoading(false);
+          reject(error);
+        }
+      );
+    });
+  };
+
+  // Clears all location-related data and sets the cleared flag
   const clearLocationData = () => {
+    setSelectedAddress(null);
+    setCurrentLocationAddress(null);
     setMapSelection(null);
     setOrderAddress(null);
-    localStorage.removeItem("mapSelection");
-    localStorage.removeItem("orderAddress");
+    setLocationCleared(true); // Mark location as manually cleared
   };
 
   return (
@@ -65,15 +162,23 @@ export const LocationProvider = ({ children }) => {
       value={{
         showModal,
         setShowModal,
-        mapSelection,       // Expose new state
-        setMapSelection,    // Expose new setter
-        addresses,
-        setAddresses,
-        clearLocationData,
-        orderAddress,
-        setOrderAddress,
         modalMode,
         setModalMode,
+        addresses,
+        setAddresses,
+        selectedAddress,
+        setSelectedAddress,
+        currentLocationAddress,
+        setCurrentLocationAddress,
+        isLocationLoading,
+        locationCleared,
+        setLocationCleared,
+        useCurrentLocation,
+        orderAddress,
+        setOrderAddress,
+        mapSelection,
+        setMapSelection,
+        clearLocationData,
       }}
     >
       {children}
@@ -82,4 +187,3 @@ export const LocationProvider = ({ children }) => {
 };
 
 export const useLocationContext = () => useContext(LocationContext);
-export default LocationContext;

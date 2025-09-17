@@ -42,20 +42,59 @@ const Cart = () => {
     }
   }, [user_id]);
 
-  
-  const handleProceedToCheckout = () => {
-    const hasOutOfStockItems = cartItems.some(item => !item.in_stock)
+
+  // ✅ NEW: Updated checkout logic
+  const handleProceedToCheckout = async () => {
+    // Basic check for an empty cart
     if (cartItems.length === 0) {
       alert("Your cart is empty.");
       return;
     }
-    // ✅ Block navigation if out of stock items exist
-    if (hasOutOfStockItems) {
-      alert("Please remove out-of-stock items from your cart before proceeding.");
-      return;
+
+    // Separate items into in-stock and out-of-stock
+    const inStockItems = cartItems.filter(item => item.in_stock);
+    const outOfStockItems = cartItems.filter(item => !item.in_stock);
+
+    // --- Case 1: All items are out of stock ---
+    if (inStockItems.length === 0 && outOfStockItems.length > 0) {
+      alert("All items in your cart are out of stock. Please add available products to proceed.");
+      return; // Stop the process
     }
-    // Navigate to the map page
-    navigate('/checkout/select-location');
+
+    // --- Case 2: A mix of in-stock and out-of-stock items ---
+    if (inStockItems.length > 0 && outOfStockItems.length > 0) {
+      // Use window.confirm to give the user a choice
+      const userConfirmed = window.confirm(
+        "Some items in your cart are out of stock and will be removed automatically. Do you want to continue?"
+      );
+
+      if (userConfirmed) {
+        setLoading(true); // Show a loading state
+
+        // Create an array of promises, one for each item to be deleted
+        const deletionPromises = outOfStockItems.map(item =>
+          removeCartItem(item.cart_item_id)
+        );
+
+        // Use Promise.all to wait for all deletions to complete concurrently
+        await Promise.all(deletionPromises);
+
+        // Update the cart state locally to only show the in-stock items
+        setCartItems(inStockItems);
+        window.dispatchEvent(new Event('cartUpdated')); // Notify other components like the header
+
+        setLoading(false);
+        navigate('/checkout/select-location'); // Proceed to the next step
+      } else {
+        // User clicked "Cancel", so we do nothing and they stay on the cart page
+        return;
+      }
+    }
+
+    // --- Default Case: All items are in stock ---
+    if (outOfStockItems.length === 0) {
+      navigate('/checkout/select-location');
+    }
   };
 
 
@@ -444,10 +483,10 @@ const Cart = () => {
                               }}
                             />
                             {!item.in_stock && (
-                                <div className="out-of-stock-overlay">
-                                  <span>Out of Stock</span>
-                                </div>
-                              )}
+                              <div className="out-of-stock-overlay">
+                                <span>Out of Stock</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Product Details */}
@@ -544,10 +583,10 @@ const Cart = () => {
                             }}
                           />
                           {!item.in_stock && (
-                                <div className="out-of-stock-overlay">
-                                  <span>Out of Stock</span>
-                                </div>
-                              )}
+                            <div className="out-of-stock-overlay">
+                              <span>Out of Stock</span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Product Details */}

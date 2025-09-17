@@ -477,7 +477,7 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
       setOpenSubmenu((prev) =>
         prev.includes("shop-by-category") ? prev : [...prev, "shop-by-category"]
       ); */
-      navigate("/all");
+      navigate("/subcategories");
     }
     if (type === "home") navigate("/");
     if (type === "wishlist") navigate("/wishlist");
