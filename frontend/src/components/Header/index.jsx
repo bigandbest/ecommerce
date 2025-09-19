@@ -242,7 +242,6 @@ const Header = () => {
   }, []);
 
   if (isMobile && location.pathname.startsWith("/subcategories")) return null;
-
   return (
     <>
       <header

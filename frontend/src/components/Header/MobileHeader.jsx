@@ -74,6 +74,9 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     if (location.pathname == "/Notifications") {
         return null;
     }
+    if (location.pathname == "/MobileAccount") {
+    return null;
+  }
 
     return (
         <header className="bg-white header-container">

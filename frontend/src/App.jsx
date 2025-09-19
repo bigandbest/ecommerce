@@ -51,9 +51,9 @@ import StoreNav from "./components/StoreNav/StoreNav.jsx";
 import BbmPicks from "./components/BBM Picks/BbmPick.jsx";
 import Stores from "./components/BBM Picks/Stores.jsx";
 import Quickyfy from "./components/BBM Picks/Quickyfy.jsx";
-import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
+/* import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
 import CategoryOfferBanner from "./components/NewSection/CategoryOfferBanner.jsx";
-import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx";
+import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx"; */
 import AllCategoriesPage from "./Pages/AllCategories/AllCategoriesPage.jsx";
 import NewCategoryDivisionPage from "./Pages/New/NewCategoryDivisionPage.jsx";
 import Notifications from "./Pages/Notifications/Notifications.jsx";

@@ -19,6 +19,15 @@ const MobileBannerCarousel = () => {
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on("select", onSelect);
+
+    // ✅ Auto-play every 2 seconds
+    const interval = setInterval(() => {
+      if (emblaApi) {
+        emblaApi.scrollNext();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [emblaApi, onSelect]);
 
   // Fetch banners on mount
@@ -61,12 +70,10 @@ const MobileBannerCarousel = () => {
       <div className="overflow-hidden rounded-xl shadow-lg" ref={emblaRef}>
         <div className="flex">
           {loading ? (
-            // ✅ Skeleton Loader for LCP
             <div className="min-w-0 flex-[0_0_100%]">
               <div className="w-full h-[150px] bg-gray-200 animate-pulse rounded-xl" />
             </div>
           ) : error || banners.length === 0 ? (
-            // ✅ Fallback if no banners
             <div className="min-w-0 flex-[0_0_100%]">
               <img
                 src="https://placehold.co/600x200?text=No+Image"
@@ -87,7 +94,6 @@ const MobileBannerCarousel = () => {
                   sizes="(max-width: 768px) 100vw, 768px"
                   alt={banner.title || `Slide ${index + 1}`}
                   className="w-full h-[150px] object-cover object-center rounded-xl"
-                  // ✅ First banner: eager + high priority
                   loading={index === 0 ? "eager" : "lazy"}
                   fetchPriority={index === 0 ? "high" : "auto"}
                   onError={(e) => {
@@ -100,19 +106,6 @@ const MobileBannerCarousel = () => {
           )}
         </div>
       </div>
-
-      {/* Pagination Dots (optional, disabled for performance) */}
-      {/* <div className="flex justify-center mt-2 space-x-2">
-        {banners.map((_, index) => (
-          <button
-            key={index}
-            className={`w-2 h-2 rounded-full ${
-              selectedIndex === index ? "bg-black" : "bg-gray-400"
-            }`}
-            onClick={() => emblaApi && emblaApi.scrollTo(index)}
-          />
-        ))}
-      </div> */}
     </div>
   );
 };

@@ -88,7 +88,6 @@ const VideoWithAutoPlay = ({ src }) => {
         e.target.poster =
           "https://placehold.co/1200x400?text=Video+Not+Available";
       }}
-      controls
     />
   );
 };
