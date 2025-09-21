@@ -56,7 +56,7 @@ function Stores({
 
   const itemClass =
     mode === "grid"
-      ? "flex flex-col items-center" // grid item
+      ? "flex flex-col items-between" // grid item
       : "flex flex-col items-center flex-shrink-0 w-[55%] mr-1 snap-start"; // scroll item
 
   return (

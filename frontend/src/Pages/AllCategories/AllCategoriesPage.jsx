@@ -13,8 +13,8 @@ import Stores from "../../components/BBM Picks/QuickPicks";
 import { getActiveCategories } from "../../utils/supabaseApi.js"; // 👈 import API function
 import { useNavigate, useLocation } from "react-router-dom";
 
-
-const menuItems = [
+const API_BASE = "https://ecommerce-8342.onrender.com/api";
+/* const menuItems = [
   {
     name: "Grocery",
     icon: <ShoppingBasket />,
@@ -40,7 +40,20 @@ const menuItems = [
     icon: <ShieldPlus />,
     img: "https://i.postimg.cc/VNzkJTCT/Candle5.jpg",
   },
-];
+]; */
+
+async function fetchStores() {
+  const res = await fetch(`${API_BASE}/stores/fetch`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+
+  // Assuming the API returns an image URL property, e.g., 'image_url'.
+  // We map it to 'img' to match the property used in the component's <img> tag.
+  return data.stores.map(store => ({
+    ...store,
+    img: store.image || 'https://placehold.co/56x56?text=Store'
+  }));
+}
 
 const data = [
   { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
@@ -112,11 +125,30 @@ export default function AllCategoriesPage() {
   const [categories, setCategories] = useState([]); // 👈 state for fetched categories
   const [activeSidebar, setActiveSidebar] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [sidebarItems, setSidebarItems] = useState([]); // State for fetched sidebar stores
+  const [isLoadingSidebar, setIsLoadingSidebar] = useState(true);
 
   const buttonRefs = useRef([]);
   const menuContainerRef = useRef(null);
 
   const { state } = useLocation();
+
+
+  useEffect(() => {
+    const loadStores = async () => {
+      setIsLoadingSidebar(true);
+      try {
+        const storesData = await fetchStores();
+        setSidebarItems(storesData);
+      } catch (error) {
+        console.error("Failed to fetch stores:", error);
+        // Optionally, set an error state to show a message to the user
+      } finally {
+        setIsLoadingSidebar(false);
+      }
+    };
+    loadStores();
+  }, []);
 
   useEffect(() => {
     if (state?.fromAllCategories) {
@@ -125,8 +157,10 @@ export default function AllCategoriesPage() {
     }
   }, [state]);
 
+  // Effect to update the position of the active indicator line
   useEffect(() => {
-    const index = menuItems.findIndex((item) => item.name === active);
+    if (!active || sidebarItems.length === 0) return;
+    const index = sidebarItems.findIndex((item) => item.name === active);
     const btn = buttonRefs.current[index];
     if (btn && menuContainerRef.current) {
       const rect = btn.getBoundingClientRect();
@@ -136,7 +170,7 @@ export default function AllCategoriesPage() {
         height: rect.height,
       });
     }
-  }, [active]);
+  }, [active, sidebarItems]);
 
   // 👇 fetch categories when drawer opens
   useEffect(() => {
@@ -171,7 +205,7 @@ export default function AllCategoriesPage() {
   return (
     <div className="sm:hidden fixed top-0 left-0 h-full w-full flex z-40">
       {/* Sidebar (always open) */}
-      <div className="relative bg-white border-r shadow-lg flex flex-col items-center w-20">
+      <div className="relative bg-white border-r shadow-lg flex flex-col items-center w-20 overflow-y-auto hide-scrollbar">
         <div
           ref={menuContainerRef}
           className="flex flex-col w-full items-center relative"
@@ -186,31 +220,42 @@ export default function AllCategoriesPage() {
           ></div>
 
           {/* Sidebar Items */}
-          <div className="flex flex-col gap-2 w-full items-center">
-            {menuItems.map((item, index) => (
-              <button
-                key={item.name}
-                ref={(el) => (buttonRefs.current[index] = el)}
-                onClick={() => {
-                  setActive(item.name);
-                  setShowDrawer(true);
-                  handleSidebarClick(item);
-                }}
-                className={`relative flex flex-col items-center justify-center w-full py-1 !ml-0 transition transform active:scale-95
-                  ${active === item.name
-                    ? "text-blue-600"
-                    : "hover:bg-gray-100 text-gray-600"
-                  }
-                `}
-              >
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="w-14 h-14 rounded-lg object-cover"
-                />
-                <span className="text-sm text-black mt-1">{item.name}</span>
-              </button>
-            ))}
+          <div className="flex flex-col gap-2 w-full items-center pb-15">
+            {isLoadingSidebar ? (
+              // Skeleton Loader while fetching sidebar items
+              [...Array(5)].map((_, index) => (
+                <div key={index} className="flex flex-col items-center w-full p-2 animate-pulse">
+                  <div className="w-14 h-14 rounded-lg bg-gray-200"></div>
+                  <div className="h-3 bg-gray-200 rounded w-12 mt-2"></div>
+                </div>
+              ))
+            ) : (
+              // Render sidebar items once loaded
+              sidebarItems.map((item, index) => (
+                <button
+                  key={item.id || item.name}
+                  ref={(el) => (buttonRefs.current[index] = el)}
+                  onClick={() => {
+                    setActive(item.name);
+                    setShowDrawer(true);
+                    handleSidebarClick(item);
+                  }}
+                  className={`relative flex flex-col items-center justify-center w-full py-1 !ml-0 transition transform active:scale-95
+                    ${active === item.name
+                      ? "text-blue-600"
+                      : "hover:bg-gray-100 text-gray-600"
+                    }
+                  `}
+                >
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    className="w-14 h-14 rounded-lg object-cover"
+                  />
+                  <span className="text-sm text-black mt-1">{item.name}</span>
+                </button>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -243,25 +288,13 @@ export default function AllCategoriesPage() {
           <div className="grid grid-cols-2 gap-4 pb-8">
             {categories.length > 0 ? (
               categories.map((cat) => {
-                // safely find the sidebar button
-                const parentButton = menuItems.find((item) => item.name === active);
+                const parentButton = sidebarItems.find((item) => item.name === active);
                 return (
                   <div
                     key={cat.id}
-                    onClick={() => {
-                      setActiveCategory(cat.name); // category highlight (optional)
-                      setActive(parentButton?.name || "Menu"); // set drawer heading
-                      navigate(`/category/${cat.id}/${cat.name}`, {
-                        state: {
-                          fromAllCategories: true,
-                          activeSidebar: parentButton?.name || "Menu",
-                          showDrawer: true,
-                        },
-                      });
-                    }}
-                    className="flex flex-col items-center p-3 bg-gray-50 rounded-lg shadow hover:bg-gray-100 transition"
+                    onClick={() => handleCategoryClick(cat, parentButton)}
+                    className="flex flex-col items-center p-3 bg-gray-50 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer"
                   >
-
                     <img
                       src={cat.image_url || "https://placehold.co/150x150?text=Category"}
                       alt={cat.name}
@@ -274,7 +307,7 @@ export default function AllCategoriesPage() {
                 );
               })
             ) : (
-              <p className="text-gray-500 text-center w-full">Loading...</p>
+              <p className="text-gray-500 text-center col-span-2">Loading categories...</p>
             )}
           </div>
         </div>

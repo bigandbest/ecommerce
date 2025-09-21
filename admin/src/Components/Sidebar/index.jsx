@@ -163,17 +163,17 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/warehouselist",
     },
     {
-      title: "Recommended Stores",
+      title: "Shop By Stores",
       icon: <FaList />,
       path: "/recommended-stores",
     },
     {
-      title: "Saving Zone",
+      title: "Corporate Celebration",
       icon: <FaList />,
       path: "/saving-zone",
     },
     {
-      title: "YouMayLike",
+      title: "You May Like",
       icon: <FaTrademark />,
       path: "/youMayLikeProducts/:id",
     },
