@@ -49,7 +49,8 @@ const AdminOrders = () => {
                   <p>Email: {order.users?.email || "Not Provided"}</p>
                   <p>Phone: {order.users?.phone || "Not Provided"}</p>
 
-                  <p>Address: {order.address}, {order.city}, {order.state}, {order.pincode}, {order.country}</p>
+                  <p>Address: {order.address} {order.city} {order.state} {order.pincode} {order.country}</p>
+                  <p>GPS Address: {order.shipping_gps_address}</p>
                 </div>
               </div>
 
