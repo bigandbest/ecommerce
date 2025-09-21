@@ -4,6 +4,7 @@ import {
   getAllProducts,
   getWishlistItems,
   addToWishlist,
+  getYouMayLikeProducts,
   removeFromWishlist,
 } from "../../utils/supabaseApi.js"; // adjust path if needed
 import { useAuth } from "../../contexts/AuthContext.jsx"; // 👈 Import useAuth
@@ -21,7 +22,7 @@ const ProductGrid3X3 = () => {
   // Fetch initial products
   useEffect(() => {
     async function fetchProducts() {
-      const { success, products } = await getAllProducts();
+      const { success, products } = await getYouMayLikeProducts();
       if (success && products.length > 0) {
         setProducts(products.slice(0, 9)); // only 9 for 3x3 grid
       }
@@ -117,7 +118,7 @@ const ProductGrid3X3 = () => {
 
       {/* See All Button */}
       <div className="mt-4">
-        <Link to="/productListing">
+        <Link to={`/ProductLisingPage/you-may-like`}>
           <button className="w-full bg-purple-800 text-white py-2 rounded-lg font-medium">
             See All →
           </button>

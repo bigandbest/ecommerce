@@ -60,6 +60,7 @@ import Notifications from "./Pages/Notifications/Notifications.jsx";
 import MapLocationPage from "./components/MapLocationPage/MapLocationPage .jsx";
 import AddressSelectionPage from "./components/AddressSelectionPage/AddressSelectionPage.jsx";
 import DetailPage from "./Pages/NewSectionGroupDetailPage/DetailPage.jsx";
+import ProductListingPage from "./Pages/NewProductListingPage/ProductListingPage.jsx";
 
 
 // Protected route component
@@ -266,6 +267,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    <Route path="/ProductLisingPage/:Name" element={<ProductListingPage />} />
                     <Route
                       path={"/wishlist"}
                       exact={true}

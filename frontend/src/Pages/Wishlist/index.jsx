@@ -6,7 +6,7 @@ import {
 } from "../../utils/supabaseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { FaTrashAlt, FaShoppingCart } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 
 const WishlistCarousel = () => {
   const { currentUser } = useAuth();
@@ -47,9 +47,7 @@ const WishlistCarousel = () => {
       return;
     }
     setAddingToCart(product_id);
-
     const { success } = await addToCart(currentUser.id, product_id, 1);
-
     if (success) {
       window.dispatchEvent(new Event("cartUpdated"));
     } else {
@@ -86,72 +84,64 @@ const WishlistCarousel = () => {
   }
 
   return (
-    <div className="bg-gray-50 py-4">
+    <div className="bg-gray-50 py-4 mt-[-42px]">
       <div className="container mx-auto max-w-4xl">
         <div className="px-4 flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold text-gray-900">Your Wishlist</h2>
         </div>
 
-        <div className="space-y-4 px-4">
+        <div className="space-y-3 px-4">
           {wishlist.map((item) => (
             <div
               key={item.wishlist_item_id}
-              className="flex bg-white rounded-lg shadow-sm overflow-hidden transition-shadow duration-300 hover:shadow-md"
+              className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm w-full"
             >
-              {/* Image Link */}
-              {/* 👇 FIX: Use item.id instead of item.product_id */}
-              <Link
-                to={`/product/${item.id}`}
-                className="w-28 sm:w-32 flex-shrink-0"
-              >
-                <img
-                  src={
-                    item.image || "https://placehold.co/300x300?text=Product"
-                  }
-                  alt={item.name || "Product"}
-                  className="w-full h-full object-cover"
-                />
-              </Link>
-
-              {/* Details */}
-              <div className="p-4 flex flex-col flex-grow justify-between">
-                <div>
-                  {/* Title Link */}
-                  {/* 👇 FIX: Use item.id instead of item.product_id */}
+              {/* Left Side: Image and Title */}
+              <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                <Link to={`/product/${item.id}`} className="flex-shrink-0">
+                  <img
+                    src={
+                      item.image || "https://placehold.co/100x100?text=Product"
+                    }
+                    alt={item.name}
+                    className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-md"
+                  />
+                </Link>
+                <div className="min-w-0">
                   <Link
                     to={`/product/${item.id}`}
                     className="hover:text-blue-600"
                   >
-                    <h3 className="font-semibold text-gray-800 line-clamp-2">
+                    <h6 className="font-semibold text-gray-800 text-sm truncate-2">
                       {item.name}
-                    </h3>
+                    </h6>
                   </Link>
-                  <p className="text-lg font-bold text-blue-600 mt-1">
-                    ₹{Number(item.price).toFixed(2)}
-                  </p>
+                  {item.uom!=null ? <p className="text-xs text-gray-500">{item.uom}</p>: <p className="text-xs text-gray-500">1 Variant</p>}
                 </div>
+              </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2 mt-4">
-                  {/* Add to Cart Button */}
-                   <button
-                     onClick={() => handleAddToCart(item.id)} //  👈 FIX: Use item.id
-                     disabled={addingToCart === item.id}
-                     className="flex-grow flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300"
-                   >
-                     <FaShoppingCart />
-                     {addingToCart === item.id
-                       ? "Adding..."
-                       : "Add to Cart"}
-                   </button>
-                  <button
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                    onClick={() => handleRemove(item.wishlist_item_id)}
-                    title="Remove from wishlist"
-                  >
-                    <FaTrashAlt size={16} />
-                  </button>
-                </div>
+              {/* Right Side: Price and Actions */}
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 ml-2">
+                <p className="text-sm sm:text-base font-bold text-gray-900 w-16 sm:w-20 text-right">
+                  ₹{Number(item.price).toFixed(2)}
+                </p>
+
+                <button
+                  onClick={() => handleAddToCart(item.id)}
+                  disabled={addingToCart === item.id}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-pink-100 text-pink-700 hover:bg-pink-200 disabled:bg-gray-200"
+                  title="Add to Cart"
+                >
+                  {addingToCart === item.id ? "Adding" : "Add"}
+                </button>
+
+                <button
+                  onClick={() => handleRemove(item.wishlist_item_id)}
+                  className="p-1 text-red-500 hover:text-red-700"
+                  title="Remove from wishlist"
+                >
+                  <FaTrashAlt size={16} />
+                </button>
               </div>
             </div>
           ))}

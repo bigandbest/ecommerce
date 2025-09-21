@@ -701,7 +701,7 @@ const Cart = () => {
                     Select Delivery Address
                   </button>
 
-                  <button
+                  {/* <button
                     onClick={handleSendEnquiry}
                     disabled={enquiryLoading || cartItems.length === 0}
                     className={`block w-full bg-primary text-white text-center py-3 px-4 rounded-md hover:bg-primary-dark transition duration-200 ${enquiryLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
@@ -714,7 +714,7 @@ const Cart = () => {
                   )}
                   {enquiryStatus === 'error' && (
                     <div className="text-red-600 text-center mt-2">Failed to send enquiry. Please try again.</div>
-                  )}
+                  )} */}
 
                   {/* <div className="flex items-center justify-center gap-2 text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

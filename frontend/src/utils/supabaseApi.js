@@ -2188,4 +2188,34 @@ export async function fetchProductsForBandBGroup(groupId) {
     return data.map(item => item.products).filter(p => p);
 }
 
+
+export const getYouMayLikeProducts = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("you_may_like")
+      .select(`
+        product_id,
+        products:product_id (id, name, price, old_price, rating, uom, discount, image, category)
+      `);
+
+    if (error) throw error;
+
+    const products = data.map((item) => ({
+      id: item.products.id,
+      name: item.products.name,
+      price: item.products.price,
+      old_price: item.products.old_price,
+      rating: item.products.rating,
+      image: item.products.image,
+      category: item.products.category,
+    }));
+
+    return { success: true, products };
+  } catch (err) {
+    console.error("Error fetching You May Like products:", err.message);
+    return { success: false, error: err.message };
+  }
+};
+
+
 /* this is a testing commit */
