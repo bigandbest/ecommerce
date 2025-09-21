@@ -77,6 +77,12 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     if (location.pathname == "/MobileAccount") {
     return null;
   }
+  if (location.pathname == "/wishlist") {
+    return null;
+  }
+  if (location.pathname == "/cart") {
+    return null;
+  }
 
     return (
         <header className="bg-white header-container">

@@ -91,6 +91,7 @@ const PaymentPage = () => {
 
   // NEW: The main orchestrator function for the payment button
   const handlePayment = async () => {
+    console.log("Data at payment time:", { orderAddress, mapSelection });
     setPaymentInProgress(true);
 
     const { deliverableItems, undeliverableItems, error } = await checkCartAvailability();
@@ -192,7 +193,8 @@ const PaymentPage = () => {
         handler: async function (response) {
           const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
 
-          const verification = await axios.post("https://ecommerce-8342.onrender.com/api/payment/verify-payment", {
+          /* Payment Verification Directly from order Api now */
+          /* const verification = await axios.post("https://ecommerce-8342.onrender.com/api/payment/verify-payment", {
             razorpay_payment_id,
             razorpay_order_id,
             razorpay_signature,
@@ -201,7 +203,7 @@ const PaymentPage = () => {
           if (!verification.data.success) {
             alert("Payment verification failed. Please contact support.");
             return;
-          }
+          } */
 
           const orderResponse = await placeOrderWithDetailedAddress(
             currentUser.id,
@@ -217,7 +219,7 @@ const PaymentPage = () => {
             mapSelection
           );
 
-          if (orderResponse.success) {
+          if (orderResponse.success && orderResponse.order) {
             alert("Order placed successfully!");
             navigate('/MyOrders'); // Navigate to user's order history
           } else {

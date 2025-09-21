@@ -7,9 +7,9 @@ import {
   ShieldPlus,
   X,
 } from "lucide-react";
-import BbmPicks from "../../components/BBM Picks/BbmPick";
-import Quickyfy from "../../components/BBM Picks/Quickyfy";
-import Stores from "../../components/BBM Picks/Stores";
+import BbmPicks from "../../components/BBM Picks/ShopByStore.jsx";
+import Quickyfy from "../../components/BBM Picks/BnB Expertise.jsx";
+import Stores from "../../components/BBM Picks/QuickPicks";
 import { getActiveCategories } from "../../utils/supabaseApi.js"; // 👈 import API function
 import { useNavigate, useLocation } from "react-router-dom";
 

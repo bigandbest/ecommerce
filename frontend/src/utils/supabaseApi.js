@@ -1937,5 +1937,255 @@ export async function migrateUserAddresses(userId) {
   }
 }
 
+const API_BASE = "https://ecommerce-8342.onrender.com/api"; 
+
+export async function fetchStores() {
+  const res = await fetch(`${API_BASE}/stores/fetch`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data.stores;
+}
+
+export async function addStore(formData) {
+  const res = await fetch(`${API_BASE}/stores/add`, {
+    method: "POST",
+    body: formData,
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data.store;
+}
+
+export async function updateStore(id, formData) {
+  const res = await fetch(`${API_BASE}/stores/update/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data.store;
+}
+
+export async function deleteStore(id) {
+  const res = await fetch(`${API_BASE}/stores/delete/${id}`, { method: "DELETE" });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return true;
+}
+
+// The API endpoint is set to your quick-pick service
+const API_URL = "https://ecommerce-8342.onrender.com/api/quick-pick";
+
+// Fetch all quick picks
+export async function fetchQuickPicks() {
+  // axios automatically throws an error for non-2xx responses
+  const response = await axios.get(`${API_URL}/list`);
+  // aaxios wraps the JSON response in a 'data' property
+  return response.data.quickPicks;
+}
+
+// NEW: Fetches all groups for a specific Quick Pick ID
+export async function fetchGroupsForQuickPick(quickPickId) {
+  // This assumes your API route is /api/quick-pick-groups/by-quick-pick/:quickPickId
+  const response = await fetch(`https://ecommerce-8342.onrender.com/api/quick-pick-group/by-quick-pick/${quickPickId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch quick pick groups");
+  }
+  const data = await response.json();
+  return data.quickPickGroups;
+}
+
+// NEW: Fetches all products for a specific Quick Pick Group ID
+export async function fetchProductsForGroup(groupId) {
+  // This assumes your API route is /api/quick-pick-group-products/products-for-group/:quick_pick_group_id
+  const response = await fetch(`https://ecommerce-8342.onrender.com/api/quick-pick-group-product/getProductsByGroup/${groupId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch products");
+  }
+  const data = await response.json();
+  // The data is nested, so we extract the product details
+  return data.map(item => item.products);
+}
+
+// Add new quick pick
+export async function addQuickPick(formData) {
+  const response = await axios.post(`${API_URL}/add`, formData, {
+    // This header is important for file uploads
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.quickPick;
+}
+
+// Edit an existing quick pick
+export async function editQuickPick(id, formData) {
+  const response = await axios.put(`${API_URL}/update/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.quickPick;
+}
+
+// Delete a quick pick
+export async function deleteQuickPick(id) {
+  await axios.delete(`${API_URL}/delete/${id}`);
+  // Return true to indicate success, matching the previous function's behavior
+  return true;
+}
+
+// The API endpoints are set for your Saving Zone services
+const API_SZ_URL = "https://ecommerce-8342.onrender.com/api/saving-zone";
+const SZ_GROUP_API_URL = "https://ecommerce-8342.onrender.com/api/saving-zone-group";
+const SZ_PRODUCT_API_URL = "https://ecommerce-8342.onrender.com/api/saving-zone-group-product";
+
+// Corresponds to: fetchQuickPicks
+// Fetches all Saving Zones
+export async function getAllSavingZones() {
+  const response = await axios.get(`${API_SZ_URL}/list`);
+  return response.data.savingZones;
+}
+
+// Corresponds to: fetchGroupsForQuickPick
+// Fetches all groups for a specific Saving Zone ID
+export async function getGroupsBySavingZoneId(savingZoneId) {
+  const response = await fetch(`https://ecommerce-8342.onrender.com/api/saving-zone-group/getGroupsBySavingZoneId/${savingZoneId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch saving zone groups");
+  }
+  const data = await response.json();
+  return data.savingZoneGroups;
+}
+
+// Corresponds to: fetchProductsForGroup
+// Fetches all products for a specific Saving Zone Group ID
+export async function getProductsForSavingZoneGroup(groupId) {
+  const response = await fetch(`${SZ_PRODUCT_API_URL}/getProductsByGroup/${groupId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch products");
+  }
+  const data = await response.json();
+  // The data is nested, so we extract the product details
+  return data.map(item => item.products);
+}
+
+// Corresponds to: addQuickPick
+// Add a new Saving Zone
+export async function addSavingZone(formData) {
+  const response = await axios.post(`${API_SZ_URL}/add`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.savingZone;
+}
+
+// Corresponds to: editQuickPick
+// Edit an existing Saving Zone
+export async function updateSavingZone(id, formData) {
+  const response = await axios.put(`${API_SZ_URL}/update/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.savingZone;
+}
+
+// Corresponds to: deleteQuickPick
+// Delete a Saving Zone
+export async function deleteSavingZone(id) {
+  await axios.delete(`${API_SZ_URL}/delete/${id}`);
+  return true; // Return true to indicate success
+}
+
+// The base URL for your recommended stores API
+const API_URL_New = "https://ecommerce-8342.onrender.com/api/recommended-stores";
+
+/**
+ * Fetches all recommended stores.
+ * @returns {Promise<Array>} A promise that resolves to an array of store objects.
+ */
+export async function fetchRecommendedStores() {
+  const response = await axios.get(`${API_URL_New}/list`);
+  return response.data.recommendedStores;
+}
+
+/**
+ * Fetches a single recommended store by its ID.
+ * @param {string|number} id - The ID of the store to fetch.
+ * @returns {Promise<Object>} A promise that resolves to a single store object.
+ */
+export async function fetchSingleRecommendedStore(id) {
+  const response = await axios.get(`${API_URL_New}/${id}`);
+  return response.data.recommendedStore;
+}
+
+/**
+ * Adds a new recommended store.
+ * @param {FormData} formData - The form data containing the store's name and image file.
+ * The image file must be appended with the key 'image_url'.
+ * e.g., formData.append('image_url', file);
+ * @returns {Promise<Object>} A promise that resolves to the newly created store object.
+ */
+export async function addRecommendedStore(formData) {
+  const response = await axios.post(`${API_URL_New}/add`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.recommendedStore;
+}
+
+/**
+ * Edits an existing recommended store.
+ * @param {string|number} id - The ID of the store to update.
+ * @param {FormData} formData - The form data containing the updated name and/or image file.
+ * NOTE: Your backend route expects the image file with the key 'image'.
+ * e.g., formData.append('image', file);
+ * @returns {Promise<Object>} A promise that resolves to the updated store object.
+ */
+export async function editRecommendedStore(id, formData) {
+  const response = await axios.put(`${API_URL_New}/update/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.recommendedStore;
+}
+
+/**
+ * Deletes a recommended store by its ID.
+ * @param {string|number} id - The ID of the store to delete.
+ * @returns {Promise<boolean>} A promise that resolves to true if deletion is successful.
+ */
+export async function deleteRecommendedStore(id) {
+  await axios.delete(`${API_URL_New}/delete/${id}`);
+  return true;
+}
+
+// --- B&B Section Functions ---
+
+// 1. Fetches all main B&B items
+export async function fetchBandBs() {
+    const response = await fetch(`https://ecommerce-8342.onrender.com/api/bnb/list`);
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch B&B items');
+    }
+    const data = await response.json();
+    return data.bandbs; // Corresponds to the key in your b&bController.js
+}
+
+// 2. Fetches all groups for a specific B&B ID
+export async function fetchGroupsForBandB(bnbId) {
+    const response = await fetch(`https://ecommerce-8342.onrender.com/api/b&b-group/by-bnb/${bnbId}`);
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch B&B groups');
+    }
+    const data = await response.json();
+    return data.bandbGroups; // Corresponds to the key in your b&bGroupController.js
+}
+
+// 3. Fetches all products for a specific B&B Group ID
+export async function fetchProductsForBandBGroup(groupId) {
+    const response = await fetch(`https://ecommerce-8342.onrender.com/api/b&b-group-product/getProductsByGroup/${groupId}`);
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch B&B products');
+    }
+    const data = await response.json();
+    // The data is nested, so we extract the product details
+    return data.map(item => item.products).filter(p => p);
+}
 
 /* this is a testing commit */

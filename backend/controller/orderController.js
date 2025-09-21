@@ -1,5 +1,6 @@
 // controllers/orderController.js
 import { supabase } from "../config/supabaseClient.js";
+import crypto from "crypto";
 
 /** Get all orders (admin usage) */
 export const getAllOrders = async (req, res) => {
@@ -83,8 +84,18 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
-    mapSelection,        // 👈 The new GPS data from the map selection
+    gpsLocation,        // 👈 The new GPS data from the map selection
   } = req.body;
+
+
+  const generatedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .digest("hex");
+
+  if (generatedSignature !== razorpay_signature) {
+  return res.status(400).json({ success: false, error: "Invalid signature" });
+}
 
   // This part remains the same, creating a string from the manual address
   const addressString = [
@@ -126,9 +137,9 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     razorpay_payment_id,
     razorpay_signature,
     // 👇 New fields from the GPS map selection
-    shipping_latitude: mapSelection?.latitude || null,
-    shipping_longitude: mapSelection?.longitude || null,
-    shipping_gps_address: mapSelection?.formatted_address || null,
+    shipping_latitude: gpsLocation?.latitude || null,
+    shipping_longitude: gpsLocation?.longitude || null,
+    shipping_gps_address: gpsLocation?.formatted_address || null,
   };
 
   const { data: order, error: orderError } = await supabase

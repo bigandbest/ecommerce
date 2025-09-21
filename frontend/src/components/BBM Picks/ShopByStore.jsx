@@ -1,21 +1,59 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { fetchRecommendedStores } from "../../utils/supabaseApi"; // Adjust this import path as needed
 
 const BbmPicks = ({ 
-  title = "Recommended Store", 
-  items = [], 
+  title = "Shop By Store", 
   mode = "scroll",
-  forceShow = false // 👈 NEW PROP
+  forceShow = false
 }) => {
   const location = useLocation();
+  
+  // State for managing data, loading, and errors
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Only show on home route
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const storesData = await fetchRecommendedStores();
+        // The API provides { name, image_url }, but the component needs { label, image }.
+        // We format the data here to match what the JSX expects.
+        const formattedItems = storesData.map(store => ({
+          label: store.name,
+          image: store.image_url,
+        }));
+        setItems(formattedItems);
+      } catch (err) {
+        setError(err.message);
+        console.error("Failed to fetch data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []); // The empty dependency array means this runs once when the component mounts.
+
+  // Don't render anything if it's not the home route (unless forced)
   if (!forceShow && location.pathname !== "/") {
     return null;
   }
+  
+  // Display a loading message while fetching
+  if (loading) {
+      return <p className="p-3 text-sm">Loading Shop By Store...</p>;
+  }
 
-  // Conditional container styles
+  // Display an error message if the fetch fails
+  if (error) {
+      return console.log(error);
+  }
+
+  // --- Your original rendering logic remains the same below ---
+
   const containerClass =
     mode === "grid"
       ? "grid grid-cols-3 gap-1"
@@ -35,7 +73,7 @@ const BbmPicks = ({
     <div className="w-full gap-4 p-3 pt-0 md:hidden">
       {/* Section Title */}
       <h2 className="flex text-sm font-semibold text-gray-900 mb-3">
-        {title} <ChevronRight />
+        Shop By Store <ChevronRight />
       </h2>
 
       {/* Items */}

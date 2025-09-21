@@ -40,6 +40,20 @@ import VideoBannerManagement from "./Pages/VideoBanners/VideoBannerManagement.js
 import AdminOrders from "./Pages/Orders/index.jsx";
 import ShippingBanner from "./Pages/ShippingBanner/ShippingBanner.jsx";
 import Notification from "./Pages/Notifications/Notification.jsx";
+import Bnb from "./Pages/B&b/B&b.jsx";
+import BnbGroup from "./Pages/B&b/B&bGroup.jsx";
+import BnbGroupProducts from "./Pages/B&b/B&bGroupProducts.jsx";
+import Brand from './Pages/Brand/Brand.jsx'
+import BrandProducts from "./Pages/Brand/BrandProducts.jsx";
+import QuickPicksPage from "./Pages/QuickPicks/QuickPicks.jsx";
+import QuickPickGroupPage from "./Pages/QuickPicks/QuickPickGroup.jsx";
+import QuickPickGroupProducts from "./Pages/QuickPicks/QuickPickGroupProducts.jsx";
+import RecommendedStore from "./Pages/RecommendedStore/RecommendedStore.jsx";
+import RecommendedStoreProducts from "./Pages/RecommendedStore/RecommendedStoreProducts.jsx";
+import SavingZone from "./Pages/SavingZone/SavingZone.jsx";
+import SavingZoneGroupPage from "./Pages/SavingZone/SavingZoneGroup.jsx";
+import SavingZoneGroupProducts from "./Pages/SavingZone/SavingZoneGroupProducts.jsx";
+import YouMayLikeProducts from "./Pages/YouMayLike/YouMayLikeProducts.jsx";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -205,6 +219,61 @@ function App() {
         {
           path: "/notifications",
           element: <Notification />,
+        },
+        {
+          path: "/b&b",
+          element: <Bnb />,
+        },
+        {
+          path: "/bnb-groups",
+          element: <BnbGroup />,
+        },
+        {
+          path: "/b&b-groups-products/:id",
+          element: <BnbGroupProducts />
+        },
+        {
+          path: "/brands",
+          element: <Brand />,
+        },
+        {
+          path: "/brandproducts/:id",
+          element: <BrandProducts />,
+        },
+        {
+          path: "/quick-picks",
+          element: <QuickPicksPage />,
+        },{
+          path: "/quick-pick-groups",
+          element: <QuickPickGroupPage />,
+        },
+        {
+          path: "/quick-pick-group/products/:id",
+          element: <QuickPickGroupProducts />,
+        },
+         {
+          path: "/recommended-stores",
+          element: <RecommendedStore />,
+        },
+        {
+          path: "/recommendedstoreproducts/:id",
+          element: <RecommendedStoreProducts />,
+        },
+        {
+          path: "/saving-zone",
+          element: <SavingZone />,
+        },
+        {
+          path: "/saving-zone-groups",
+          element: <SavingZoneGroupPage />,
+        },
+        {
+          path: "/saving-zone-group/products/:id",
+          element: <SavingZoneGroupProducts />
+        },
+        {
+          path: "/youMayLikeProducts/:id",
+          element: <YouMayLikeProducts />,
         },
       ],
     },

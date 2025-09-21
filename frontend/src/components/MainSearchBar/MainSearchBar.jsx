@@ -27,6 +27,12 @@ const MainSearchBar = () => {
     if (location.pathname == "/MobileAccount") {
     return null;
   }
+    if (location.pathname == "/wishlist") {
+    return null;
+  }
+    if (location.pathname == "/cart") {
+    return null;
+  }
 
     return (
         <div className="mobile-search-bar-container w-full px-2 py-1 ">

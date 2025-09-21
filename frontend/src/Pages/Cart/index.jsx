@@ -420,12 +420,14 @@ const Cart = () => {
       message: '', // Optionally add a message field
       cartItems
     });
+    /* console.log("Data being sent to createEnquiry:", enquiry); */
     if (success) {
       setEnquiryStatus('success');
       await clearCart(user_id);
       setCartItems([]);
     } else {
       setEnquiryStatus('error');
+      console.error(error)
     }
     setEnquiryLoading(false);
   };
@@ -699,9 +701,7 @@ const Cart = () => {
                     Select Delivery Address
                   </button>
 
-
-
-                  {/* <button
+                  <button
                     onClick={handleSendEnquiry}
                     disabled={enquiryLoading || cartItems.length === 0}
                     className={`block w-full bg-primary text-white text-center py-3 px-4 rounded-md hover:bg-primary-dark transition duration-200 ${enquiryLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
@@ -716,12 +716,12 @@ const Cart = () => {
                     <div className="text-red-600 text-center mt-2">Failed to send enquiry. Please try again.</div>
                   )}
 
-                  <div className="flex items-center justify-center gap-2 text-gray-600">
+                  {/* <div className="flex items-center justify-center gap-2 text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                     </svg>
                     <span className="text-sm">Secure Checkout</span>
-                  </div> */}
+                  </div>  */}
                 </div>
 
                 {/* Payment Methods */}

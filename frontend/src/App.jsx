@@ -48,9 +48,9 @@ import MainSearchBar from "./components/MainSearchBar/MainSearchBar.jsx";
 import ConditionalMobileCategoriesBar from "./components/CategoriesBar/ConditionalMobileCategoriesBar.jsx";
 import MobileHeader from "./components/Header/MobileHeader.jsx";
 import StoreNav from "./components/StoreNav/StoreNav.jsx";
-import BbmPicks from "./components/BBM Picks/BbmPick.jsx";
-import Stores from "./components/BBM Picks/Stores.jsx";
-import Quickyfy from "./components/BBM Picks/Quickyfy.jsx";
+import BbmPicks from "./components/BBM Picks/ShopByStore.jsx";
+import Stores from "./components/BBM Picks/QuickPicks.jsx";
+import Quickyfy from "./components/BBM Picks/BnB Expertise.jsx";
 /* import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
 import CategoryOfferBanner from "./components/NewSection/CategoryOfferBanner.jsx";
 import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx"; */
@@ -59,6 +59,7 @@ import NewCategoryDivisionPage from "./Pages/New/NewCategoryDivisionPage.jsx";
 import Notifications from "./Pages/Notifications/Notifications.jsx";
 import MapLocationPage from "./components/MapLocationPage/MapLocationPage .jsx";
 import AddressSelectionPage from "./components/AddressSelectionPage/AddressSelectionPage.jsx";
+import DetailPage from "./Pages/NewSectionGroupDetailPage/DetailPage.jsx";
 
 
 // Protected route component
@@ -133,7 +134,7 @@ function App() {
                   <div className="!sticky top-0">
                     <MainSearchBar />
                   </div>
-                  {/* <StoreNav /> */}
+                  <StoreNav />
                   <LocationModal />
                   <MobileBannerCarousel />
 
@@ -222,6 +223,8 @@ function App() {
                       element={<MyOrders />}
                     />
                     <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} />
+                    {/* <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} /> */}
+                    <Route path="/:section/:id" element={<DetailPage />} />
                     <Route
                       path={"/BusinessPartner"}
                       exact={true}

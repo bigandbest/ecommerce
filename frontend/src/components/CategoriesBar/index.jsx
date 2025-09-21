@@ -15,7 +15,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import CategoriesMenu from "../CategoriesMenu";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { MdClose } from "react-icons/md";
-import { ArrowDown, User } from "lucide-react";
+import { ArrowDown, User,ClipboardList } from "lucide-react";
 import { FaHome } from "react-icons/fa";
 import {
   MdCategory,
@@ -481,7 +481,7 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
     }
     if (type === "home") navigate("/");
     if (type === "wishlist") navigate("/wishlist");
-    if (type === "E-Partner") navigate("/BusinessPartner");
+    if (type === "Enquiry") navigate("/enquiry-history");
     if (type === "cart") navigate("/cart");
     if (type === "Login") navigate("/login");
   };
@@ -1334,8 +1334,8 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
 
         <button
           className="mobile-bottom-nav-btn"
-          aria-label="E-Partner"
-          onClick={() => handleBottomMenu("E-Partner")}
+          aria-label="Enquiry"
+          onClick={() => handleBottomMenu("Enquiry")}
           style={{
             background: "none",
             border: "none",
@@ -1346,8 +1346,8 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
             padding: 0,
           }}
         >
-          <User size={22} />
-          <span style={{ fontSize: "11px" }}>E-Partner</span>
+          <ClipboardList size={22} />
+          <span style={{ fontSize: "11px" }}>Enquiry</span>
         </button>
       </div>
 
