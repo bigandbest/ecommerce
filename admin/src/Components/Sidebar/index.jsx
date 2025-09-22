@@ -173,6 +173,11 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/saving-zone",
     },
     {
+      title: "Section",
+      icon: <FaList />,
+      path: "/section",
+    },
+    {
       title: "You May Like",
       icon: <FaTrademark />,
       path: "/youMayLikeProducts/:id",

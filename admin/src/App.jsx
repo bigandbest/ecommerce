@@ -54,6 +54,7 @@ import SavingZone from "./Pages/SavingZone/SavingZone.jsx";
 import SavingZoneGroupPage from "./Pages/SavingZone/SavingZoneGroup.jsx";
 import SavingZoneGroupProducts from "./Pages/SavingZone/SavingZoneGroupProducts.jsx";
 import YouMayLikeProducts from "./Pages/YouMayLike/YouMayLikeProducts.jsx";
+import Store from "./Components/Store/Store.jsx";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -175,6 +176,10 @@ function App() {
         {
           path: "/messages",
           element: <Messages />,
+        },
+        {
+          path: "/section",
+          element: <Store />,
         },
         {
           path: "/settings",

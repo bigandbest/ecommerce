@@ -267,6 +267,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    <Route path="/ProductLisingPage/:Name/:id" element={<ProductListingPage />} />
                     <Route path="/ProductLisingPage/:Name" element={<ProductListingPage />} />
                     <Route
                       path={"/wishlist"}

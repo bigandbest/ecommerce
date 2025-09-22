@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { fetchRecommendedStores } from "../../utils/supabaseApi"; // Adjust this import path as needed
-
+import { Link } from "react-router-dom";
 const BbmPicks = ({ 
   title = "Shop By Store", 
   mode = "scroll",
@@ -22,6 +22,7 @@ const BbmPicks = ({
         // The API provides { name, image_url }, but the component needs { label, image }.
         // We format the data here to match what the JSX expects.
         const formattedItems = storesData.map(store => ({
+          id: store.id, 
           label: store.name,
           image: store.image_url,
         }));
@@ -81,6 +82,7 @@ const BbmPicks = ({
         {items.map((item, index) => (
           <div key={index} className={itemClass}>
             {/* Circle Image */}
+            <Link to={`/ProductLisingPage/shop-by-product/${item.id}`}>
             <div className={imageWrapperClass}>
               <img
                 src={item.image}
@@ -92,6 +94,7 @@ const BbmPicks = ({
                 }}
               />
             </div>
+            </Link>
             {/* Label */}
             <p className="mt-1 text-[11px] text-gray-700 text-center truncate w-full">
               {item.label}

@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import {
   getYouMayLikeProducts,
   getAllProducts,
-  addToCart // fallback if unknown section
+  addToCart,
+  getProductsForRecommendedStore, // fallback if unknown section
 } from "../../utils/supabaseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -11,6 +12,7 @@ import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
 const ProductListingPage = () => {
   const { Name } = useParams();
   const [products, setProducts] = useState([]);
+  const {id} = useParams();
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth(); 
   const [addingToCart, setAddingToCart] = useState(null);
@@ -21,7 +23,9 @@ const ProductListingPage = () => {
       let result;
       if (Name === "you-may-like") {
         result = await getYouMayLikeProducts();
-      } else {
+      } else if(Name === "shop-by-product"){
+        result = await getProductsForRecommendedStore(id);
+      }else {
         result = await getAllProducts(); // fallback
       }
 

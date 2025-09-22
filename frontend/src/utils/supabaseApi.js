@@ -2217,5 +2217,25 @@ export const getYouMayLikeProducts = async () => {
   }
 };
 
+export async function getProductsForRecommendedStore(storeId) {
+  // Use the storeId to construct the URL for the API endpoint.
+  // This assumes your API is hosted at a similar base URL.
+  const response = await fetch(`https://ecommerce-8342.onrender.com/api/product-recommended-stores/${storeId}`);
+  
+  // Check if the network request was successful.
+  if (!response.ok) {
+    // If not, parse the error message from the server and throw a new error.
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch recommended products.');
+  }
+
+  // If the request was successful, parse the JSON data.
+  const data = await response.json();
+  
+  // The API response from the server-side code contains a nested structure.
+  // We need to map over the array to get the `products` object from each item.
+  // The filter() part removes any potential null or undefined products.
+  return data.map(item => item.products).filter(p => p);
+}
 
 /* this is a testing commit */
