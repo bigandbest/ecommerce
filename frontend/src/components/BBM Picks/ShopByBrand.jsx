@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = "https://ecommerce-8342.onrender.com/api/brand";
@@ -47,6 +47,7 @@ const FeaturedThisWeek = () => {
                         className="flex-shrink-0 w-[28%] sm:w-[24%] rounded-xl shadow-md overflow-hidden border bg-white"
                     >
                         {/* Added aspect-square and w-full to force a perfect square container */}
+                        <Link to={`/ProductLisingPage/shopbybrand/${item.id}`}>
                         <div className="relative w-full">
                             <img
                                 src={item.img}
@@ -54,6 +55,7 @@ const FeaturedThisWeek = () => {
                                 className="w-full h-full object-cover rounded-md"
                             />
                         </div>
+                        </Link>
                     </div>
                 ))}
             </div>

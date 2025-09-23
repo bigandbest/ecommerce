@@ -22,6 +22,7 @@ import bnbRoutes from './routes/b&bRoutes.js';
 import bnbGroupRoutes from './routes/b&bGroupRoutes.js';
 import bnbGroupProductRoutes from './routes/b&bGroupProductRoutes.js'
 import brandRoutes from './routes/brandRoutes.js';
+import brandProductsRoutes from './routes/brandProducts.js'
 import recommendedStoreRoutes from './routes/recommendedStoreRoutes.js';
 import productRecommendedStoreRoutes from './routes/productRecommendedStoreRoutes.js';
 import quickPickRoutes from './routes/quickPickRoutes.js';
@@ -90,6 +91,7 @@ app.use("/api/bnb", bnbRoutes);
 app.use("/api/b&b-group", bnbGroupRoutes);
 app.use("/api/b&b-group-product", bnbGroupProductRoutes);
 app.use("/api/brand", brandRoutes);
+app.use("/api/product-brand", brandProductsRoutes);
 app.use("/api/recommended-stores", recommendedStoreRoutes);
 app.use("/api/product-recommended-stores", productRecommendedStoreRoutes);
 app.use("/api/quick-pick", quickPickRoutes);

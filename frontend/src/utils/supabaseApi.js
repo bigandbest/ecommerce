@@ -2238,4 +2238,26 @@ export async function getProductsForRecommendedStore(storeId) {
   return data.map(item => item.products).filter(p => p);
 }
 
+
+export async function getProductsForBrand(brandId) {
+  try {
+    const response = await fetch(
+      `https://ecommerce-8342.onrender.com/api/product-brand/${brandId}`
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch products for brand.");
+    }
+
+    const data = await response.json();
+
+    // The backend controller already returns just products[]
+    return data.map(item => item.products).filter(p => p);
+  } catch (err) {
+    console.error("Error in getProductsForBrand:", err.message);
+    throw err;
+  }
+}
+
 /* this is a testing commit */

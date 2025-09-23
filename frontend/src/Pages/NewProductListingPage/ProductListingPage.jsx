@@ -5,6 +5,7 @@ import {
   getAllProducts,
   addToCart,
   getProductsForRecommendedStore, // fallback if unknown section
+  getProductsForBrand,
 } from "../../utils/supabaseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -25,6 +26,8 @@ const ProductListingPage = () => {
         result = await getYouMayLikeProducts();
       } else if(Name === "shop-by-product"){
         result = await getProductsForRecommendedStore(id);
+      } else if(Name === "shopbybrand"){
+        result = await getProductsForBrand(id);
       }else {
         result = await getAllProducts(); // fallback
       }
