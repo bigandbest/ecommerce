@@ -46,8 +46,14 @@ const FeaturedThisWeek = () => {
                         key={item.id}
                         className="flex-shrink-0 w-[28%] sm:w-[24%] rounded-xl shadow-md overflow-hidden border bg-white"
                     >
-                        {/* Added aspect-square and w-full to force a perfect square container */}
-                        <Link to={`/ProductLisingPage/shopbybrand/${item.id}`}>
+                        {/* Pass all brands data to the product listing page */}
+                        <Link 
+                            to={`/ProductLisingPage/shopbybrand/${item.id}`}
+                            state={{ 
+                                selectedBrand: item,
+                                allBrands: featuredItems // Pass all brands for sliding functionality
+                            }}
+                        >
                         <div className="relative w-full">
                             <img
                                 src={item.img}

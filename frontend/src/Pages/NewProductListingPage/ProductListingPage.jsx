@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   getYouMayLikeProducts,
   getAllProducts,
   addToCart,
-  getProductsForRecommendedStore, // fallback if unknown section
+  getProductsForRecommendedStore,
   getProductsForBrand,
+  fetchRecommendedStores,
 } from "../../utils/supabaseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -14,9 +16,103 @@ const ProductListingPage = () => {
   const { Name } = useParams();
   const [products, setProducts] = useState([]);
   const {id} = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Handle both store and brand data from location.state
+  const { 
+    selectedStore, 
+    allStores, 
+    selectedBrand, 
+    allBrands 
+  } = location.state || {};
+  
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth(); 
   const [addingToCart, setAddingToCart] = useState(null);
+  
+  // State for stores/brands (fallback if not in location.state)
+  const [storesData, setStoresData] = useState(allStores || []);
+  const [brandsData, setBrandsData] = useState(allBrands || []);
+  const [currentStore, setCurrentStore] = useState(selectedStore || null);
+  const [currentBrand, setCurrentBrand] = useState(selectedBrand || null);
+
+  // Update current store/brand when URL params change
+  useEffect(() => {
+    if (Name === "shop-by-product" && id && storesData.length > 0) {
+      const foundStore = storesData.find(store => store.id === parseInt(id));
+      if (foundStore) {
+        setCurrentStore(foundStore);
+      }
+    } else if (Name === "shopbybrand" && id && brandsData.length > 0) {
+      const foundBrand = brandsData.find(brand => brand.id === parseInt(id));
+      if (foundBrand) {
+        setCurrentBrand(foundBrand);
+      }
+    }
+  }, [Name, id, storesData, brandsData]);
+
+  // Update current store/brand when location.state changes (navigation with state)
+  useEffect(() => {
+    if (selectedStore) {
+      setCurrentStore(selectedStore);
+    }
+    if (selectedBrand) {
+      setCurrentBrand(selectedBrand);
+    }
+    if (allStores) {
+      setStoresData(allStores);
+    }
+    if (allBrands) {
+      setBrandsData(allBrands);
+    }
+  }, [selectedStore, selectedBrand, allStores, allBrands]);
+
+  // Fetch stores/brands if not available in location.state
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (Name === "shop-by-product" && storesData.length === 0) {
+          const stores = await fetchRecommendedStores();
+          const formattedStores = stores.map(store => ({
+            id: store.id,
+            label: store.name,
+            image: store.image_url,
+          }));
+          setStoresData(formattedStores);
+          
+          // Set current store after fetching if we have an id
+          if (id) {
+            const foundStore = formattedStores.find(store => store.id === parseInt(id));
+            if (foundStore) {
+              setCurrentStore(foundStore);
+            }
+          }
+        } else if (Name === "shopbybrand" && brandsData.length === 0) {
+          const response = await axios.get("https://ecommerce-8342.onrender.com/api/brand/list");
+          const formattedBrands = response.data.brands.map(brand => ({
+            id: brand.id,
+            label: brand.name,
+            img: brand.image_url,
+            tag: "Featured",
+          }));
+          setBrandsData(formattedBrands);
+          
+          // Set current brand after fetching if we have an id
+          if (id) {
+            const foundBrand = formattedBrands.find(brand => brand.id === parseInt(id));
+            if (foundBrand) {
+              setCurrentBrand(foundBrand);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
+    };
+
+    fetchData();
+  }, [Name]); // Removed dependencies to prevent infinite loops
 
   useEffect(() => {
     async function fetchProducts() {
@@ -29,7 +125,7 @@ const ProductListingPage = () => {
       } else if(Name === "shopbybrand"){
         result = await getProductsForBrand(id);
       }else {
-        result = await getAllProducts(); // fallback
+        result = await getAllProducts();
       }
 
       if (result && result.success !== false) {
@@ -39,9 +135,22 @@ const ProductListingPage = () => {
     }
 
     fetchProducts();
-  }, [Name]);
+  }, [Name, id]);
 
-  // Placeholder for Add to Cart functionality
+  const handleStoreClick = (store) => {
+    setCurrentStore(store); // Update state immediately for better UX
+    navigate(`/ProductLisingPage/shop-by-product/${store.id}`, {
+      state: { selectedStore: store, allStores: storesData },
+    });
+  };
+
+  const handleBrandClick = (brand) => {
+    setCurrentBrand(brand); // Update state immediately for better UX
+    navigate(`/ProductLisingPage/shopbybrand/${brand.id}`, {
+      state: { selectedBrand: brand, allBrands: brandsData },
+    });
+  };
+
   const handleAddToCart = async (e, productId) => {
     e.preventDefault();
     e.stopPropagation();
@@ -51,19 +160,17 @@ const ProductListingPage = () => {
       return;
     }
 
-    setAddingToCart(productId); // Set loading state for this specific button
+    setAddingToCart(productId);
 
     const { success, error } = await addToCart(currentUser.id, productId, 1);
 
     if (success) {
-      alert("Item added to cart!");
-      // This event can be used by other components (like a navbar cart icon) to update themselves
       window.dispatchEvent(new Event("cartUpdated"));
     } else {
       alert(`Failed to add item to cart: ${error}`);
     }
 
-    setAddingToCart(null); // Reset loading state
+    setAddingToCart(null);
   };
 
   const calculateDiscount = (oldPrice, newPrice) => {
@@ -71,23 +178,99 @@ const ProductListingPage = () => {
     return Math.round(((oldPrice - newPrice) / oldPrice) * 100);
   };
 
+  // Determine what type of gallery to show
+  const isStoreView = Name === "shop-by-product";
+  const isBrandView = Name === "shopbybrand";
+  
+  const galleryData = isStoreView ? storesData : brandsData;
+  const currentItem = isStoreView ? currentStore : currentBrand;
+  const handleItemClick = isStoreView ? handleStoreClick : handleBrandClick;
+  const galleryTitle = isStoreView ? "Shop By Store" : "Shop By Brand";
+
   if (loading) return <p className="text-center py-10">Loading...</p>;
 
   return (
     <div className="bg-gray-50 min-h-screen mt-[-40px]">
       <div className="container mx-auto max-w-2xl px-2 py-4">
-        {/* Header */}
-       {/*  <div className="flex justify-between items-center mb-4 px-2">
-          <p className="font-semibold text-gray-800">{products.length} Items</p>
-          <div className="flex items-center gap-4">
-            <button className="flex items-center gap-1 text-sm font-medium text-gray-700">
-              <ArrowUpDown size={16} /> Sort
-            </button>
-            <button className="flex items-center gap-1 text-sm font-medium text-gray-700">
-              <SlidersHorizontal size={16} /> Filter
-            </button>
+
+        {/* Slideable Gallery - Different styling for stores vs brands */}
+        {(isStoreView || isBrandView) && galleryData && galleryData.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3 px-2">
+              {currentItem ? currentItem.label : galleryTitle}
+            </h3>
+            <div className="flex gap-3 overflow-x-auto pb-2 px-2" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+              {galleryData.map((item, index) => {
+                const isSelected = currentItem && item.id === currentItem.id;
+                const imageSource = isStoreView ? item.image : item.img;
+                
+                return (
+                  <div
+                    key={item.id || index}
+                    className="flex flex-col items-center flex-shrink-0 cursor-pointer transition-transform hover:scale-105"
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <div 
+                      className={`w-16 h-16 overflow-hidden border-2 transition-all duration-200 ${
+                        isSelected 
+                          ? 'border-red-400 ring-2 ring-red-200 shadow-lg' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      } ${
+                        isBrandView ? 'rounded-full' : 'rounded-lg'
+                      }`}
+                    >
+                      <img
+                        src={imageSource}
+                        alt={item.label}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://placehold.co/64x64?text=Brand";
+                        }}
+                      />
+                    </div>
+                    <p className={`text-xs mt-1 text-center max-w-[60px] truncate transition-colors ${
+                      isSelected ? 'text-red-600 font-medium' : 'text-gray-700'
+                    }`}>
+                      {item.label}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div> */}
+        )}
+
+        {/* Current Store/Brand Header */}
+        {currentItem && (
+          <div className="mb-4 px-2">
+            <div className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm">
+              <div 
+                className={`w-12 h-12 overflow-hidden border border-gray-200 ${
+                  isBrandView ? 'rounded-full' : 'rounded-lg'
+                }`}
+              >
+                <img
+                  src={isStoreView ? currentItem.image : currentItem.img}
+                  alt={currentItem.label}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://placehold.co/48x48?text=Item";
+                  }}
+                />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  {currentItem.label}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  {products.length} Items Available
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Product List */}
         {products.length === 0 ? (
@@ -103,7 +286,6 @@ const ProductListingPage = () => {
                   to={`/product/${item.id}`}
                   className="flex bg-white !ml-0 rounded-lg shadow-sm overflow-hidden transition-shadow hover:shadow-md w-full"
                 >
-                  {/* Image Section */}
                   <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0">
                     <img
                       src={item.image || "https://via.placeholder.com/150"}
@@ -117,7 +299,6 @@ const ProductListingPage = () => {
                     )}
                   </div>
 
-                  {/* Details Section */}
                   <div className="px-3 py-2 flex flex-col flex-grow">
                     <div>
                       <p className="text-xs text-gray-400 uppercase font-medium">
@@ -128,13 +309,11 @@ const ProductListingPage = () => {
                       </h3>
                     </div>
 
-                    {/* Placeholder for size/variant selector */}
                     <div className="text-xs text-gray-600 mt-1 border rounded px-2 py-1 w-fit">
                       {item.uom ? <p>{item.uom}</p>: <p>1 Variant</p>}
                     </div>
 
                     <div className="flex justify-between items-end">
-                      {/* Price */}
                       <div className="flex items-center">
                         <p className="text-base font-bold text-black">
                           ₹{item.price || "--"}
@@ -146,7 +325,6 @@ const ProductListingPage = () => {
                         )}
                       </div>
 
-                      {/* Add Button */}
                       <button
                         onClick={(e) => handleAddToCart(e, item.id)}
                         disabled={isAdding} 

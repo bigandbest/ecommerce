@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { fetchRecommendedStores } from "../../utils/supabaseApi"; // Adjust this import path as needed
 import { Link } from "react-router-dom";
+
 const BbmPicks = ({ 
   title = "Shop By Store", 
   mode = "scroll",
@@ -82,7 +83,13 @@ const BbmPicks = ({
         {items.map((item, index) => (
           <div key={index} className={itemClass}>
             {/* Circle Image */}
-            <Link to={`/ProductLisingPage/shop-by-product/${item.id}`}>
+            <Link 
+              to={`/ProductLisingPage/shop-by-product/${item.id}`} 
+              state={{ 
+                selectedStore: item,
+                allStores: items // Pass all stores for sliding functionality
+              }}
+            >
             <div className={imageWrapperClass}>
               <img
                 src={item.image}
