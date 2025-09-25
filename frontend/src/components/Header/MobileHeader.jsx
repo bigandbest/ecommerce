@@ -71,6 +71,7 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     if (location.pathname.startsWith("/ProductLisingPage")) return null;
     if (location.pathname.startsWith("/b&b")) return null;
     if (location.pathname.startsWith("/quick-pick")) return null;
+    if (location.pathname.startsWith("/saving-zone")) return null;
     if (location.pathname == "/all") {
         return null;
     }

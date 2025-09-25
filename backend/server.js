@@ -33,6 +33,9 @@ import savingZoneGroupRoutes from './routes/savingZoneGroupRoutes.js';
 import savingZoneGroupProductRoutes from './routes/savingZoneGroupProductRoutes.js'
 import storeRoutes from './routes/storeRoute.js';
 import YouMayLikeProductRoutes from './routes/youMayLikeRoutes.js';
+import addBannerRoutes from './routes/addBannerRoutes.js';
+import addBannerGroupRoutes from './routes/addBannerGroupRoutes.js';
+import addBannerGroupProductRoutes from './routes/addBannerGroupProductRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -102,5 +105,8 @@ app.use("/api/saving-zone-group", savingZoneGroupRoutes);
 app.use("/api/saving-zone-group-product", savingZoneGroupProductRoutes);
 app.use("/api/stores", storeRoutes);
 app.use("/api/you-may-like-products", YouMayLikeProductRoutes);
+app.use("/api/banner", addBannerRoutes);
+app.use("/api/banner-groups", addBannerGroupRoutes);
+app.use("/api/banner-group-products", addBannerGroupProductRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

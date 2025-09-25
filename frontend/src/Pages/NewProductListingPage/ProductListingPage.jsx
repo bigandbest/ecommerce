@@ -15,22 +15,22 @@ import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
 const ProductListingPage = () => {
   const { Name } = useParams();
   const [products, setProducts] = useState([]);
-  const {id} = useParams();
+  const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Handle both store and brand data from location.state
-  const { 
-    selectedStore, 
-    allStores, 
-    selectedBrand, 
-    allBrands 
+  const {
+    selectedStore,
+    allStores,
+    selectedBrand,
+    allBrands
   } = location.state || {};
-  
+
   const [loading, setLoading] = useState(true);
-  const { currentUser } = useAuth(); 
+  const { currentUser } = useAuth();
   const [addingToCart, setAddingToCart] = useState(null);
-  
+
   // State for stores/brands (fallback if not in location.state)
   const [storesData, setStoresData] = useState(allStores || []);
   const [brandsData, setBrandsData] = useState(allBrands || []);
@@ -80,7 +80,7 @@ const ProductListingPage = () => {
             image: store.image_url,
           }));
           setStoresData(formattedStores);
-          
+
           // Set current store after fetching if we have an id
           if (id) {
             const foundStore = formattedStores.find(store => store.id === parseInt(id));
@@ -97,7 +97,7 @@ const ProductListingPage = () => {
             tag: "Featured",
           }));
           setBrandsData(formattedBrands);
-          
+
           // Set current brand after fetching if we have an id
           if (id) {
             const foundBrand = formattedBrands.find(brand => brand.id === parseInt(id));
@@ -120,11 +120,11 @@ const ProductListingPage = () => {
       let result;
       if (Name === "you-may-like") {
         result = await getYouMayLikeProducts();
-      } else if(Name === "shop-by-product"){
+      } else if (Name === "shop-by-product") {
         result = await getProductsForRecommendedStore(id);
-      } else if(Name === "shopbybrand"){
+      } else if (Name === "shopbybrand") {
         result = await getProductsForBrand(id);
-      }else {
+      } else {
         result = await getAllProducts();
       }
 
@@ -181,7 +181,7 @@ const ProductListingPage = () => {
   // Determine what type of gallery to show
   const isStoreView = Name === "shop-by-product";
   const isBrandView = Name === "shopbybrand";
-  
+
   const galleryData = isStoreView ? storesData : brandsData;
   const currentItem = isStoreView ? currentStore : currentBrand;
   const handleItemClick = isStoreView ? handleStoreClick : handleBrandClick;
@@ -195,29 +195,29 @@ const ProductListingPage = () => {
 
         {/* Slideable Gallery - Different styling for stores vs brands */}
         {(isStoreView || isBrandView) && galleryData && galleryData.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-800 mb-3 px-2">
+          <div className="mb-3"> {/* reduced from mb-6 */}
+            <h3 className="text-sm font-semibold text-gray-800 mb-1 px-2"> {/* reduced from mb-3 */}
               {currentItem ? currentItem.label : galleryTitle}
             </h3>
-            <div className="flex gap-3 overflow-x-auto pb-2 px-2" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+            <div
+              className="flex gap-2 overflow-x-auto px-2" // reduced gap-3 → gap-2, removed pb-2
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
               {galleryData.map((item, index) => {
                 const isSelected = currentItem && item.id === currentItem.id;
                 const imageSource = isStoreView ? item.image : item.img;
-                
+
                 return (
                   <div
                     key={item.id || index}
                     className="flex flex-col items-center flex-shrink-0 cursor-pointer transition-transform hover:scale-105"
                     onClick={() => handleItemClick(item)}
                   >
-                    <div 
-                      className={`w-16 h-16 overflow-hidden border-2 transition-all duration-200 ${
-                        isSelected 
-                          ? 'border-red-400 ring-2 ring-red-200 shadow-lg' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      } ${
-                        isBrandView ? 'rounded-full' : 'rounded-lg'
-                      }`}
+                    <div
+                      className={`w-16 h-16 overflow-hidden border-2 transition-all duration-200 ${isSelected
+                          ? "border-red-400 ring-2 ring-red-200 shadow-lg"
+                          : "border-gray-200 hover:border-gray-300"
+                        } ${isBrandView ? "rounded-full" : "rounded-lg"}`}
                     >
                       <img
                         src={imageSource}
@@ -229,9 +229,12 @@ const ProductListingPage = () => {
                         }}
                       />
                     </div>
-                    <p className={`text-xs mt-1 text-center max-w-[60px] truncate transition-colors ${
-                      isSelected ? 'text-red-600 font-medium' : 'text-gray-700'
-                    }`}>
+                    <p
+                      className={`text-xs mt-0.5 text-center max-w-[60px] truncate transition-colors ${isSelected
+                          ? "text-red-600 font-medium"
+                          : "text-gray-700"
+                        }`} // reduced mt-1 → mt-0.5
+                    >
                       {item.label}
                     </p>
                   </div>
@@ -241,42 +244,13 @@ const ProductListingPage = () => {
           </div>
         )}
 
-        {/* Current Store/Brand Header */}
-        {currentItem && (
-          <div className="mb-4 px-2">
-            <div className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm">
-              <div 
-                className={`w-12 h-12 overflow-hidden border border-gray-200 ${
-                  isBrandView ? 'rounded-full' : 'rounded-lg'
-                }`}
-              >
-                <img
-                  src={isStoreView ? currentItem.image : currentItem.img}
-                  alt={currentItem.label}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://placehold.co/48x48?text=Item";
-                  }}
-                />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {currentItem.label}
-                </h2>
-                <p className="text-sm text-gray-600">
-                  {products.length} Items Available
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Product List */}
         {products.length === 0 ? (
           <p className="text-center text-gray-500 py-10">No products found.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-1">
+
             {products.map((item) => {
               const discount = calculateDiscount(item.old_price, item.price);
               const isAdding = addingToCart === item.id;
@@ -310,7 +284,7 @@ const ProductListingPage = () => {
                     </div>
 
                     <div className="text-xs text-gray-600 mt-1 border rounded px-2 py-1 w-fit">
-                      {item.uom ? <p>{item.uom}</p>: <p>1 Variant</p>}
+                      {item.uom ? <p>{item.uom}</p> : <p>1 Variant</p>}
                     </div>
 
                     <div className="flex justify-between items-end">
@@ -327,8 +301,8 @@ const ProductListingPage = () => {
 
                       <button
                         onClick={(e) => handleAddToCart(e, item.id)}
-                        disabled={isAdding} 
-                        style={{minHeight:'20px'}}
+                        disabled={isAdding}
+                        style={{ minHeight: '20px' }}
                         className="bg-red-400 text-white text-sm font-bold py-2 px-6 rounded-md hover:bg-red-600 transition-colors disabled:bg-red-300 disabled:cursor-not-allowed"
                       >
                         {isAdding ? "Adding..." : "Add"}
