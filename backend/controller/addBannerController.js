@@ -3,7 +3,8 @@ import { supabase } from "../config/supabaseClient.js";
 // Add a Banner
 export async function addBanner(req, res) {
   try {
-    const { name } = req.body;
+    // 💡 MODIFIED: Destructuring banner_type from req.body
+    const { name, banner_type } = req.body; 
     const imageFile = req.file;
     let imageUrl = null;
 
@@ -18,8 +19,8 @@ export async function addBanner(req, res) {
       imageUrl = urlData.publicUrl;
     }
 
-    // Insert new Banner into the 'add_banner' table
-    const { data, error } = await supabase.from("add_banner").insert([{ name, image_url: imageUrl }]).select().single();
+    // 💡 MODIFIED: Including banner_type in the insert object
+    const { data, error } = await supabase.from("add_banner").insert([{ name, image_url: imageUrl, banner_type }]).select().single();
     if (error) return res.status(400).json({ success: false, error: error.message });
     res.status(201).json({ success: true, banner: data });
   } catch (err) {
@@ -31,9 +32,11 @@ export async function addBanner(req, res) {
 export async function updateBanner(req, res) {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    // 💡 MODIFIED: Destructuring banner_type from req.body
+    const { name, banner_type } = req.body;
     const imageFile = req.file;
-    let updateData = { name };
+    // 💡 MODIFIED: Including banner_type in the initial updateData object
+    let updateData = { name, banner_type }; 
 
     // Update image if a new one is provided
     if (imageFile) {
@@ -68,6 +71,7 @@ export async function deleteBanner(req, res) {
 }
 
 // View All Banners
+// No change needed, as SELECT * will automatically include the new column
 export async function getAllBanners(req, res) {
   try {
     const { data, error } = await supabase.from("add_banner").select("*");
@@ -79,6 +83,7 @@ export async function getAllBanners(req, res) {
 }
 
 // View a Single Banner
+// No change needed, as SELECT * will automatically include the new column
 export async function getBannerById(req, res) {
   try {
     const { id } = req.params;
@@ -92,6 +97,29 @@ export async function getBannerById(req, res) {
     if (!data) return res.status(404).json({ success: false, error: "Banner not found" });
 
     res.json({ success: true, banner: data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+// 🆕 NEW API: Get all Banners by banner_type
+export async function getBannersByType(req, res) {
+  try {
+    const { bannerType } = req.params;
+    
+    if (!bannerType) {
+      return res.status(400).json({ success: false, error: "Banner type is required." });
+    }
+
+    const { data, error } = await supabase
+      .from("add_banner")
+      .select("*")
+      .eq("banner_type", bannerType); // 💡 Filtering by the new column
+
+    if (error) return res.status(400).json({ success: false, error: error.message });
+    
+    // You might want to return 404 if no banners are found, but returning an empty array (200 OK) is also common for list endpoints.
+    res.status(200).json({ success: true, banners: data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

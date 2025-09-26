@@ -6,15 +6,23 @@ import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 // Base URL for your banner backend APIs
 const API_URL = 'http://localhost:8000/api/banner';
 
+// Define banner types for the dropdown
+const BANNER_TYPES = ['Discount', 'Offer', 'Deals'];
+
 // Component to handle adding/editing a Banner
 const BannerForm = ({ initialData, onSave, onCancel }) => {
   const [name, setName] = useState(initialData?.name || '');
+  // 💡 MODIFIED: New state for banner_type, initialized to the first type or current data
+  const [bannerType, setBannerType] = useState(initialData?.banner_type || BANNER_TYPES[0]);
   const [image, setImage] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append('name', name);
+    // 💡 MODIFIED: Append the new banner_type field
+    formData.append('banner_type', bannerType);
+
     if (image) {
       formData.append('image', image);
     }
@@ -33,6 +41,8 @@ const BannerForm = ({ initialData, onSave, onCancel }) => {
       <div className="bg-white p-8 rounded-md shadow-lg w-96">
         <h2 className="text-2xl font-bold mb-4">{initialData ? 'Edit Banner' : 'Add Banner'}</h2>
         <form onSubmit={handleSubmit}>
+
+          {/* Banner Name Input */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
               Banner Name
@@ -47,6 +57,28 @@ const BannerForm = ({ initialData, onSave, onCancel }) => {
               required
             />
           </div>
+
+          {/* 💡 NEW: Banner Type Dropdown */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="banner_type">
+              Banner Type
+            </label>
+            <select
+              id="banner_type"
+              value={bannerType}
+              onChange={(e) => setBannerType(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            >
+              {BANNER_TYPES.map(type => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Image File Input */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="image">
               Choose File
@@ -61,6 +93,8 @@ const BannerForm = ({ initialData, onSave, onCancel }) => {
               <p className="text-sm text-gray-500 mt-2">Current image selected.</p>
             )}
           </div>
+
+          {/* Action Buttons */}
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -152,7 +186,7 @@ const AddBanner = () => {
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Banners</h1>
-      <button 
+      <button
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6 flex items-center"
         onClick={handleAddClick}
       >
@@ -177,6 +211,10 @@ const AddBanner = () => {
               <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Name
               </th>
+              {/* 💡 NEW: Table Header for Banner Type */}
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Type
+              </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Image
               </th>
@@ -195,24 +233,28 @@ const AddBanner = () => {
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p className="text-gray-900 whitespace-no-wrap">{banner.name}</p>
                   </td>
+                  {/* 💡 NEW: Table Data for Banner Type */}
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <p className="text-gray-900 whitespace-no-wrap">{banner.banner_type}</p>
+                  </td>
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <img src={banner.image_url} alt={banner.name} className="h-12 w-12 object-cover rounded-full" />
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div className="flex space-x-2">
-                      <button 
+                      <button
                         className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm"
                         onClick={() => handleEditClick(banner)}
                       >
                         <FaEdit />
                       </button>
-                      <button 
+                      <button
                         className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm"
                         onClick={() => handleDelete(banner.id)}
                       >
                         <FaTrash />
                       </button>
-                      <button 
+                      <button
                         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm"
                         onClick={() => navigate(`/add-banner-group?bannerId=${banner.id}`)}
                       >
@@ -224,7 +266,8 @@ const AddBanner = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="text-center py-4">No Banners found.</td>
+                <td colSpan="5" className="text-center py-4">No Banners found.</td>
+                {/* 💡 NOTE: Colspan is now 5 */}
               </tr>
             )}
           </tbody>

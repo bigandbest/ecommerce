@@ -2260,4 +2260,58 @@ export async function getProductsForBrand(brandId) {
   }
 }
 
+// --- Banner Section Functions ---
+
+// 1. Fetches all Banners filtered by a specific type (e.g., 'Deals', 'Offer')
+// This uses the /api/banner/type/:bannerType route we created earlier.
+export async function fetchBannersByType(bannerType) {
+    if (!bannerType) {
+        throw new Error('Banner type is required.');
+    }
+    const response = await fetch(`http://localhost:8000/api/banner/type/${bannerType}`);
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `Failed to fetch banners for type: ${bannerType}`);
+    }
+
+    const data = await response.json();
+    return data.banners; // Corresponds to the key in your addBannerController.js
+}
+
+// 2. Fetches all Banner Groups for a specific Banner ID
+// This uses the /api/banner-groups/by-banner/:bannerId route from your groups controller.
+export async function fetchGroupsForBanner(bannerId) {
+    if (!bannerId) {
+        throw new Error('Banner ID is required.');
+    }
+    const response = await fetch(`http://localhost:8000/api/banner-groups/by-banner/${bannerId}`);
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `Failed to fetch groups for Banner ID: ${bannerId}`);
+    }
+
+    const data = await response.json();
+    return data.bannerGroups; // Corresponds to the key in your addBannerGroupController.js
+}
+
+// 3. Fetches all products for a specific Banner Group ID
+// This uses the /api/banner-group-products/by-group/:add_banner_group_id route.
+export async function fetchProductsForBannerGroup(groupId) {
+    if (!groupId) {
+        throw new Error('Group ID is required.');
+    }
+    const response = await fetch(`http://localhost:8000/api/banner-group-products/getProductsByGroup/${groupId}`);
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `Failed to fetch products for Banner Group ID: ${groupId}`);
+    }
+
+    const data = await response.json();
+    // The data is an array of {product_id, products: {...}} objects. We extract the product data.
+    return data.map(item => item.products).filter(p => p);
+}
+
 /* this is a testing commit */

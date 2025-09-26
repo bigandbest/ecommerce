@@ -55,7 +55,7 @@ const AddBannerGroupProducts = () => {
         if (isConfirmed) {
             try {
                 await axios.delete(`${API_URL_PRODUCTS}/remove`, {
-                    data: { product_id: productId, add_banner_group_id: id } 
+                    data: { product_id: productId, add_banner_group_id: id }
                 });
                 notifications.show({ color: 'green', message: 'Product removed successfully.' });
                 fetchGroupData(); // Refresh the product list
@@ -74,7 +74,7 @@ const AddBannerGroupProducts = () => {
         try {
             await axios.post(`${API_URL_PRODUCTS}/map`, {
                 product_id: selectedProduct,
-                add_banner_group_id: id, 
+                add_banner_group_id: id,
             });
             notifications.show({ color: 'green', message: 'Product added successfully.' });
             setSelectedProduct(null);
@@ -91,6 +91,12 @@ const AddBannerGroupProducts = () => {
 
     return (
         <div className="p-8 bg-gray-100 min-h-screen">
+            <button
+                className="text-blue-500 hover:underline mb-4"
+                onClick={() => navigate(`/add-banner-group?bannerId=${group.banner_id}`)}
+            >
+                ← Back to the Groups
+            </button>
 
             <h1 className="text-3xl font-bold mb-2">Manage Products for the Banner Group: {group.name}</h1>
             <p className="text-gray-600 mb-6">ID: {group.id}</p>

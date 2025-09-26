@@ -484,6 +484,7 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
     if (type === "Enquiry") navigate("/enquiry-history");
     if (type === "cart") navigate("/cart");
     if (type === "Login") navigate("/login");
+    if (type === "all") navigate("/all");
   };
 
   return (
@@ -1295,8 +1296,8 @@ const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
         </button>
         <button
           className="mobile-bottom-nav-btn"
-          aria-label="Category"
-          onClick={() => handleBottomMenu("category")}
+          aria-label="all"
+          onClick={() => handleBottomMenu("all")}
           style={{
             background: "none",
             border: "none",

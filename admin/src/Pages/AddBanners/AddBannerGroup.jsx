@@ -176,7 +176,7 @@ const AddBannerGroup = () => {
     <div className="p-8 bg-gray-100 min-h-screen">
       <button
         className="text-blue-500 hover:underline mb-4"
-        onClick={() => navigate('/banners')}
+        onClick={() => navigate('/add-banner')}
       >
         ← Back to Banners
       </button>

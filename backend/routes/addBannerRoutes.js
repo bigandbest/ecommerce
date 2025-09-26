@@ -4,7 +4,8 @@ import {
   updateBanner,
   deleteBanner,
   getAllBanners,
-  getBannerById
+  getBannerById,
+  getBannersByType,
 } from "../controller/addBannerController.js";
 import multer from "multer";
 
@@ -25,5 +26,9 @@ router.get("/all", getAllBanners);
 
 // Get a single Banner by ID
 router.get("/:id", getBannerById);
+
+// Get all Banners by a specific type (e.g., /api/banner/type/homepage)
+router.get("/type/:bannerType", getBannersByType);
+
 
 export default router;
