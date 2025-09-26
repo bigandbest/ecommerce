@@ -2268,7 +2268,7 @@ export async function fetchBannersByType(bannerType) {
     if (!bannerType) {
         throw new Error('Banner type is required.');
     }
-    const response = await fetch(`http://localhost:8000/api/banner/type/${bannerType}`);
+    const response = await fetch(`https://ecommerce-8342.onrender.com/api/banner/type/${bannerType}`);
 
     if (!response.ok) {
         const error = await response.json();
@@ -2285,7 +2285,7 @@ export async function fetchGroupsForBanner(bannerId) {
     if (!bannerId) {
         throw new Error('Banner ID is required.');
     }
-    const response = await fetch(`http://localhost:8000/api/banner-groups/by-banner/${bannerId}`);
+    const response = await fetch(`https://ecommerce-8342.onrender.com/api/banner-groups/by-banner/${bannerId}`);
 
     if (!response.ok) {
         const error = await response.json();
@@ -2302,7 +2302,7 @@ export async function fetchProductsForBannerGroup(groupId) {
     if (!groupId) {
         throw new Error('Group ID is required.');
     }
-    const response = await fetch(`http://localhost:8000/api/banner-group-products/getProductsByGroup/${groupId}`);
+    const response = await fetch(`https://ecommerce-8342.onrender.com/api/banner-group-products/by-group/${groupId}`);
 
     if (!response.ok) {
         const error = await response.json();

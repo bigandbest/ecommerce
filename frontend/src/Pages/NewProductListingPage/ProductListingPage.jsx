@@ -8,6 +8,7 @@ import {
   getProductsForRecommendedStore,
   getProductsForBrand,
   fetchRecommendedStores,
+  fetchProductsForBannerGroup,
 } from "../../utils/supabaseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -124,7 +125,15 @@ const ProductListingPage = () => {
         result = await getProductsForRecommendedStore(id);
       } else if (Name === "shopbybrand") {
         result = await getProductsForBrand(id);
-      } else {
+      } else if (Name === "discount") {
+        // Assuming a function exists to fetch discounted products by some criteria
+        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+      } else if (Name === "offers") {
+        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+      } else if (Name === "deals") {
+        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+      }
+      else {
         result = await getAllProducts();
       }
 
@@ -179,7 +188,7 @@ const ProductListingPage = () => {
   };
 
   // Determine what type of gallery to show
-  const isStoreView = Name === "shop-by-product";
+  const isStoreView = Name === "shop-by-product" || Name === "discount";
   const isBrandView = Name === "shopbybrand";
 
   const galleryData = isStoreView ? storesData : brandsData;

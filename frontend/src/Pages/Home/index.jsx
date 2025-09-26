@@ -19,6 +19,10 @@ import EigthProductSection from "../../components/NewSection/EigthProductSection
 import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
 import BannerImagesSlider from "../../components/NewSection/BannerImagesSlider.jsx";
 import ProductBannerSlider from "../../components/NewSection/ProductBannerSlider.jsx";
+import OfferBannerSlider from "../../components/NewSection/OfferBannerSlider.jsx"; // First one
+import CategoryOfferBanner from "../../components/NewSection/CategoryOfferBanner.jsx"; // Second one
+import GroupBannerSlider from "../../components/NewSection/GroupBannerSlider.jsx"; // Third one
+
 
 // Import Swiper styles
 import "swiper/css";
@@ -520,6 +524,12 @@ export const Home = () => {
       <FlashSale />
       <HomeFestivalGrid />
       <FeaturedThisWeek />
+
+      {/* === Offer Banners below Shop By Category === */}
+      <OfferBannerSlider  count={1}/>
+      <CategoryOfferBanner  count={1}/>
+      <GroupBannerSlider  count={1}/>
+
       {/* <BannerImagesSlider
         count={3}
         bannerUrl="https://i.postimg.cc/W4pL05Hw/Opening-Soon.png"

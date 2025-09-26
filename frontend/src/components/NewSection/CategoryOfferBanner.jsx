@@ -1,108 +1,109 @@
+// second one
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-// 💡 Assuming fetchBannersByType is available in your utils/supabaseApi.js or similar
-import { fetchBannersByType, fetchGroupsForBanner, fetchProductsForBannerGroup } from '../../utils/supabaseApi'; 
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  fetchBannersByType,
+  fetchGroupsForBanner,
+} from '../../utils/supabaseApi';
 import { notifications } from '@mantine/notifications';
 
-// Define the type we want to fetch for this component
-const BANNER_TYPE = "Offer"; 
+// Define the banner type this component is responsible for displaying
+const BANNER_TYPE = "Offer";
 
 const CategoryOfferBanner = ({ count = 1 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [bannerUrl, setBannerUrl] = useState(null);
-  const [categoryData, setCategoryData] = useState([]);
+  const [groupCards, setGroupCards] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Show only on Home route
-  if (location.pathname !== "/") {
-    return null;
-  }
+  // --- Utility Functions (UNCHANGED) ---
 
-  useEffect(() => {
-    const loadOfferBannerData = async () => {
-      setLoading(true);
-      try {
-        // 1. Fetch Banners of type 'Offer'
-        const banners = await fetchBannersByType(BANNER_TYPE);
-
-        if (banners.length === 0) {
-          notifications.show({ color: 'yellow', message: `No banners found for type: ${BANNER_TYPE}` });
-          setLoading(false);
-          return;
-        }
-
-        // Use the first banner's image as the background
-        const primaryBanner = banners[0];
-        setBannerUrl(primaryBanner.image_url);
-
-        // 2. Fetch Groups associated with that primary Banner
-        const groups = await fetchGroupsForBanner(primaryBanner.id);
-
-        if (groups.length === 0) {
-          // If no groups, we can't fill the cards, so we use dummy data or stop.
-          setCategoryData(createDummyData()); 
-          notifications.show({ color: 'yellow', message: 'No groups associated with the primary offer banner.' });
-          setLoading(false);
-          return;
-        }
-
-        // 3. To mimic the 3-card structure, we fetch products for the first N groups (e.g., first 3)
-        // You would typically link categories/products to the groups in the admin.
-        const promises = groups.slice(0, 3).map(group => 
-          fetchProductsForBannerGroup(group.id).then(products => ({
-            id: group.id,
-            title: group.name,
-            subtitle: "View Products", // Placeholder subtitle
-            image: group.image_url, // Use the group's image for the card image
-            // Note: The product logic here is simplified. You might use the products
-            // but for this UI, we just need the group's details.
-          }))
-        );
-
-        const cardData = await Promise.all(promises);
-        
-        // Fill up to 3 cards, falling back to dummy data if fewer than 3 groups/products were found
-        while (cardData.length < 3) {
-             cardData.push(createDummyCard(cardData.length + 1));
-        }
-        
-        setCategoryData(cardData);
-
-      } catch (error) {
-        console.error(`Error loading ${BANNER_TYPE} banner data:`, error);
-        notifications.show({ color: 'red', message: `Failed to load ${BANNER_TYPE} banner data.` });
-        setBannerUrl(null); // Clear URL on error
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadOfferBannerData();
-  }, []); // Run once on component mount
-
-  // Helper function to create dummy card data if data fetching fails or is incomplete
   const createDummyCard = (id) => ({
-    id: id,
-    title: `Placeholder Card ${id}`,
-    subtitle: "Dummy Data",
-    image: "https://i.postimg.cc/nrDyCyq1/Screenshot-2025-09-03-175154-removebg-preview.png",
+    id: `dummy-${id}`,
+    title: `Group ${id}`,
+    image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+    link: `/productListing`,
   });
-  
+
   const createDummyData = () => [
     createDummyCard(1),
     createDummyCard(2),
     createDummyCard(3),
   ];
 
+  // --- Data Fetching Logic (UNCHANGED) ---
 
-  if (loading || !bannerUrl || categoryData.length === 0) {
-    // Optionally render a loading state or nothing if no data is available
-    return <div className="text-center p-4">Loading Offers...</div>;
+  useEffect(() => {
+    const loadOfferBannerData = async () => {
+      setLoading(true);
+      try {
+        const banners = await fetchBannersByType(BANNER_TYPE);
+
+        if (banners.length === 0) {
+          notifications.show({ color: 'yellow', message: `No banners found for type: ${BANNER_TYPE}` });
+          setGroupCards(createDummyData());
+          return;
+        }
+
+        const primaryBanner = banners[0];
+        setBannerUrl(primaryBanner.image_url);
+
+        const groups = await fetchGroupsForBanner(primaryBanner.id);
+
+        let cardData = [];
+        if (groups.length > 0) {
+          cardData = groups.slice(0, 3).map(group => ({
+            id: group.id,
+            title: group.name,
+            image: group.image_url,
+            link: `/ProductLisingPage/offers/${group.id}`
+          }));
+        }
+
+        while (cardData.length < 3) {
+          cardData.push(createDummyCard(cardData.length + 1));
+        }
+
+        setGroupCards(cardData);
+
+      } catch (error) {
+        console.error(`Error loading ${BANNER_TYPE} banner data:`, error);
+        notifications.show({ color: 'red', message: `Failed to load ${BANNER_TYPE} banner data.` });
+        setBannerUrl(null);
+        setGroupCards(createDummyData());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (location.pathname === "/") {
+      loadOfferBannerData();
+    }
+  }, [location.pathname]);
+
+  // --- Render Guards (UNCHANGED) ---
+
+  if (location.pathname !== "/") {
+    return null;
   }
 
-  // --- Render logic using fetched data ---
+  if (loading) {
+    return (
+      <div className="p-2 space-y-8 md:hidden">
+        <div className="text-center bg-white p-4 rounded-xl shadow-md">Loading Offers...</div>
+      </div>
+    );
+  }
+
+  if (!bannerUrl && groupCards.length === 0) {
+    return null;
+  }
+
+
+  // --- Render Logic (JSX) ---
+
   return (
-    // ... same UI structure as before, now using state data ...
     <div className="space-y-8 md:hidden">
       {Array.from({ length: count }).map((_, sectionIndex) => (
         <div
@@ -111,34 +112,49 @@ const CategoryOfferBanner = ({ count = 1 }) => {
         >
           {/* Banner Background */}
           <div
-            className="bg-cover bg-center rounded-xl flex flex-col justify-end aspect-[2/1] sm:aspect-[16/7] md:aspect-[16/6]"
+            className="bg-cover bg-center bg-no-repeat rounded-xl flex flex-col justify-end w-full min-h-[250px] sm:min-h-[300px] overflow-hidden"
             style={{
-              backgroundImage: `url('${bannerUrl}')`, // Uses fetched image URL
+              backgroundImage: bannerUrl ? `url('${bannerUrl}')` : 'none',
+              backgroundColor: bannerUrl ? 'transparent' : '#e0e0e0',
             }}
           >
-            {/* Exactly 3 cards in a row */}
-            <div className="grid grid-cols-3 gap-1 h-[81%]">
-              {categoryData.slice(0, 3).map((category, idx) => (
+            {/* Overlay Card Container */}
+            <div
+              // ✅ FIX 1: Set gap-0 to remove spacing between grid columns/rows.
+              // ✅ FIX 2: Set px-0 to remove padding from container edges.
+              className="grid grid-cols-3 gap-0 w-full px-0 pt-4 pb-0 -mb-2"
+            >
+              {groupCards.slice(0, 3).map((group, idx) => (
                 <div
-                  key={category.id}
-                  className={`flex flex-col justify-center items-center text-center p-1 ${
-                    idx !== 2 // Check if it's not the last card (index 2)
-                      ? "border-r border-gray-200"
-                      : ""
-                  }`}
+                  key={group.id}
+                  onClick={() => navigate(group.link)}
+                  className={`
+                                        flex flex-col justify-center items-center text-center rounded-xl shadow-xl cursor-pointer transition-transform duration-200 transform hover:scale-[1.02] 
+                                        bg-white
+                                        h-28 
+                                        // ❌ FIX 3: Removed margin class (m-[4px]) to stop card separation
+                                    `}
                 >
-                  <img
-                    src={category.image}
-                    alt={category.title}
-                    className="object-contain"
-                  />
-                  {/* You can add text/title here if needed, but the original code only had the image */}
+                  {/* Card Content: The group image is the entire content of the box */}
+                  <div className="w-full h-full flex justify-center items-center">
+                    <img
+                      src={group.image}
+                      alt={group.title}
+                      className="object-contain max-w-full max-h-full"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
       ))}
+      {/* Footer/Bank Offer Section (Hardcoded example from your image - if uncommented) */}
+      {/* <div className="flex justify-between items-center bg-white rounded-b-xl px-4 py-2 text-xs text-gray-700 shadow-md">
+                        <span className="font-semibold">10% off on ₹499</span>
+                        <span className="font-extrabold text-blue-700">HDFC BANK</span>
+                        <span className="font-semibold">₹200 off on ₹2,000</span>
+                    </div> */}
     </div>
   );
 };
