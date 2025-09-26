@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 
 // Base URL for your banner backend APIs
-const API_URL = 'http://localhost:8000/api/banner';
+const API_URL = 'https://ecommerce-8342.onrender.com/api/banner';
 
 // Define banner types for the dropdown
 const BANNER_TYPES = ['Discount', 'Offer', 'Deals'];

@@ -5,9 +5,9 @@ import { FaTrash, FaPlus, FaTimes } from 'react-icons/fa';
 import { notifications } from '@mantine/notifications';
 import { getAllProducts } from '../../utils/supabaseApi'
 
-const API_URL_PRODUCTS = 'http://localhost:8000/api/banner-group-products';
-const API_URL_ALL_PRODUCTS = 'http://localhost:8000/api/productsroute';
-const API_URL_GROUP = 'http://localhost:8000/api/banner-groups';
+const API_URL_PRODUCTS = 'https://ecommerce-8342.onrender.com/api/banner-group-products';
+const API_URL_ALL_PRODUCTS = 'https://ecommerce-8342.onrender.com/api/productsroute';
+const API_URL_GROUP = 'https://ecommerce-8342.onrender.com/api/banner-groups';
 
 const AddBannerGroupProducts = () => {
     const { id } = useParams();

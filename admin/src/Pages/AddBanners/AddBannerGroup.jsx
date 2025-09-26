@@ -5,8 +5,8 @@ import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import { notifications } from '@mantine/notifications';
 import { supabaseAdmin } from '../../utils/supabase.js';
 
-const API_URL = "http://localhost:8000/api/banner-groups";
-const BANNER_API_URL = "http://localhost:8000/api/banner";
+const API_URL = "https://ecommerce-8342.onrender.com/api/banner-groups";
+const BANNER_API_URL = "https://ecommerce-8342.onrender.com/api/banner";
 
 // Component to handle adding/editing a Banner Group
 const BannerGroupForm = ({ initialData, onSave, onCancel, bannerId }) => {
