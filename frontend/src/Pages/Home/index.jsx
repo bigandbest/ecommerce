@@ -530,10 +530,10 @@ export const Home = () => {
       <CategoryOfferBanner  count={1}/>
       <GroupBannerSlider  count={1}/>
 
-      {/* <BannerImagesSlider
+       <BannerImagesSlider
         count={3}
         bannerUrl="https://i.postimg.cc/W4pL05Hw/Opening-Soon.png"
-      /> */}
+      />      {/* Opening soon */}
 
       {/* ================== PROMOTIONAL BANNER ================== */}
       {/* Desktop version (lg and up) */}
@@ -585,11 +585,14 @@ export const Home = () => {
 
       <VideoBannerSlider />
       <ProductGrid3X3 />
-      {/* <BannerImagesSlider
+       <BannerImagesSlider
         count={2}
         bannerUrl="https://i.postimg.cc/mrVcS62L/Untitled-design-1.png"
-      />
-      <EigthProductSection sectionCount={2} startIndex={0} />
+      />{/* Summer Big Sale */}
+      
+      <EigthProductSection sectionCount={1} startIndex={0} />   {/* Section 1,2.. change coung */}
+      
+      
       <div className="p-4 bg-white md:hidden">
         {sectionData.map((section, idx) => (
           <ProductGrid2X2
@@ -598,11 +601,11 @@ export const Home = () => {
             products={section.products}
           />
         ))}
-      </div> */}
-      {/* <ProductBannerSlider
+      </div>                   {/* Best Quality and Trending Now */}
+       <ProductBannerSlider
         count={1}
         bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
-      /> */}
+      /> 
 
       {/* <EigthProductSection sectionCount={3} startIndex={2} /> */}
       {/* <ProductBannerSlider
