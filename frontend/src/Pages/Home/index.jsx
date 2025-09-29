@@ -18,6 +18,7 @@ import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
 import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
 import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
 import BannerImagesSlider from "../../components/NewSection/BannerImagesSlider.jsx";
+import SummerBigSaleBanner from "../../components/NewSection/SummerBigSaleBanner.jsx";
 import ProductBannerSlider from "../../components/NewSection/ProductBannerSlider.jsx";
 import OfferBannerSlider from "../../components/NewSection/OfferBannerSlider.jsx"; // First one
 import CategoryOfferBanner from "../../components/NewSection/CategoryOfferBanner.jsx"; // Second one
@@ -328,7 +329,7 @@ export const Home = () => {
         },
       ],
     },
-    {
+    /* {
       title: "Trending Now",
       products: [
         {
@@ -377,7 +378,7 @@ export const Home = () => {
           image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
         },
       ],
-    },
+    }, */
   ];
   const sectionData2 = [
     {
@@ -531,9 +532,9 @@ export const Home = () => {
       <GroupBannerSlider  count={1}/>
 
        <BannerImagesSlider
-        count={3}
+        count={1}         
         bannerUrl="https://i.postimg.cc/W4pL05Hw/Opening-Soon.png"
-      />      {/* Opening soon */}
+      />      {/* Opening soon */} {/* Change count to adjust the no.s of sections */}
 
       {/* ================== PROMOTIONAL BANNER ================== */}
       {/* Desktop version (lg and up) */}
@@ -585,10 +586,7 @@ export const Home = () => {
 
       <VideoBannerSlider />
       <ProductGrid3X3 />
-       <BannerImagesSlider
-        count={2}
-        bannerUrl="https://i.postimg.cc/mrVcS62L/Untitled-design-1.png"
-      />{/* Summer Big Sale */}
+      <SummerBigSaleBanner />   {/* Summer Big Sale */} 
       
       <EigthProductSection sectionCount={1} startIndex={0} />   {/* Section 1,2.. change coung */}
       

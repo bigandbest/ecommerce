@@ -58,6 +58,8 @@ import Store from "./Components/Store/Store.jsx";
 import AddBanner from "./Pages/AddBanners/AddBanner.jsx";
 import AddBannerGroup from "./Pages/AddBanners/AddBannerGroup.jsx";
 import AddBannerGroupProducts from "./Pages/AddBanners/AddBannerGroupProducts.jsx";
+import UniqueSection from "./Pages/UniqueSection/UniqueSection.jsx";
+import UniqueSectionProducts from "./Pages/UniqueSection/UniqueSectionProduct.jsx";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -292,6 +294,14 @@ function App() {
         {
           path: "/youMayLikeProducts/:id",
           element: <YouMayLikeProducts />,
+        },
+        {
+          path: "/unique-sections",
+          element: <UniqueSection />,
+        },
+        {
+          path: "/unique-sections/products/:id",
+          element: <UniqueSectionProducts />,
         },
       ],
     },

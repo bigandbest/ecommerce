@@ -129,6 +129,11 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/add-banner",
     },
     {
+      title: "UniqueSections",
+      icon: <FaPlus />,
+      path: "/unique-sections",
+    },
+    {
       title: "Brands",
       icon: <FaTrademark />,
       path: "/brands",

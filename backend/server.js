@@ -36,6 +36,8 @@ import YouMayLikeProductRoutes from './routes/youMayLikeRoutes.js';
 import addBannerRoutes from './routes/addBannerRoutes.js';
 import addBannerGroupRoutes from './routes/addBannerGroupRoutes.js';
 import addBannerGroupProductRoutes from './routes/addBannerGroupProductRoutes.js';
+import uniqueSectionRoutes from './routes/uniqueSectionRoutes.js';
+import uniqueSectionProductRoutes from './routes/uniqueSectionProductRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -108,5 +110,7 @@ app.use("/api/you-may-like-products", YouMayLikeProductRoutes);
 app.use("/api/banner", addBannerRoutes);
 app.use("/api/banner-groups", addBannerGroupRoutes);
 app.use("/api/banner-group-products", addBannerGroupProductRoutes);
+app.use("/api/unique-sections", uniqueSectionRoutes);
+app.use("/api/unique-section-products", uniqueSectionProductRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
