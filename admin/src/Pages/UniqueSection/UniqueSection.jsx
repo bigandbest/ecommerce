@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 const UniqueSection = () => {
   const [editingSection, setEditingSection] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -14,6 +14,7 @@ const UniqueSection = () => {
   const [submitting, setSubmitting] = useState(false);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
+      const navigate = useNavigate();
 
   const fetchSections = async () => {
     try {
@@ -155,7 +156,7 @@ const UniqueSection = () => {
               >
                 {/* Ensure the initial value is an empty string if required by DB */}
                 <option value="">Select Section Type</option> 
-                <option value="Section 1">Section 1</option>
+                <option value="Section 1">New Menu</option>
                 <option value="Best quality">Best quality</option>
               </select>
               <input
@@ -237,6 +238,12 @@ const UniqueSection = () => {
                     >
                       🗑️
                     </button>
+                    <button
+                      className="bg-green-600 text-white px-3 py-1 rounded"
+                      onClick={() => navigate(`/unique-sections/products/${section.id}`)}
+                    >
+                      📦 Products
+                    </button>
                   </td>
                 </tr>
               ))}

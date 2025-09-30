@@ -136,6 +136,8 @@ const ProductListingPage = () => {
         result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
       } else if (Name === "opening-soon") {
         result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+      } else if (Name === "section1") {
+        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
       } else {
         result = await getAllProducts();
       }

@@ -21,7 +21,7 @@ export async function addUniqueSection(req, res) {
     // Insert new Unique Section into the 'unique_section' table
     // Changed field to section_type
     const { data, error } = await supabase.from("unique_section").insert([{ name, image_url: imageUrl, section_type }]).select().single();
-    if (error) return res.status(400).json({ success: false, error: error.message });
+    if (error) {console.error(error); return res.status(400).json({ success: false, error: error.message });}
     res.status(201).json({ success: true, uniqueSection: data });
   } catch (err) {
     console.error("Add Unique Section Error:", err);

@@ -7,7 +7,7 @@ import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 const API_URL = 'https://ecommerce-8342.onrender.com/api/banner';
 
 // Define banner types for the dropdown
-const BANNER_TYPES = ['Discount', 'Offer', 'Deals', 'Summer Big Sale', 'Opening Soon'];
+const BANNER_TYPES = ['Discount', 'Offer', 'Deals', 'Summer Big Sale', 'Opening Soon', 'Section 1'];
 
 // Component to handle adding/editing a Banner
 const BannerForm = ({ initialData, onSave, onCancel }) => {

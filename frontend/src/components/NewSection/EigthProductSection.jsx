@@ -1,81 +1,137 @@
+// EightProductSection.jsx
+// section 1
 import React, { useEffect, useState } from "react";
-import { getAllProducts } from "../../utils/supabaseApi.js"; 
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  fetchBannersByType,
+  fetchGroupsForBanner,
+} from "../../utils/supabaseApi";
+import { notifications } from "@mantine/notifications";
 
-const sectionColors = [
-  "bg-blue-100",
-  "bg-green-100",
-  "bg-pink-100",
-  "bg-yellow-100",
-  "bg-purple-100",
-  "bg-red-100",
-  "bg-indigo-100",
-  "bg-orange-100",
-];
+const BANNER_TYPE = "Section 1";
 
-const EigthProductSection = ({ sectionCount = 8, startIndex = 0 }) => {
-  const [sections, setSections] = useState([]);
+const EightProductSection = ({ count = 1 }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [bannerUrl, setBannerUrl] = useState(null);
+  const [groupCards, setGroupCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const createDummyCard = (id) => ({
+    id: `dummy-${id}`,
+    title: `Product ${id}`,
+    image: "https://i.postimg.cc/VNzkJTCT/Candle5.jpg",
+    link: `/productListing`,
+  });
+
+  const createDummyData = () =>
+    Array.from({ length: 8 }, (_, i) => createDummyCard(i + 1));
 
   useEffect(() => {
-    async function fetchProducts() {
-      const { success, products } = await getAllProducts();
-      if (success) {
-        const minProducts = 4; 
-        const maxProducts = 5; 
+    const loadSectionData = async () => {
+      setLoading(true);
+      try {
+        const banners = await fetchBannersByType(BANNER_TYPE);
 
-        const newSections = Array.from({ length: sectionCount }, (_, i) => {
-          let start = (i * minProducts) % products.length;
-          let end = start + minProducts;
-          let sectionProducts = products.slice(start, end);
+        if (banners.length === 0) {
+          notifications.show({
+            color: "yellow",
+            message: `No banners found for type: ${BANNER_TYPE}`,
+          });
+          setGroupCards(createDummyData());
+          return;
+        }
 
-          while (sectionProducts.length < minProducts) {
-            sectionProducts = [
-              ...sectionProducts,
-              ...products.slice(0, minProducts - sectionProducts.length),
-            ];
-          }
+        const primaryBanner = banners[0];
+        setBannerUrl(primaryBanner.image_url);
 
-          if (sectionProducts.length < maxProducts && products.length > minProducts) {
-            sectionProducts.push(products[end % products.length]);
-          }
+        const groups = await fetchGroupsForBanner(primaryBanner.id);
 
-          return {
-            title: `Section ${startIndex + i + 1}`, // 👈 continuous numbering
-            bg: sectionColors[(startIndex + i) % sectionColors.length],
-            products: sectionProducts,
-          };
+        let cardData = [];
+        if (groups.length > 0) {
+          cardData = groups.map((group) => ({
+            id: group.id,
+            title: group.name,
+            image: group.image_url,
+            link: `/ProductListingPage/section1/${group.id}`,
+          }));
+        }
+
+        if (cardData.length === 0) {
+          cardData = createDummyData();
+        }
+
+        setGroupCards(cardData);
+      } catch (error) {
+        console.error(`Error loading ${BANNER_TYPE} banner data:`, error);
+        notifications.show({
+          color: "red",
+          message: `Failed to load ${BANNER_TYPE} banner data.`,
         });
-        setSections(newSections);
+        setBannerUrl(null);
+        setGroupCards(createDummyData());
+      } finally {
+        setLoading(false);
       }
+    };
+
+    if (location.pathname === "/") {
+      loadSectionData();
     }
-    fetchProducts();
-  }, [sectionCount, startIndex]);
+  }, [location.pathname]);
+
+  if (location.pathname !== "/") {
+    return null;
+  }
+
+  if (loading || (!bannerUrl && groupCards.length === 0)) {
+    return <div className="p-4 text-center">Loading Section 1...</div>;
+  }
 
   return (
-    <div className="block md:hidden p-3 bg-white">
-      {sections.map((section, i) => (
-        <div key={i} className={`${section.bg} py-4 mb-4 rounded-md shadow-md`}>
-          <h2 className="text-lg font-semibold px-3 mb-2">{section.title}</h2>
-          <div className="flex overflow-x-auto px-3 space-x-4 hide-scrollbar">
-            {section.products.map((product, idx) => (
-              <div
-                key={`${product.id}-${idx}`}
-                className="flex-shrink-0 w-[40%] flex flex-col items-center"
-              >
-                <div className="w-full h-40 flex flex-col items-center justify-center rounded-2xl overflow-hidden">
-                  <img
-                    src={
-                      /* product.image || */ "https://i.postimg.cc/VNzkJTCT/Candle5.jpg"
-                    }
-                    alt={product.name}
-                    className="h-full w-full object-cover rounded-t-2xl"
-                  />
-                  <div className="bg-blue-600 w-full text-center">From ₹299</div>
+    <div className="space-y-8 md:hidden">
+      {Array.from({ length: count }).map((_, sectionIndex) => (
+        <div
+          key={sectionIndex}
+          className="relative rounded-xl shadow-md overflow-hidden p-2"
+        >
+          <div
+            className="bg-cover bg-center bg-no-repeat rounded-xl flex flex-col justify-end w-full min-h-[250px] sm:min-h-[300px] relative overflow-hidden"
+            style={{
+              backgroundImage: bannerUrl ? `url('${bannerUrl}')` : "none",
+              backgroundColor: bannerUrl ? "transparent" : "#e0e0e0",
+            }}
+          >
+            {/* Horizontal Scroll Cards */}
+            <div
+              className="flex overflow-x-scroll w-full gap-0 px-0 pb-3 no-scrollbar absolute bottom-0 left-0"
+              style={{
+                transform: "translateY(-5px)", // less overlap
+                paddingLeft: "10px",
+                paddingRight: "10px",
+              }}
+            >
+              {groupCards.map((group) => (
+                <div
+                  key={group.id}
+                  onClick={() => navigate(group.link)}
+                  className="flex-shrink-0 w-40 flex flex-col items-center text-center cursor-pointer mx-2"
+                >
+                  {/* Image */}
+                  <div className="w-full h-[100px] flex justify-center items-center  rounded-xl shadow-lg overflow-hidden">
+                    <img
+                      src={group.image}
+                      alt={group.title}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  {/* Title */}
+                  <p className="mt-2 text-xs font-semibold text-gray-800 truncate w-full">
+                    {group.title}
+                  </p>
                 </div>
-                <p className="text-sm font-medium mt-2 text-center line-clamp-2">
-                  {product.name}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       ))}
@@ -83,4 +139,4 @@ const EigthProductSection = ({ sectionCount = 8, startIndex = 0 }) => {
   );
 };
 
-export default EigthProductSection;
+export default EightProductSection;

@@ -49,7 +49,7 @@ const allowedOrigins = [
   'https://www.bigbestmart.com',
   'https://admin-eight-ruddy.vercel.app'
 ];
-
+  
 
 const corsOptions = {
   origin: function (origin, callback) {

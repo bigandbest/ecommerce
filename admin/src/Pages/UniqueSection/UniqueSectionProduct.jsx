@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API = "http://localhost:8000/api/unique-section-products";
+
 const UniqueSectionProducts = () => {
   const { id } = useParams(); // section_id
   const navigate = useNavigate();
@@ -12,88 +14,45 @@ const UniqueSectionProducts = () => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Fetch Section info
   const fetchSection = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8000/api/unique-section/${id}`
-      );
-      setSection(res.data.section);
-    } catch (err) {
-      console.error("Failed to fetch Section details:", err);
-    }
+    const res = await axios.get(`${API}/section/${id}`);
+    setSection(res.data);
   };
 
-  // Fetch products mapped to this Section
   const fetchSectionProducts = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8000/api/unique-section-products/${id}`
-      );
-      const mapped = res.data.map((item) => item.products);
-      setProductsInSection(mapped);
-    } catch (err) {
-      console.error("Failed to fetch products for Section:", err);
-    }
+    const res = await axios.get(`${API}/products/${id}`);
+    setProductsInSection(res.data);
   };
 
-  // Fetch all available products
   const fetchAllProducts = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8000/api/productsroute/allproducts`
-      );
-      setAllProducts(res.data);
-    } catch (err) {
-      console.error("Failed to fetch all products:", err);
-    }
+    const res = await axios.get(`${API}/all-products`);
+    setAllProducts(res.data);
   };
 
-  // Add product to section
   const handleAddProduct = async () => {
     if (!selectedProductId) return;
-
     try {
-      await axios.post(
-        "http://localhost:8000/api/unique-section-products/map",
-        {
-          product_id: selectedProductId,
-          section_id: id,
-        }
-      );
+      await axios.post(`${API}/map`, { product_id: selectedProductId, section_id: id });
       setSelectedProductId("");
       await fetchSectionProducts();
-    } catch (err) {
+    } catch {
       alert("Product already mapped or an error occurred");
-      console.error(err);
     }
   };
 
-  // Remove product from section
   const handleRemoveProduct = async (product_id) => {
     try {
-      await axios.post(
-        "http://localhost:8000/api/unique-section-products/remove",
-        {
-          product_id,
-          section_id: id,
-        }
-      );
+      await axios.delete(`${API}/remove`, { data: { product_id, section_id: id } });
       await fetchSectionProducts();
-    } catch (err) {
+    } catch {
       alert("Failed to remove product");
-      console.error(err);
     }
   };
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchSection(),
-        fetchSectionProducts(),
-        fetchAllProducts(),
-      ]);
+      await Promise.all([fetchSection(), fetchSectionProducts(), fetchAllProducts()]);
       setLoading(false);
     };
     load();
@@ -101,22 +60,15 @@ const UniqueSectionProducts = () => {
 
   if (loading || !section) return <p className="p-4">Loading...</p>;
 
-  const mappedProductIds = productsInSection.map((p) => p.id);
+  const mappedIds = productsInSection.map((p) => p.id);
 
   return (
     <div className="p-6 max-w-screen-lg mx-auto">
-      <div className="mb-6">
-        <button
-          onClick={() => navigate("/unique-sections")}
-          className="text-blue-600 hover:underline mb-2"
-        >
-          ← Back to Sections
-        </button>
-        <h2 className="text-xl font-bold">
-          Manage Products for Unique Section:
-        </h2>
-        <p className="text-lg">Section Name: {section.name}</p>
-      </div>
+      <button onClick={() => navigate("/unique-sections")} className="text-blue-600 hover:underline mb-4">
+        ← Back to Sections
+      </button>
+      <h2 className="text-xl font-bold mb-2">Manage Products for Section</h2>
+      <p className="text-lg mb-6">Section: {section.name}</p>
 
       {/* Add product */}
       <div className="bg-white p-4 rounded shadow mb-6">
@@ -128,20 +80,13 @@ const UniqueSectionProducts = () => {
             onChange={(e) => setSelectedProductId(e.target.value)}
           >
             <option value="">Select product</option>
-            {allProducts.map((product) => (
-              <option
-                key={product.id}
-                value={product.id}
-                disabled={mappedProductIds.includes(product.id)}
-              >
-                {product.name}
+            {allProducts.map((p) => (
+              <option key={p.id} value={p.id} disabled={mappedIds.includes(p.id)}>
+                {p.name}
               </option>
             ))}
           </select>
-          <button
-            onClick={handleAddProduct}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
+          <button onClick={handleAddProduct} className="bg-green-600 text-white px-4 py-2 rounded">
             Add
           </button>
         </div>
@@ -156,20 +101,20 @@ const UniqueSectionProducts = () => {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="bg-gray-100 text-left">
-                <th className="py-2 px-4">Product Name</th>
+                <th className="py-2 px-4">Name</th>
                 <th className="py-2 px-4">Price</th>
                 <th className="py-2 px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {productsInSection.map((product) => (
-                <tr key={product.id} className="border-t">
-                  <td className="py-2 px-4">{product.name}</td>
-                  <td className="py-2 px-4">₹{product.price}</td>
+              {productsInSection.map((p) => (
+                <tr key={p.id} className="border-t">
+                  <td className="py-2 px-4">{p.name}</td>
+                  <td className="py-2 px-4">₹{p.price}</td>
                   <td className="py-2 px-4">
                     <button
-                      onClick={() => handleRemoveProduct(product.id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                      onClick={() => handleRemoveProduct(p.id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded"
                     >
                       🗑 Remove
                     </button>
