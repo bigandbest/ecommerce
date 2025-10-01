@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { updateUserProfileWithAddress } from "../../utils/supabaseApi";
+import { updateUserProfileWithAddress, getUserOrders } from "../../utils/supabaseApi";
 import { formatDateOnlyIST } from "../../utils/dateUtils";
 import supabase from "../../utils/supabase.ts";
 import {
@@ -91,6 +91,9 @@ const AccountPage = () => {
     confirm: false,
   });
 
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
   // Utility functions
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type });
@@ -133,7 +136,30 @@ const AccountPage = () => {
         console.error("Error parsing stored profile:", error);
       }
     }
+
+    // Fetch user orders
+    fetchUserOrders();
   }, [currentUser, navigate]);
+
+  const fetchUserOrders = async () => {
+    if (!currentUser?.id) return;
+    
+    setOrdersLoading(true);
+    try {
+      const { success, orders: fetchedOrders, error } = await getUserOrders(currentUser.id);
+      if (success && fetchedOrders) {
+        setOrders(fetchedOrders);
+      } else {
+        console.error('Failed to fetch orders:', error);
+        setOrders([]);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrders([]);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   // Update vertical tab when horizontal tab changes
   useEffect(() => {
@@ -462,12 +488,16 @@ const AccountPage = () => {
                         <FaShoppingBag className="text-indigo-600" />
                         My Orders
                       </h2>
-                      <ComingSoonPlaceholder
-                        icon={FaShoppingBag}
-                        title="Order Management Coming Soon"
-                        description="We're working on bringing you a comprehensive order tracking system."
-                        linkTo="/coming-soon?feature=orders"
-                      />
+                      <div className="text-center py-8">
+                        <p className="text-gray-600 mb-4">View your complete order history</p>
+                        <Link 
+                          to="/MyOrders" 
+                          className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        >
+                          <FaShoppingBag className="mr-2" />
+                          View All Orders
+                        </Link>
+                      </div>
                     </div>
                   )}
 
@@ -629,12 +659,82 @@ const AccountPage = () => {
                         <FaHistory className="text-indigo-600" />
                         Past Orders
                       </h2>
-                      <ComingSoonPlaceholder
-                        icon={FaHistory}
-                        title="Order History Coming Soon"
-                        description="We're developing a comprehensive order history feature for easy reordering."
-                        linkTo="/coming-soon?feature=orders"
-                      />
+                      {ordersLoading ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                          <p className="mt-4 text-gray-600">Loading your orders...</p>
+                        </div>
+                      ) : orders.length === 0 ? (
+                        <div className="text-center py-12">
+                          <div className="text-6xl mb-4">📦</div>
+                          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Orders Yet</h3>
+                          <p className="text-gray-600 mb-6">You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                          <Link 
+                            to="/" 
+                            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                          >
+                            Start Shopping
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {orders.slice(0, 3).map(order => (
+                            <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h4>
+                                  <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString()}</p>
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
+                                  order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                  order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                  order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {order.status}
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <p className="text-sm text-gray-600 mb-2">Items: {order.order_items?.length || 0}</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {order.order_items?.slice(0, 3).map((item, idx) => (
+                                    <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">
+                                      {item.products?.name || 'Product'}
+                                    </span>
+                                  ))}
+                                  {order.order_items?.length > 3 && (
+                                    <span className="text-xs text-gray-500">+{order.order_items.length - 3} more</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-gray-900">₹{order.total?.toLocaleString('en-IN')}</span>
+                                <div className="flex gap-2">
+                                  <Link 
+                                    to="/MyOrders" 
+                                    className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                  >
+                                    View Details
+                                  </Link>
+                                  {order.status === 'delivered' && (
+                                    <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
+                                      Reorder
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <div className="text-center pt-4">
+                            <Link 
+                              to="/MyOrders" 
+                              className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                              <FaHistory className="mr-2" />
+                              View All Orders
+                            </Link>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 

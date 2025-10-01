@@ -11,9 +11,16 @@ const razorpay = new Razorpay({
 
 export const createRazorpayOrder = async (req, res) => {
     try {
+        console.log('Payment request received:', req.body);
+        console.log('Razorpay credentials check:', {
+            key_id: process.env.RAZORPAY_KEY_ID ? 'Present' : 'Missing',
+            key_secret: process.env.RAZORPAY_KEY_SECRET ? 'Present' : 'Missing'
+        });
+        
         const { amount } = req.body;
 
         if (!amount || isNaN(amount)) {
+            console.log('Invalid amount:', amount);
             return res.status(400).json({ success: false, error: "Valid amount is required" });
         }
 
@@ -24,7 +31,9 @@ export const createRazorpayOrder = async (req, res) => {
             payment_capture: 1,
         };
 
+        console.log('Creating Razorpay order with options:', options);
         const order = await razorpay.orders.create(options);
+        console.log('Razorpay order created successfully:', order.id);
 
         return res.json({
             success: true,
@@ -33,8 +42,16 @@ export const createRazorpayOrder = async (req, res) => {
             currency: order.currency,
         });
     } catch (error) {
-        console.error("Razorpay error:", error);
-        return res.status(500).json({ success: false, error: "Razorpay order creation failed" });
+        console.error("Razorpay error details:", {
+            message: error.message,
+            stack: error.stack,
+            response: error.response?.data
+        });
+        return res.status(500).json({ 
+            success: false, 
+            error: "Razorpay order creation failed",
+            details: error.message 
+        });
     }
 };
 

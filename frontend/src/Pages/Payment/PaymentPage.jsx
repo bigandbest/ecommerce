@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { placeOrderWithDetailedAddress, getCartItems, removeCartItem } from '../../utils/supabaseApi';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import OrderSuccessModal from '../../components/OrderSuccessModal/OrderSuccessModal';
 
 const PaymentPage = () => {
   const { currentUser } = useAuth();
@@ -17,6 +18,8 @@ const PaymentPage = () => {
   const [displaySubtotal, setDisplaySubtotal] = useState(0);
   const [displayShipping, setDisplayShipping] = useState(0);
   const [displayTotal, setDisplayTotal] = useState(0);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [orderDetails, setOrderDetails] = useState(null);
 
 
   useEffect(() => {
@@ -31,8 +34,10 @@ const PaymentPage = () => {
 
 
   useEffect(() => {
+    console.log('Payment page - orderAddress:', orderAddress);
     if (!orderAddress) {
-      navigate('/checkout/select-address');
+      console.log('No order address found, redirecting to address selection');
+      navigate('/checkout/confirm-address');
       return;
     }
 
@@ -220,8 +225,10 @@ const PaymentPage = () => {
           );
 
           if (orderResponse.success && orderResponse.order) {
-            alert("Order placed successfully!");
-            navigate('/MyOrders'); // Navigate to user's order history
+            // Clear cart items from state to reflect the successful order
+            setCartItems([]);
+            setOrderDetails(orderResponse.order);
+            setShowSuccessModal(true);
           } else {
             alert("Failed to place order: " + (orderResponse.error || "Unknown error"));
           }
@@ -248,18 +255,26 @@ const PaymentPage = () => {
     <div className="container mx-auto p-4 max-w-2xl">
       <h1 className="text-2xl font-bold mb-6 text-center">Confirm Order & Pay</h1>
 
-      <div className="mb-6">
-        <h2 className="font-semibold text-lg mb-2">Delivering To</h2>
-        <div className="border p-4 rounded-md bg-gray-50 text-gray-800">
-          <p className="font-bold">{orderAddress.address_name}</p>
-          <p>{orderAddress.house_number}, {orderAddress.street_address}</p>
-          <p>{orderAddress.city}, {orderAddress.state} - {orderAddress.postal_code}</p>
-          <Link to="/checkout/confirm-address" className="text-blue-600 text-sm mt-2 inline-block hover:underline">Change Address</Link>
+      {orderAddress && (
+        <div className="mb-6">
+          <h2 className="font-semibold text-lg mb-2">Delivering To</h2>
+          <div className="border p-4 rounded-md bg-gray-50 text-gray-800">
+            <p className="font-bold">{orderAddress.address_name || 'Address'}</p>
+            <p>{orderAddress.house_number || ''} {orderAddress.street_address || orderAddress.formatted_address || ''}</p>
+            <p>{orderAddress.city || ''}, {orderAddress.state || ''} - {orderAddress.postal_code || ''}</p>
+            <Link to="/checkout/confirm-address" className="text-blue-600 text-sm mt-2 inline-block hover:underline">Change Address</Link>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="border-t pt-6 mt-6">
         <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+        
+        {cartItems.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <p>No items in cart. Redirecting...</p>
+          </div>
+        )}
 
         {/* NEW: Displaying each cart item */}
         <div className="space-y-4 mb-4">
@@ -283,14 +298,29 @@ const PaymentPage = () => {
           <div className="flex justify-between"><span>Shipping:</span> <span>{displayShipping === 0 ? 'Free' : `₹${displayShipping.toFixed(2)}`}</span></div>
           <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2"><span>Total:</span> <span>₹{displayTotal.toFixed(2)}</span></div>
         </div>
-        <button
-          onClick={handlePayment}
-          disabled={cartItems.length === 0 || paymentInProgress || loading}
-          className="w-full bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition duration-200 disabled:bg-gray-400"
-        >
-          {paymentInProgress ? 'Verifying...' : `Proceed to Pay ₹${displayTotal.toFixed(2)}`}
-        </button>
+        {cartItems.length > 0 && orderAddress && (
+          <button
+            onClick={handlePayment}
+            disabled={cartItems.length === 0 || paymentInProgress || loading || !orderAddress}
+            className="w-full bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition duration-200 disabled:bg-gray-400"
+          >
+            {paymentInProgress ? 'Verifying...' : `Proceed to Pay ₹${displayTotal.toFixed(2)}`}
+          </button>
+        )}
+        
+        {(!orderAddress || cartItems.length === 0) && (
+          <div className="text-center py-4 text-gray-500">
+            {!orderAddress && <p>Please select a delivery address</p>}
+            {cartItems.length === 0 && <p>Your cart is empty</p>}
+          </div>
+        )}
       </div>
+
+      <OrderSuccessModal 
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        orderDetails={orderDetails}
+      />
     </div>
   );
 };

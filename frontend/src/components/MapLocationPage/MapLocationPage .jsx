@@ -66,28 +66,21 @@ const MapLocationPage = () => {
     if (!position) return alert("Location not set.");
     setLoading(true);
     try {
-      const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${position[0]}+${position[1]}&key=${import.meta.env.VITE_OPENCAGE_API_KEY}`);
-      const data = await response.json();
-      const result = data?.results?.[0];
-
-      if (result) {
-        const locationData = {
-          latitude: position[0],
-          longitude: position[1],
-          formatted_address: result.formatted,
-          is_geolocation: true,
-          city: result.components.city || result.components.town || "",
-          state: result.components.state || "",
-          postal_code: result.components.postcode || "",
-          country: result.components.country || "",
-        };
-        setMapSelection(locationData);
-        navigate('/checkout/confirm-address'); // Navigate to the next step
-      } else {
-        alert("Could not retrieve address details for this location.");
-      }
+      // Fallback solution without OpenCage API
+      const locationData = {
+        latitude: position[0],
+        longitude: position[1],
+        formatted_address: `Selected Location (${position[0].toFixed(4)}, ${position[1].toFixed(4)})`,
+        is_geolocation: true,
+        city: "Selected Area",
+        state: "",
+        postal_code: "",
+        country: "India",
+      };
+      setMapSelection(locationData);
+      navigate('/checkout/confirm-address');
     } catch (error) {
-      console.error("Reverse geocoding failed", error);
+      console.error("Location processing failed", error);
       alert("Failed to process location.");
     } finally {
       setLoading(false);
