@@ -53,7 +53,7 @@ const EightProductSection = ({ count = 1 }) => {
             id: group.id,
             title: group.name,
             image: group.image_url,
-            link: `/ProductListingPage/section1/${group.id}`,
+            link: `/ProductLisingPage/sectionOne/${group.id}`,
           }));
         }
 
@@ -96,7 +96,7 @@ const EightProductSection = ({ count = 1 }) => {
           className="relative rounded-xl shadow-md overflow-hidden p-2"
         >
           <div
-            className="bg-cover bg-center bg-no-repeat rounded-xl flex flex-col justify-end w-full min-h-[250px] sm:min-h-[300px] relative overflow-hidden"
+            className="bg-cover bg-center bg-no-repeat rounded-xl flex flex-col justify-end w-full min-h-[300px] sm:min-h-[340px] relative overflow-hidden"
             style={{
               backgroundImage: bannerUrl ? `url('${bannerUrl}')` : "none",
               backgroundColor: bannerUrl ? "transparent" : "#e0e0e0",
@@ -104,29 +104,31 @@ const EightProductSection = ({ count = 1 }) => {
           >
             {/* Horizontal Scroll Cards */}
             <div
-              className="flex overflow-x-scroll w-full gap-0 px-0 pb-3 no-scrollbar absolute bottom-0 left-0"
+              className="flex overflow-x-scroll w-full gap-2 px-2 pb-3 no-scrollbar absolute bottom-0 left-0"
               style={{
-                transform: "translateY(-5px)", // less overlap
-                paddingLeft: "10px",
-                paddingRight: "10px",
+                transform: "translateY(-10px)",
               }}
             >
               {groupCards.map((group) => (
                 <div
                   key={group.id}
                   onClick={() => navigate(group.link)}
-                  className="flex-shrink-0 w-40 flex flex-col items-center text-center cursor-pointer mx-2"
+                  className="flex-shrink-0 w-28 sm:w-32 flex flex-col items-center text-center cursor-pointer"
                 >
-                  {/* Image */}
-                  <div className="w-full h-[100px] flex justify-center items-center  rounded-xl shadow-lg overflow-hidden">
+                  {/* Image wrapper (taller & wider, preserves aspect) */}
+                  <div className="w-full h-[150px] sm:h-[170px] flex justify-center items-center rounded-xl shadow-lg overflow-hidden">
                     <img
                       src={group.image}
                       alt={group.title}
-                      className="object-cover w-full h-full"
+                      className="block h-full w-auto object-contain"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          "https://via.placeholder.com/160x160?text=No+Image";
+                      }}
                     />
                   </div>
                   {/* Title */}
-                  <p className="mt-2 text-xs font-semibold text-gray-800 truncate w-full">
+                  <p className="mt-2 text-[13px] font-semibold text-gray-800 w-full line-clamp-2">
                     {group.title}
                   </p>
                 </div>

@@ -99,3 +99,21 @@ export async function getSingleUniqueSection(req, res) {
     res.status(500).json({ success: false, error: err.message });
   }
 }
+
+// In uniqueSectionController.js
+export async function getUniqueSectionsByType(req, res) {
+  try {
+    const { section_type } = req.params;
+
+    const { data, error } = await supabase
+      .from("unique_section")
+      .select("*")
+      .eq("section_type", section_type);
+
+    if (error) return res.status(400).json({ success: false, error: error.message });
+
+    res.json({ success: true, uniqueSections: data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}

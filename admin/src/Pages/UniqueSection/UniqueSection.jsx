@@ -19,7 +19,7 @@ const UniqueSection = () => {
   const fetchSections = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8000/api/unique-sections/list"
+        "https://ecommerce-8342.onrender.com/api/unique-sections/list"
       );
       setSections(res.data.uniqueSections || []);
     } catch (err) {
@@ -37,7 +37,7 @@ const UniqueSection = () => {
 
     try {
       await axios.delete(
-        `http://localhost:8000/api/unique-sections/${id}`
+        `https://ecommerce-8342.onrender.com/api/unique-sections/${id}`
       );
       await fetchSections();
     } catch (err) {
@@ -62,12 +62,12 @@ const UniqueSection = () => {
     try {
       if (editingSection) {
         await axios.put(
-          `http://localhost:8000/api/unique-sections/${editingSection.id}`,
+          `https://ecommerce-8342.onrender.com/api/unique-sections/${editingSection.id}`,
           formData
         );
       } else {
         await axios.post(
-          "http://localhost:8000/api/unique-sections/",
+          "https://ecommerce-8342.onrender.com/api/unique-sections/",
           formData
         );
       }
@@ -156,7 +156,7 @@ const UniqueSection = () => {
               >
                 {/* Ensure the initial value is an empty string if required by DB */}
                 <option value="">Select Section Type</option> 
-                <option value="Section 1">New Menu</option>
+                <option value="New Menu">New Menu</option>
                 <option value="Best quality">Best quality</option>
               </select>
               <input
@@ -240,7 +240,7 @@ const UniqueSection = () => {
                     </button>
                     <button
                       className="bg-green-600 text-white px-3 py-1 rounded"
-                      onClick={() => navigate(`/unique-sections/products/${section.id}`)}
+                      onClick={() => navigate(`/unique-sections/sections/${section.id}`)}
                     >
                       📦 Products
                     </button>

@@ -8,6 +8,7 @@ import {
   deleteUniqueSection,
   getAllUniqueSections,
   getSingleUniqueSection,
+  getUniqueSectionsByType
 } from '../controller/uniqueSectionController.js'; // Adjust path as needed
 
 const router = express.Router();
@@ -18,7 +19,7 @@ const upload = multer({ storage: storage });
 // === Unique Section Routes ===
 
 // GET all unique sections
-router.get("/list", getAllUniqueSections);
+router.get("/list", getAllUniqueSections); // add in supabaseApi
 
 // GET a single unique section by ID
 router.get("/:id", getSingleUniqueSection);
@@ -33,5 +34,7 @@ router.put("/:id", upload.single("image_url"), editUniqueSection);
 
 // DELETE a unique section by ID
 router.delete("/:id", deleteUniqueSection);
+
+router.get("/type/:section_type", getUniqueSectionsByType);
 
 export default router;
