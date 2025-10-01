@@ -65,7 +65,7 @@ const ProductGrid2X2 = ({ title = SECTION_TYPE }) => {
         {preview.map((item) => (
           <div
             key={item.id}
-            onClick={() => navigate(`/ProductLisingPage/product/${item.id}`)}
+            onClick={() => navigate(`/product/${item.id}`)}
             className="bg-white rounded-xl p-2 cursor-pointer"
           >
             <img

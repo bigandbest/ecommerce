@@ -46,7 +46,7 @@ export default function StoreNav({ onClick }) {
           <Link
             key={store.id}
             to={store.link || "/"} // Use 'to' instead of 'href' for Link
-            className={`flex flex-col items-center w-[90px] py-1 rounded-lg font-medium shadow-sm transition-colors shrink-0
+            className={`flex flex-col items-center w-[65px] py-1 rounded-lg font-medium shadow-sm transition-colors shrink-0
               ${isActive ? "bg-blue-100" : "bg-gray-200"}
               ${isActive ? "" : "hover:bg-gray-300"}
             `}

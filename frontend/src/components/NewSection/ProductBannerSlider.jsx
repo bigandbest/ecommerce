@@ -1,17 +1,21 @@
 // ProductBannerSlider.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../contexts/AuthContext';
 import {
   fetchUniqueSectionsByType,
   fetchProductsForUniqueSection,
+  addToCart,
 } from "../../utils/supabaseApi"; // adjust path
 
 const SECTION_TYPE = "New Menu";
 
 const ProductBannerSlider = ({ count = 1 }) => {
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
+  const [addingToCart, setAddingToCart] = useState(null);
   const [products, setProducts] = useState([]);
   const [bannerUrl, setBannerUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
 
@@ -51,6 +55,28 @@ const ProductBannerSlider = ({ count = 1 }) => {
     load();
   }, []);
 
+  const handleAddToCart = async (e, productId) => {
+      e.preventDefault();
+      e.stopPropagation();
+  
+      if (!currentUser) {
+        alert("Please log in to add items to your cart.");
+        return;
+      }
+  
+      setAddingToCart(productId);
+  
+      const { success, error } = await addToCart(currentUser.id, productId, 1);
+  
+      if (success) {
+        window.dispatchEvent(new Event("cartUpdated"));
+      } else {
+        alert(`Failed to add item to cart: ${error}`);
+      }
+  
+      setAddingToCart(null);
+    };
+
   if (loading) return <div className="p-4">Loading...</div>;
   if (err) return <div className="p-4 text-red-600">{err}</div>;
   if (!products.length) return <div className="p-4 text-gray-600">No products found.</div>;
@@ -76,6 +102,7 @@ const ProductBannerSlider = ({ count = 1 }) => {
             {/* Product Cards - Horizontal scroll */}
             <div className="flex space-x-2 overflow-x-auto hide-scrollbar pb-2">
               {preview.map((product) => {
+                const isAdding = addingToCart === product.id;
                 const discount =
                   product.old_price && product.price
                     ? product.old_price - product.price
@@ -85,10 +112,10 @@ const ProductBannerSlider = ({ count = 1 }) => {
                   <div
                     key={product.id}
                     className="bg-white rounded-xl shadow p-3 flex-shrink-0 w-40 sm:w-56 flex flex-col cursor-pointer"
-                    onClick={() => navigate(`/ProductLisingPage/product/${product.id}`)}
+
                   >
                     {/* Product Image */}
-                    <div>
+                    <div onClick={() => navigate(`/product/${product.id}`)}>
                       <img
                         src={product.image}
                         alt={product.name}
@@ -124,8 +151,11 @@ const ProductBannerSlider = ({ count = 1 }) => {
                     </h3>
 
                     {/* Add Button */}
-                    <button className="bg-pink-500 text-white text-xs px-3 py-1 rounded-lg w-full mt-auto">
-                      ADD
+                    <button className="bg-pink-500 text-white text-xs px-3 py-1 rounded-lg w-full mt-auto"
+                      onClick={(e) => handleAddToCart(e, product.id)}
+                        disabled={isAdding}
+                    >
+                      {isAdding ? "Adding..." : "Add"}
                     </button>
                   </div>
                 );
