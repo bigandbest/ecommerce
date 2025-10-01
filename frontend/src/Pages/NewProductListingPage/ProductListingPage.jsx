@@ -9,6 +9,8 @@ import {
   getProductsForBrand,
   fetchRecommendedStores,
   fetchProductsForBannerGroup,
+  fetchUniqueSectionsByType,
+  fetchProductsForUniqueSection,
 } from "../../utils/supabaseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -136,9 +138,21 @@ const ProductListingPage = () => {
         result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
       } else if (Name === "opening-soon") {
         result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
-      } else if (Name === "section1") {
+      } else if (Name === "sectionOne") {
         result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
-      } else {
+      } else if (Name === "best-quality") {
+        const sections = await fetchUniqueSectionsByType("Best quality");
+        const productGroups = await Promise.all(
+          sections.map((s) => fetchProductsForUniqueSection(s.id))
+        );
+        result = productGroups.flat();
+      } else if (Name == "new-menu") {
+        const sections = await fetchUniqueSectionsByType("New Menu");
+        const productGroups = await Promise.all(
+          sections.map((s) => fetchProductsForUniqueSection(s.id))
+        );
+        result = productGroups.flat();
+      }else {
         result = await getAllProducts();
       }
 
@@ -229,8 +243,8 @@ const ProductListingPage = () => {
                   >
                     <div
                       className={`w-16 h-16 overflow-hidden border-2 transition-all duration-200 ${isSelected
-                          ? "border-red-400 ring-2 ring-red-200 shadow-lg"
-                          : "border-gray-200 hover:border-gray-300"
+                        ? "border-red-400 ring-2 ring-red-200 shadow-lg"
+                        : "border-gray-200 hover:border-gray-300"
                         } ${isBrandView ? "rounded-full" : "rounded-lg"}`}
                     >
                       <img
@@ -245,8 +259,8 @@ const ProductListingPage = () => {
                     </div>
                     <p
                       className={`text-xs mt-0.5 text-center max-w-[60px] truncate transition-colors ${isSelected
-                          ? "text-red-600 font-medium"
-                          : "text-gray-700"
+                        ? "text-red-600 font-medium"
+                        : "text-gray-700"
                         }`} // reduced mt-1 → mt-0.5
                     >
                       {item.label}

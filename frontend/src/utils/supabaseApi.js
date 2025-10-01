@@ -2314,4 +2314,178 @@ export async function fetchProductsForBannerGroup(groupId) {
     return data.map(item => item.products).filter(p => p);
 }
 
+// --- Banner Section Functions ---
+// --- Unique Section APIs ---
+// Base URL: adjust if you deploy
+const BASE_URL2 = "https://ecommerce-8342.onrender.com";
+
+// 1) Fetch all Unique Sections
+// GET /api/unique-sections/list
+export async function fetchUniqueSections() {
+  const response = await fetch(`${BASE_URL2}/api/unique-sections/list`);
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(error?.error || "Failed to fetch unique sections.");
+  }
+
+  const data = await response.json();
+  // Controller returns: { success: true, uniqueSections: [...] }
+  return data.uniqueSections || [];
+}
+
+// 2) Fetch a single Unique Section by ID
+// GET /api/unique-sections/:id
+export async function fetchUniqueSectionById(sectionId) {
+  if (!sectionId) throw new Error("Section ID is required.");
+
+  const response = await fetch(`${BASE_URL2}/api/unique-sections/${sectionId}`);
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(error?.error || `Failed to fetch section ${sectionId}.`);
+  }
+
+  const data = await response.json();
+  // Controller returns: { success: true, uniqueSection: {...} }
+  return data.uniqueSection;
+}
+
+// 3) Fetch all products for a Unique Section
+// GET /api/unique-sections-products/section/:unique_section_id
+// Returns [{ product_id, products: { ... } }]
+export async function fetchProductsForUniqueSection(sectionId) {
+  if (!sectionId) throw new Error("Section ID is required.");
+
+  const response = await fetch(
+    `${BASE_URL2}/api/unique-sections-products/section/${sectionId}`
+  );
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(
+      error?.error || `Failed to fetch products for section ${sectionId}.`
+    );
+  }
+
+  const data = await response.json();
+  // Extract the denormalized product rows
+  return (data || []).map((row) => row.products).filter(Boolean);
+}
+
+// 4) Fetch all Unique Sections that stock a specific product
+// GET /api/unique-sections-products/product/:product_id
+// Returns [{ unique_section_id, unique_section: {...} }]
+export async function fetchUniqueSectionsForProduct(productId) {
+  if (!productId) throw new Error("Product ID is required.");
+
+  const response = await fetch(
+    `${BASE_URL2}/api/unique-sections-products/product/${productId}`
+  );
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(
+      error?.error || `Failed to fetch sections for product ${productId}.`
+    );
+  }
+
+  const data = await response.json();
+  // Return the embedded sections array for convenience
+  return (data || []).map((row) => row.unique_section).filter(Boolean);
+}
+
+// 5) Map a single product to a Unique Section
+// POST /api/unique-sections-products/map
+export async function mapProductToUniqueSectionApi({ product_id, unique_section_id }) {
+  if (!product_id || !unique_section_id) {
+    throw new Error("product_id and unique_section_id are required.");
+  }
+
+  const response = await fetch(`${BASE_URL2}/api/unique-sections-products/map`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id, unique_section_id }),
+  });
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(error?.error || "Failed to map product to section.");
+  }
+
+  return await response.json(); // { message: ... }
+}
+
+// 6) Remove a product from a Unique Section
+// DELETE /api/unique-sections-products/remove  (expects JSON body)
+export async function removeProductFromUniqueSectionApi({ product_id, unique_section_id }) {
+  if (!product_id || !unique_section_id) {
+    throw new Error("product_id and unique_section_id are required.");
+  }
+
+  const response = await fetch(`${BASE_URL2}/api/unique-sections-products/remove`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id, unique_section_id }),
+  });
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(error?.error || "Failed to remove product from section.");
+  }
+
+  return await response.json(); // { message: ... }
+}
+
+// 7) Bulk map products to a Unique Section by names
+// POST /api/unique-sections-products/bulk-map-by-names
+export async function bulkMapUniqueSectionByNamesApi({ section_name, product_names }) {
+  if (!section_name || !Array.isArray(product_names)) {
+    throw new Error("section_name and product_names[] are required.");
+  }
+
+  const response = await fetch(
+    `${BASE_URL2}/api/unique-sections-products/bulk-map-by-names`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ section_name, product_names }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(error?.error || "Failed to bulk map products to section.");
+  }
+
+  return await response.json(); // { message, mapped_products }
+}
+
+// 8) Fetch Unique Sections by section_type (banner type)
+// GET /api/unique-sections/list  + client-side filter
+export async function fetchUniqueSectionsByType(sectionType) {
+  const response = await fetch(`${BASE_URL2}/api/unique-sections/type/${sectionType}`);
+
+  if (!response.ok) {
+    const error = await safeJson(response);
+    throw new Error(error?.error || `Failed to fetch sections of type ${sectionType}`);
+  }
+
+  const data = await response.json();
+  return data.uniqueSections || [];
+}
+
+
+// --- helpers ---
+async function safeJson(res) {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+
+
+
 /* this is a testing commit */

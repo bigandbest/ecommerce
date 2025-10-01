@@ -53,7 +53,7 @@ const EightProductSection = ({ count = 1 }) => {
             id: group.id,
             title: group.name,
             image: group.image_url,
-            link: `/ProductListingPage/section1/${group.id}`,
+            link: `/ProductLisingPage/sectionOne/${group.id}`,
           }));
         }
 
@@ -115,10 +115,10 @@ const EightProductSection = ({ count = 1 }) => {
                 <div
                   key={group.id}
                   onClick={() => navigate(group.link)}
-                  className="flex-shrink-0 w-40 flex flex-col items-center text-center cursor-pointer mx-2"
+                  className="flex-shrink-0 w-20 flex flex-col items-center text-center cursor-pointer mx-2"
                 >
                   {/* Image */}
-                  <div className="w-full h-[100px] flex justify-center items-center  rounded-xl shadow-lg overflow-hidden">
+                  <div className="w-full h-[80px] flex justify-center items-center  rounded-xl shadow-lg overflow-hidden">
                     <img
                       src={group.image}
                       alt={group.title}
@@ -126,7 +126,7 @@ const EightProductSection = ({ count = 1 }) => {
                     />
                   </div>
                   {/* Title */}
-                  <p className="mt-2 text-xs font-semibold text-gray-800 truncate w-full">
+                  <p className="mt-2 text-xs font-semibold text-gray-800 w-full line-clamp-2">
                     {group.title}
                   </p>
                 </div>

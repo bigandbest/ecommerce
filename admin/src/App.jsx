@@ -300,7 +300,7 @@ function App() {
           element: <UniqueSection />,
         },
         {
-          path: "/unique-sections/products/:id",
+          path: "/unique-sections/sections/:id",
           element: <UniqueSectionProducts />,
         },
       ],
