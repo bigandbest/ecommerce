@@ -113,27 +113,22 @@ export const LocationProvider = ({ children }) => {
         async (position) => {
           const { latitude, longitude } = position.coords;
           try {
-            const res = await axios.get(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${import.meta.env.VITE_OPENCAGE_API_KEY}`);
-            const result = res.data.results[0];
-            if (result) {
-              const locationData = {
-                address_name: "Current Location",
-                postal_code: result.components.postcode || "",
-                state: result.components.state || "",
-                city: result.components.city || result.components.town || "",
-                street_address: result.components.road || "",
-                latitude,
-                longitude,
-                formatted_address: result.formatted,
-                is_geolocation: true,
-              };
-              setSelectedAddress(locationData);
-              setCurrentLocationAddress(result.formatted);
-              setLocationCleared(false); // A new location is set, so it's no longer "cleared"
-              resolve(locationData);
-            } else {
-              reject(new Error("Could not retrieve address details."));
-            }
+            // Fallback solution without OpenCage API
+            const locationData = {
+              address_name: "Current Location",
+              postal_code: "",
+              state: "",
+              city: "Current Location",
+              street_address: `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`,
+              latitude,
+              longitude,
+              formatted_address: `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`,
+              is_geolocation: true,
+            };
+            setSelectedAddress(locationData);
+            setCurrentLocationAddress(locationData.formatted_address);
+            setLocationCleared(false);
+            resolve(locationData);
           } catch (error) {
             reject(error);
           } finally {
