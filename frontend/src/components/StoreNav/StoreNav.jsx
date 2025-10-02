@@ -37,7 +37,7 @@ export default function StoreNav({ onClick }) {
 
   // FIX 3 (Cont.): The component must return JSX directly
   return (
-    <div className="flex overflow-x-auto whitespace-nowrap py-2 px-2 gap-0 hide-scrollbar">
+    <div className="flex overflow-x-auto whitespace-nowrap py-2 px-2 gap-0 hide-scrollbar md:hidden">
       {stores.map((store) => {
         // Assuming 'store' objects have a 'path' property for the Link's 'to' prop
         const isActive = location.pathname === store.path; 

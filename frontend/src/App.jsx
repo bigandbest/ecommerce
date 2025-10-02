@@ -48,6 +48,7 @@ import MainSearchBar from "./components/MainSearchBar/MainSearchBar.jsx";
 import ConditionalMobileCategoriesBar from "./components/CategoriesBar/ConditionalMobileCategoriesBar.jsx";
 import MobileHeader from "./components/Header/MobileHeader.jsx";
 import StoreNav from "./components/StoreNav/StoreNav.jsx";
+import SubStoreNav from "./components/SubStoreNav/SubStoreNav.jsx";
 import BbmPicks from "./components/BBM Picks/ShopByStore.jsx";
 import Stores from "./components/BBM Picks/QuickPicks.jsx";
 import Quickyfy from "./components/BBM Picks/BnB Expertise.jsx";
@@ -142,6 +143,7 @@ function App() {
                   <Stores title="BBM Picks" items={Seconddata} />
                   <BbmPicks title="Recommended Store" items={data} />
                   <Quickyfy title="Quickyfy" items={Thirddata} />
+                  <SubStoreNav />
                   <MobileCategoriesBar />
                   {/* <OfferBannerSlider
                   count={1}
@@ -149,7 +151,7 @@ function App() {
                 />
                 <CategoryOfferBanner count={1} bannerUrl="https://i.postimg.cc/bNfdYphd/Untitled-design-5.png" />
                 <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/TPcZN3S5/Untitled-design-7.png" /> */}
-
+                  
                   <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
                     setMobileMenuOpen={setMobileMenuOpen} />
                   <Routes>

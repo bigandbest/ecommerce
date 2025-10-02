@@ -2486,6 +2486,50 @@ async function safeJson(res) {
 }
 
 
+// ---SUB SECTIONS FUNCTIONS (SUBSTORES)----
+// The server.js route for SubStores is mounted at "/api/sub-stores"
+const SUBSTORE_API_PATH = "https://ecommerce-8342.onrender.com/api/sub-stores";
 
+
+export async function fetchSubStores() {
+  // Corresponds to router.get("/fetch", getAllSubStores);
+  const res = await fetch(`${SUBSTORE_API_PATH}/fetch`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  // Assuming the backend returns 'stores' key (as per your SubStoreAdmin component)
+  return data.stores; 
+}
+
+export async function addSubStore(formData) {
+  // Corresponds to router.post("/add", upload.single("image"), addSubStore);
+  const res = await fetch(`${SUBSTORE_API_PATH}/add`, {
+    method: "POST",
+    body: formData, // FormData handles the 'multipart/form-data' header automatically
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  // Assuming the backend returns 'store' key
+  return data.store; 
+}
+
+export async function updateSubStore(id, formData) {
+  // Corresponds to router.put("/update/:id", upload.single("image"), updateSubStore);
+  const res = await fetch(`${SUBSTORE_API_PATH}/update/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  // Assuming the backend returns 'store' key
+  return data.store;
+}
+
+export async function deleteSubStore(id) {
+  // Corresponds to router.delete("/delete/:id", deleteSubStore);
+  const res = await fetch(`${SUBSTORE_API_PATH}/delete/${id}`, { method: "DELETE" });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return true;
+}
 
 /* this is a testing commit */
