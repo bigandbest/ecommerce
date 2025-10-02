@@ -86,10 +86,13 @@ function MobileAccountPage() {
           </div>
         </div>
 
+      
+
         {/* Main Actions Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="divide-y divide-gray-200">
             <AccountLink to="/coming-soon?feature=orders" icon={Package}> Orders</AccountLink>
+             <AccountLink to="/account" icon={User}> Profile</AccountLink>
             <AccountLink to="/wishlist" icon={Heart}> Wishlist</AccountLink>
             <AccountLink to="/coming-soon?feature=wallet" icon={Wallet}> Wallet</AccountLink>
             <AccountLink to="/cart" icon={ShoppingCart}> Cart</AccountLink>

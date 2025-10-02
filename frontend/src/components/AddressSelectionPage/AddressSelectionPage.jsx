@@ -36,6 +36,7 @@ const AddressSelectionPage = () => {
 
   const handleSelectAddress = (address) => {
     setOrderAddress(address);
+    console.log('Address selected:', address);
   };
   
   // NEW: Handle adding a new address from the inline form
@@ -57,6 +58,7 @@ const AddressSelectionPage = () => {
       alert("Please select or add a delivery address.");
       return;
     }
+    console.log('Navigating to payment with address:', orderAddress);
     navigate('/checkout/payment'); // Navigate to the new payment page
   };
 
