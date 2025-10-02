@@ -93,6 +93,7 @@ const AccountPage = () => {
 
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Utility functions
   const showNotification = (message, type = "success") => {
@@ -486,18 +487,81 @@ const AccountPage = () => {
                     <div>
                       <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                         <FaShoppingBag className="text-indigo-600" />
-                        My Orders
+                        My Orders (Delivered)
                       </h2>
-                      <div className="text-center py-8">
-                        <p className="text-gray-600 mb-4">View your complete order history</p>
-                        <Link 
-                          to="/MyOrders" 
-                          className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                        >
-                          <FaShoppingBag className="mr-2" />
-                          View All Orders
-                        </Link>
-                      </div>
+                      {ordersLoading ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                          <p className="mt-4 text-gray-600">Loading delivered orders...</p>
+                        </div>
+                      ) : (
+                        <div>
+                          {orders.filter(order => order.status === 'delivered').length === 0 ? (
+                            <div className="text-center py-12">
+                              <div className="text-6xl mb-4">📦</div>
+                              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Delivered Orders</h3>
+                              <p className="text-gray-600 mb-6">Your delivered orders will appear here once completed.</p>
+                              <Link 
+                                to="/MyOrders" 
+                                className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                              >
+                                View Active Orders
+                              </Link>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {orders.filter(order => order.status === 'delivered').slice(0, 5).map(order => (
+                                <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                  <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                      <h4 className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h4>
+                                      <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-green-100 text-green-800">
+                                      Delivered
+                                    </span>
+                                  </div>
+                                  <div className="mb-3">
+                                    <p className="text-sm text-gray-600 mb-2">Items: {order.order_items?.length || 0}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {order.order_items?.slice(0, 3).map((item, idx) => (
+                                        <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">
+                                          {item.products?.name || 'Product'}
+                                        </span>
+                                      ))}
+                                      {order.order_items?.length > 3 && (
+                                        <span className="text-xs text-gray-500">+{order.order_items.length - 3} more</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-semibold text-gray-900">₹{order.total?.toLocaleString('en-IN')}</span>
+                                    <div className="flex gap-2">
+                                      <button 
+                                        onClick={() => setSelectedOrder(order)}
+                                        className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                      >
+                                        View Details
+                                      </button>
+                                      <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
+                                        Reorder
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              <div className="text-center pt-4">
+                                <Link 
+                                  to="/MyOrders" 
+                                  className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                >
+                                  View Active Orders
+                                </Link>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -657,18 +721,18 @@ const AccountPage = () => {
                     <div>
                       <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                         <FaHistory className="text-indigo-600" />
-                        Past Orders
+                        Past Orders (Delivered)
                       </h2>
                       {ordersLoading ? (
                         <div className="text-center py-8">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                          <p className="mt-4 text-gray-600">Loading your orders...</p>
+                          <p className="mt-4 text-gray-600">Loading delivered orders...</p>
                         </div>
-                      ) : orders.length === 0 ? (
+                      ) : orders.filter(order => order.status === 'delivered').length === 0 ? (
                         <div className="text-center py-12">
                           <div className="text-6xl mb-4">📦</div>
-                          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Orders Yet</h3>
-                          <p className="text-gray-600 mb-6">You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Delivered Orders Yet</h3>
+                          <p className="text-gray-600 mb-6">Your delivered orders will appear here for easy reordering!</p>
                           <Link 
                             to="/" 
                             className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -678,19 +742,15 @@ const AccountPage = () => {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {orders.slice(0, 3).map(order => (
+                          {orders.filter(order => order.status === 'delivered').slice(0, 3).map(order => (
                             <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                               <div className="flex justify-between items-start mb-3">
                                 <div>
                                   <h4 className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h4>
                                   <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString()}</p>
                                 </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
-                                  order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                                  order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                  order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {order.status}
+                                <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-green-100 text-green-800">
+                                  Delivered
                                 </span>
                               </div>
                               <div className="mb-3">
@@ -709,28 +769,35 @@ const AccountPage = () => {
                               <div className="flex justify-between items-center">
                                 <span className="font-semibold text-gray-900">₹{order.total?.toLocaleString('en-IN')}</span>
                                 <div className="flex gap-2">
-                                  <Link 
-                                    to="/MyOrders" 
+                                  <button 
+                                    onClick={() => setSelectedOrder(order)}
                                     className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
                                   >
                                     View Details
-                                  </Link>
-                                  {order.status === 'delivered' && (
-                                    <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
-                                      Reorder
-                                    </button>
-                                  )}
+                                  </button>
+                                  <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
+                                    Reorder
+                                  </button>
                                 </div>
                               </div>
                             </div>
                           ))}
                           <div className="text-center pt-4">
+                            <button 
+                              onClick={() => {
+                                setActiveHorizontalTab('repeat');
+                                setActiveVerticalTab('past-orders');
+                              }}
+                              className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mr-3"
+                            >
+                              <FaHistory className="mr-2" />
+                              View All Delivered Orders
+                            </button>
                             <Link 
                               to="/MyOrders" 
                               className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                             >
-                              <FaHistory className="mr-2" />
-                              View All Orders
+                              View Active Orders
                             </Link>
                           </div>
                         </div>
@@ -770,6 +837,99 @@ const AccountPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Order Details Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-bold text-gray-900">Order Details</h3>
+                <button 
+                  onClick={() => setSelectedOrder(null)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Order Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Order ID</h4>
+                  <p className="text-gray-900">#{selectedOrder.id.slice(0, 8)}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Status</h4>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-green-100 text-green-800">
+                    {selectedOrder.status}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Order Date</h4>
+                  <p className="text-gray-900">{new Date(selectedOrder.created_at).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">Payment Method</h4>
+                  <p className="text-gray-900">{selectedOrder.payment_method || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-4">Items Ordered</h4>
+                <div className="space-y-3">
+                  {selectedOrder.order_items?.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                        {item.products?.image ? (
+                          <img src={item.products.image} alt={item.products.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xl">📦</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-semibold text-gray-900 leading-tight">{item.products?.name || 'Product'}</h5>
+                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                        <p className="text-sm text-gray-600">Price: ₹{item.price?.toLocaleString('en-IN')}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">₹{(item.price * item.quantity)?.toLocaleString('en-IN')}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Address */}
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-2">Delivery Address</h4>
+                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedOrder.address || 'No address provided'}</p>
+              </div>
+
+              {/* Order Summary */}
+              <div className="border-t pt-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="text-gray-900">₹{selectedOrder.subtotal?.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Shipping:</span>
+                    <span className="text-gray-900">₹{selectedOrder.shipping?.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg border-t pt-2">
+                    <span>Total:</span>
+                    <span>₹{selectedOrder.total?.toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

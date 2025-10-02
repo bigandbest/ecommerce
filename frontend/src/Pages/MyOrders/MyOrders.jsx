@@ -21,7 +21,9 @@ function MyOrders() {
       try {
         const { success, orders: fetchedOrders, error } = await getUserOrders(currentUser.id)
         if (success && fetchedOrders) {
-          const formattedOrders = fetchedOrders.map(order => ({
+          const formattedOrders = fetchedOrders
+            .filter(order => order.status !== 'delivered') // Only show non-delivered orders
+            .map(order => ({
             id: order.id,
             status: order.status || 'pending',
             items: order.order_items?.map(item => item.products?.name || 'Product') || [],
@@ -78,7 +80,9 @@ function MyOrders() {
       try {
         const { success, orders: fetchedOrders } = await getUserOrders(currentUser.id)
         if (success && fetchedOrders) {
-          const formattedOrders = fetchedOrders.map(order => ({
+          const formattedOrders = fetchedOrders
+            .filter(order => order.status !== 'delivered') // Only show non-delivered orders
+            .map(order => ({
             id: order.id,
             status: order.status || 'pending',
             items: order.order_items?.map(item => item.products?.name || 'Product') || [],
@@ -122,8 +126,8 @@ function MyOrders() {
       return (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Orders Yet</h3>
-          <p className="text-gray-600 mb-6">You haven't placed any orders yet. Start shopping to see your orders here!</p>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Active Orders</h3>
+          <p className="text-gray-600 mb-6">You have no pending, processing, or shipped orders. Check your delivered orders in Profile section!</p>
           <a href="/" className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
             Start Shopping
           </a>
@@ -232,7 +236,44 @@ function MyOrders() {
   }
 
   const OrderHistory = () => {
-    if (loading) {
+    // Get all orders for history (including delivered orders)
+    const [allOrders, setAllOrders] = useState([])
+    const [historyLoading, setHistoryLoading] = useState(false)
+
+    useEffect(() => {
+      const fetchAllOrders = async () => {
+        if (!currentUser?.id) return
+        
+        setHistoryLoading(true)
+        try {
+          const { success, orders: fetchedOrders } = await getUserOrders(currentUser.id)
+          if (success && fetchedOrders) {
+            const formattedOrders = fetchedOrders.map(order => ({
+              id: order.id,
+              status: order.status || 'pending',
+              items: order.order_items?.map(item => item.products?.name || 'Product') || [],
+              total: order.total || 0,
+              subtotal: order.subtotal || 0,
+              shipping: order.shipping || 0,
+              date: order.created_at,
+              estimatedDelivery: order.created_at,
+              address: order.address || 'No address provided',
+              payment_method: order.payment_method || 'Unknown',
+              order_items: order.order_items || []
+            }))
+            setAllOrders(formattedOrders)
+          }
+        } catch (error) {
+          console.error('Error fetching all orders:', error)
+        } finally {
+          setHistoryLoading(false)
+        }
+      }
+
+      fetchAllOrders()
+    }, [currentUser])
+
+    if (historyLoading) {
       return (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
@@ -241,20 +282,20 @@ function MyOrders() {
       )
     }
 
-    if (orders.length === 0) {
+    if (allOrders.length === 0) {
       return (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📄</div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">No Order History</h3>
-          <p className="text-gray-600">Your order history will appear here once you make your first purchase.</p>
+          <p className="text-gray-600">Your complete order history will appear here.</p>
         </div>
       )
     }
 
     return (
       <div>
-        <h2 className="text-gray-800 mb-4 sm:mb-6 text-lg sm:text-3xl font-semibold">Order History & Receipts</h2>
-        {orders.map(order => (
+        <h2 className="text-gray-800 mb-4 sm:mb-6 text-lg sm:text-3xl font-semibold">Complete Order History & Receipts</h2>
+        {allOrders.map(order => (
           <div key={order.id} className="bg-white rounded-xl sm:rounded-2xl mb-4 sm:mb-6 shadow-sm border border-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden">
             <div className="flex justify-between items-start p-3 sm:p-6 pb-0 mb-3 sm:mb-5">
               <div className="flex flex-col gap-0.5 sm:gap-1">
