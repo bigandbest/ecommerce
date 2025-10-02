@@ -104,7 +104,7 @@ const EightProductSection = ({ count = 1 }) => {
           >
             {/* Horizontal Scroll Cards */}
             <div
-              className="flex overflow-x-scroll w-full gap-2 px-2 pb-3 no-scrollbar absolute bottom-0 left-0"
+              className="flex overflow-x-scroll w-full gap-2 px-2 no-scrollbar absolute bottom-0 left-0"
               style={{
                 transform: "translateY(-10px)",
               }}
@@ -113,10 +113,10 @@ const EightProductSection = ({ count = 1 }) => {
                 <div
                   key={group.id}
                   onClick={() => navigate(group.link)}
-                  className="flex-shrink-0 w-28 sm:w-32 flex flex-col items-center text-center cursor-pointer"
+                  className="flex-shrink-0 w-35 sm:w-32 flex flex-col items-center text-center cursor-pointer"
                 >
                   {/* Image wrapper (taller & wider, preserves aspect) */}
-                  <div className="w-full h-[150px] sm:h-[170px] flex justify-center items-center rounded-xl shadow-lg overflow-hidden">
+                  <div className="w-full   flex justify-center items-center rounded-xl shadow-lg overflow-hidden">
                     <img
                       src={group.image}
                       alt={group.title}

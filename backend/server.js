@@ -32,6 +32,7 @@ import savingZoneRoutes from './routes/savingZoneRoutes.js';
 import savingZoneGroupRoutes from './routes/savingZoneGroupRoutes.js';
 import savingZoneGroupProductRoutes from './routes/savingZoneGroupProductRoutes.js'
 import storeRoutes from './routes/storeRoute.js';
+import subStoreRoutes from './routes/subStoreRoute.js';
 import YouMayLikeProductRoutes from './routes/youMayLikeRoutes.js';
 import addBannerRoutes from './routes/addBannerRoutes.js';
 import addBannerGroupRoutes from './routes/addBannerGroupRoutes.js';
@@ -106,6 +107,7 @@ app.use("/api/saving-zone", savingZoneRoutes);
 app.use("/api/saving-zone-group", savingZoneGroupRoutes);
 app.use("/api/saving-zone-group-product", savingZoneGroupProductRoutes);
 app.use("/api/stores", storeRoutes);
+app.use("/api/sub-stores", subStoreRoutes);
 app.use("/api/you-may-like-products", YouMayLikeProductRoutes);
 app.use("/api/banner", addBannerRoutes);
 app.use("/api/banner-groups", addBannerGroupRoutes);

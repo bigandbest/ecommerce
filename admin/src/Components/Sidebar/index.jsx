@@ -188,6 +188,11 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/section",
     },
     {
+      title: "Sub-Section",
+      icon: <FaList />,
+      path: "/sub-section",
+    },
+    {
       title: "You May Like",
       icon: <FaTrademark />,
       path: "/youMayLikeProducts/:id",

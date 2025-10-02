@@ -55,6 +55,7 @@ import SavingZoneGroupPage from "./Pages/SavingZone/SavingZoneGroup.jsx";
 import SavingZoneGroupProducts from "./Pages/SavingZone/SavingZoneGroupProducts.jsx";
 import YouMayLikeProducts from "./Pages/YouMayLike/YouMayLikeProducts.jsx";
 import Store from "./Components/Store/Store.jsx";
+import SubStore from "./Pages/SubStore/SubStore.jsx";
 import AddBanner from "./Pages/AddBanners/AddBanner.jsx";
 import AddBannerGroup from "./Pages/AddBanners/AddBannerGroup.jsx";
 import AddBannerGroupProducts from "./Pages/AddBanners/AddBannerGroupProducts.jsx";
@@ -185,6 +186,10 @@ function App() {
         {
           path: "/section",
           element: <Store />,
+        },
+        {
+          path: "/sub-section",
+          element: <SubStore />,
         },
         {
           path: "/settings",
