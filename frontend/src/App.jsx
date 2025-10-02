@@ -79,7 +79,9 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-function App() {
+// Component to conditionally render header and other components
+const ConditionalLayout = ({ children }) => {
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -97,6 +99,24 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Check if current route is any account/dashboard page
+  const isDashboardPage = location.pathname === '/MyOrders' || 
+                         location.pathname === '/account' || 
+                         location.pathname === '/MobileAccount' || 
+                         location.pathname === '/wishlist' || 
+                         location.pathname === '/enquiry-history' || 
+                         location.pathname === '/custom-printing' || 
+                         location.pathname === '/Notifications' || 
+                         location.pathname === '/contact-us' || 
+                         location.pathname === '/about-us' || 
+                         location.pathname === '/faq' || 
+                         location.pathname === '/shipping-returns' || 
+                         location.pathname === '/terms-of-service' || 
+                         location.pathname === '/privacy-policy' ||
+                         location.pathname === '/coming-soon' ||
+                         location.pathname.includes('/wallet') ||
+                         location.pathname.includes('/refund');
+
   const data = [
     { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
     { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Packaging" },
@@ -109,7 +129,7 @@ function App() {
     { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
     { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
     { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
-    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "More" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpager-preview.jpg", label: "More" },
   ];
   const Thirddata = [
     { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
@@ -121,6 +141,32 @@ function App() {
 
   return (
     <>
+      {!isDashboardPage && <AnnouncementBar />}
+      {!isDashboardPage && (
+        <>
+          {isMobile ? <MobileHeader toggleMobileMenu={toggleMobileMenu} /> : <Header />}
+          <div className="!sticky top-0">
+            <MainSearchBar />
+          </div>
+          <StoreNav />
+          <MobileBannerCarousel />
+          <Stores title="BBM Picks" items={Seconddata} />
+          <BbmPicks title="Recommended Store" items={data} />
+          <Quickyfy title="Quickyfy" items={Thirddata} />
+          <MobileCategoriesBar />
+          <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen} />
+        </>
+      )}
+      <LocationModal />
+      {children}
+    </>
+  );
+};
+
+function App() {
+  return (
+    <>
       <AuthProvider>
         <LocationProvider>
           <SettingsProvider>
@@ -128,32 +174,7 @@ function App() {
               <NotificationProvider>
                 <DynamicHead />
                 <BrowserRouter>
-                  <AnnouncementBar />
-                  {isMobile ? <MobileHeader toggleMobileMenu={toggleMobileMenu} /> : <Header />}
-                  {/* <div className="mobile-search-bar-container w-full px-5 py-4 pt-5 z-999">
-                  <Search />
-                </div> */}
-                  <div className="!sticky top-0">
-                    <MainSearchBar />
-                  </div>
-                  <StoreNav />
-                  <LocationModal />
-                  <MobileBannerCarousel />
-
-                  <Stores title="BBM Picks" items={Seconddata} />
-                  <BbmPicks title="Recommended Store" items={data} />
-                  <Quickyfy title="Quickyfy" items={Thirddata} />
-                  <SubStoreNav />
-                  <MobileCategoriesBar />
-                  {/* <OfferBannerSlider
-                  count={1}
-                  bannerUrl="https://i.postimg.cc/rF7J75bL/Untitled-design-3.png"
-                />
-                <CategoryOfferBanner count={1} bannerUrl="https://i.postimg.cc/bNfdYphd/Untitled-design-5.png" />
-                <GroupBannerSlider count={1} bannerUrl="https://i.postimg.cc/TPcZN3S5/Untitled-design-7.png" /> */}
-                  
-                  <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
-                    setMobileMenuOpen={setMobileMenuOpen} />
+                  <ConditionalLayout>
                   <Routes>
                     <Route path={"/"} exact={true} element={<Home />} />
                     <Route
@@ -306,6 +327,7 @@ function App() {
                       }
                     />
                   </Routes>
+                  </ConditionalLayout>
                   <WhatsAppWidget />
                   <Footer />
                 </BrowserRouter>
