@@ -11,6 +11,7 @@ import {
   fetchProductsForBannerGroup,
   fetchUniqueSectionsByType,
   fetchProductsForUniqueSection,
+  getProductEnquiryStatus, // <- already imported
 } from "../../utils/supabaseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -33,6 +34,9 @@ const ProductListingPage = () => {
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
   const [addingToCart, setAddingToCart] = useState(null);
+
+  // NEW: keep productId -> enquiry boolean map
+  const [enquiryStatusMap, setEnquiryStatusMap] = useState({});
 
   // State for stores/brands (fallback if not in location.state)
   const [storesData, setStoresData] = useState(allStores || []);
@@ -128,18 +132,17 @@ const ProductListingPage = () => {
       } else if (Name === "shopbybrand") {
         result = await getProductsForBrand(id);
       } else if (Name === "discount") {
-        // Assuming a function exists to fetch discounted products by some criteria
-        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+        result = await fetchProductsForBannerGroup(id);
       } else if (Name === "offers") {
-        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+        result = await fetchProductsForBannerGroup(id);
       } else if (Name === "deals") {
-        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+        result = await fetchProductsForBannerGroup(id);
       } else if (Name === "summer-sale") {
-        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+        result = await fetchProductsForBannerGroup(id);
       } else if (Name === "opening-soon") {
-        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+        result = await fetchProductsForBannerGroup(id);
       } else if (Name === "sectionOne") {
-        result = await fetchProductsForBannerGroup(id); // Adjust based on actual API response structure
+        result = await fetchProductsForBannerGroup(id);
       } else if (Name === "best-quality") {
         const sections = await fetchUniqueSectionsByType("Best quality");
         const productGroups = await Promise.all(
@@ -152,7 +155,7 @@ const ProductListingPage = () => {
           sections.map((s) => fetchProductsForUniqueSection(s.id))
         );
         result = productGroups.flat();
-      }else {
+      } else {
         result = await getAllProducts();
       }
 
@@ -164,6 +167,49 @@ const ProductListingPage = () => {
 
     fetchProducts();
   }, [Name, id]);
+
+  // NEW: fetch enquiry status for all currently loaded products
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadEnquiryStatuses = async () => {
+      try {
+        if (!products || products.length === 0) {
+          setEnquiryStatusMap({});
+          return;
+        }
+
+        const entries = await Promise.all(
+          products.map(async (p) => {
+            try {
+              // Expecting getProductEnquiryStatus to return { enquiry: boolean } or boolean
+              const res = await getProductEnquiryStatus(p.id);
+              const value =
+                typeof res === "boolean"
+                  ? res
+                  : (res?.enquiry ?? false);
+              return [p.id, value];
+            } catch {
+              return [p.id, false]; // fallback if any error
+            }
+          })
+        );
+
+        if (!isCancelled) {
+          const map = Object.fromEntries(entries);
+          setEnquiryStatusMap(map);
+        }
+      } catch (e) {
+        console.error("Failed to load enquiry statuses", e);
+      }
+    };
+
+    loadEnquiryStatuses();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [products]);
 
   const handleStoreClick = (store) => {
     setCurrentStore(store); // Update state immediately for better UX
@@ -201,6 +247,13 @@ const ProductListingPage = () => {
     setAddingToCart(null);
   };
 
+  // NEW: handle enquiry button click
+  const handleEnquiryClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate("/enquiry-history");
+  };
+
   const calculateDiscount = (oldPrice, newPrice) => {
     if (!oldPrice || !newPrice) return 0;
     return Math.round(((oldPrice - newPrice) / oldPrice) * 100);
@@ -223,12 +276,12 @@ const ProductListingPage = () => {
 
         {/* Slideable Gallery - Different styling for stores vs brands */}
         {(isStoreView || isBrandView) && galleryData && galleryData.length > 0 && (
-          <div className="mb-3"> {/* reduced from mb-6 */}
-            <h3 className="text-sm font-semibold text-gray-800 mb-1 px-2"> {/* reduced from mb-3 */}
+          <div className="mb-3">
+            <h3 className="text-sm font-semibold text-gray-800 mb-1 px-2">
               {currentItem ? currentItem.label : galleryTitle}
             </h3>
             <div
-              className="flex gap-2 overflow-x-auto px-2" // reduced gap-3 → gap-2, removed pb-2
+              className="flex gap-2 overflow-x-auto px-2"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {galleryData.map((item, index) => {
@@ -261,7 +314,7 @@ const ProductListingPage = () => {
                       className={`text-xs mt-0.5 text-center max-w-[60px] truncate transition-colors ${isSelected
                         ? "text-red-600 font-medium"
                         : "text-gray-700"
-                        }`} // reduced mt-1 → mt-0.5
+                        }`}
                     >
                       {item.label}
                     </p>
@@ -272,16 +325,16 @@ const ProductListingPage = () => {
           </div>
         )}
 
-
         {/* Product List */}
         {products.length === 0 ? (
           <p className="text-center text-gray-500 py-10">No products found.</p>
         ) : (
           <div className="space-y-1">
-
             {products.map((item) => {
               const discount = calculateDiscount(item.old_price, item.price);
               const isAdding = addingToCart === item.id;
+              const isEnquiry = !!enquiryStatusMap[item.id];
+
               return (
                 <Link
                   key={item.id}
@@ -327,14 +380,25 @@ const ProductListingPage = () => {
                         )}
                       </div>
 
-                      <button
-                        onClick={(e) => handleAddToCart(e, item.id)}
-                        disabled={isAdding}
-                        style={{ minHeight: '20px' }}
-                        className="bg-red-400 text-white text-sm font-bold py-2 px-6 rounded-md hover:bg-red-600 transition-colors disabled:bg-red-300 disabled:cursor-not-allowed"
-                      >
-                        {isAdding ? "Adding..." : "Add"}
-                      </button>
+                      {/* NEW: Button switches to ENQUIRY if enquiry is true */}
+                      {isEnquiry ? (
+                        <button
+                          onClick={handleEnquiryClick}
+                          style={{ minHeight: '20px' }}
+                          className="bg-red-400 text-white text-sm font-bold py-2 px-6 rounded-md hover:bg-red-600 transition-colors"
+                        >
+                          ENQUIRY
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => handleAddToCart(e, item.id)}
+                          disabled={isAdding}
+                          style={{ minHeight: '20px' }}
+                          className="bg-red-400 text-white text-sm font-bold py-2 px-6 rounded-md hover:bg-red-600 transition-colors disabled:bg-red-300 disabled:cursor-not-allowed"
+                        >
+                          {isAdding ? "Adding..." : "Add"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </Link>
