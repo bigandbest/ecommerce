@@ -20,13 +20,13 @@ import { use } from "react";
 const AccountLink = ({ to, icon: Icon, children }) => (
   <Link
     to={to}
-    className="flex items-center justify-between w-full p-4 !m-0 text-gray-800 transition-colors hover:bg-gray-50"
+    className="flex items-center justify-between w-full p-4 !m-0 text-gray-800 transition-colors hover:bg-gray-50 mobile-account-link"
   >
-    <div className="flex items-center">
-      <Icon className="w-5 h-5 text-gray-500" />
+    <div className="flex items-center flex-1 min-w-0">
+      <Icon className="w-5 h-5 text-gray-500 flex-shrink-0" />
       <span className="font-medium pl-2">{children}</span>
     </div>
-    <ChevronRight className="w-5 h-5 text-gray-400" />
+    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
   </Link>
 );
 
@@ -66,20 +66,21 @@ function MobileAccountPage() {
 
   return (
     <div className="bg-gray-50 md:hidden mt-[-55px] min-h-screen">
-      <div className="p-4 space-y-5">
+      <div className="p-4 space-y-5 mobile-account-container">
 
         {/* Profile Header */}
-        <div className="p-4 bg-white rounded-xl shadow-sm">
-          <div className="flex items-center space-x-4">
-            <div className="relative inline-flex items-center justify-center w-16 h-16 overflow-hidden bg-gray-200 rounded-full">
-              {/* You can replace this with an <img> tag if you have user avatars */}
-              <span className="font-medium text-xl text-gray-600">
+        <div className="p-3 mt-12 bg-white rounded-xl shadow-sm mobile-profile-header">
+          <div className="flex items-start space-x-3">
+            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="font-medium text-base text-gray-600">
                 {currentUser?.name ? currentUser.name[0].toUpperCase() : <User />}
               </span>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">{currentUser?.name || "Guest User"}</h1>
-              <Link to="/account" className="text-sm font-medium text-blue-600 hover:underline">
+            <div className="flex-1 overflow-hidden">
+              <h1 className="text-base font-bold text-gray-900 break-words leading-tight">
+                {currentUser?.name || "Guest User"}
+              </h1>
+              <Link to="/account" className="text-sm text-blue-600 hover:underline inline-block mt-1">
                 View and edit profile
               </Link>
             </div>
@@ -112,7 +113,7 @@ function MobileAccountPage() {
         <div className="pt-4">
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center w-full text-center bg-white text-red-500 font-medium rounded-xl py-3 px-4 shadow-sm hover:bg-red-50 transition"
+            className="flex items-center justify-center w-full text-center bg-white text-red-500 font-medium rounded-xl py-3 px-4 shadow-sm hover:bg-red-50 transition mobile-logout-btn"
           >
             <LogOut className="w-5 h-5 mr-3" />
             Logout
