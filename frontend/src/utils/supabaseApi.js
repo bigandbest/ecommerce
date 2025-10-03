@@ -1366,6 +1366,23 @@ export async function markEnquiriesAsRead(userId) {
   return { success: true };
 }
 
+// this is the fn to fetch the 'enquiry' boolean column from products table
+export async function getProductEnquiryStatus() {
+  // Fetches the 'id' and the boolean 'enquiry' column from the 'products' table.
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, enquiry");
+
+  if (error) {
+    console.error("Error fetching product enquiry status:", error.message);
+    return { success: false, error: error.message };
+  }
+  
+  // The 'data' will be an array of objects like: 
+  // [{ id: 'uuid-1', enquiry: true }, { id: 'uuid-2', enquiry: false }, ...]
+  return { success: true, productEnquiryStatuses: data };
+}
+
 // WEBSITE SETTINGS
 /**
  * Uploads an image for website settings (logo, banners, etc.)
