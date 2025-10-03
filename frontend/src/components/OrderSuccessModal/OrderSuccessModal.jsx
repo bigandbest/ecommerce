@@ -8,6 +8,8 @@ const OrderSuccessModal = ({ isOpen, onClose, orderDetails }) => {
 
   const handleViewOrders = () => {
     onClose();
+    // Force refresh orders before navigating
+    window.dispatchEvent(new CustomEvent('orderPlaced'));
     navigate('/MyOrders');
   };
 

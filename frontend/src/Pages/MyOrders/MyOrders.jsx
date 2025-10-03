@@ -9,6 +9,41 @@ function MyOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const [networkStatus, setNetworkStatus] = useState('checking')
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // Check network connectivity
+  useEffect(() => {
+    const checkNetwork = async () => {
+      try {
+        const response = await fetch('https://ecommerce-8342.onrender.com/api/order/all')
+        if (response.ok) {
+          setNetworkStatus('connected')
+        } else {
+          setNetworkStatus('error')
+        }
+      } catch (error) {
+        setNetworkStatus('offline')
+      }
+    }
+    checkNetwork()
+  }, [])
+
+  // Force refresh function
+  const forceRefresh = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  // Listen for order placement events
+  useEffect(() => {
+    const handleOrderPlaced = () => {
+      console.log('Order placed event received, refreshing orders...')
+      forceRefresh()
+    }
+
+    window.addEventListener('orderPlaced', handleOrderPlaced)
+    return () => window.removeEventListener('orderPlaced', handleOrderPlaced)
+  }, [])
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -22,7 +57,7 @@ function MyOrders() {
         const { success, orders: fetchedOrders, error } = await getUserOrders(currentUser.id)
         if (success && fetchedOrders) {
           const formattedOrders = fetchedOrders
-            .filter(order => order.status !== 'delivered') // Only show non-delivered orders
+            .filter(order => order.status !== 'cancelled') // Show all orders except cancelled
             .map(order => ({
             id: order.id,
             status: order.status || 'pending',
@@ -40,7 +75,7 @@ function MyOrders() {
               { step: 'Processing', completed: ['processing', 'shipped', 'delivered'].includes(order.status), time: '' },
               { step: 'Shipped', completed: ['shipped', 'delivered'].includes(order.status), time: '' },
               { step: 'Out for Delivery', completed: order.status === 'delivered', time: '' },
-              { step: 'Delivered', completed: order.status === 'delivered', time: order.status === 'delivered' ? 'Delivered' : '' }
+              { step: 'Delivered', completed: order.status === 'delivered', time: order.status === 'delivered' ? new Date(order.updated_at || order.created_at).toLocaleString() : '' }
             ]
           }))
           setOrders(formattedOrders)
@@ -57,7 +92,7 @@ function MyOrders() {
     }
 
     fetchOrders()
-  }, [currentUser])
+  }, [currentUser, refreshTrigger])
 
   const [notifications, setNotifications] = useState([])
 
@@ -81,7 +116,7 @@ function MyOrders() {
         const { success, orders: fetchedOrders } = await getUserOrders(currentUser.id)
         if (success && fetchedOrders) {
           const formattedOrders = fetchedOrders
-            .filter(order => order.status !== 'delivered') // Only show non-delivered orders
+            .filter(order => order.status !== 'cancelled') // Show all orders except cancelled
             .map(order => ({
             id: order.id,
             status: order.status || 'pending',
@@ -99,7 +134,7 @@ function MyOrders() {
               { step: 'Processing', completed: ['processing', 'shipped', 'delivered'].includes(order.status), time: '' },
               { step: 'Shipped', completed: ['shipped', 'delivered'].includes(order.status), time: '' },
               { step: 'Out for Delivery', completed: order.status === 'delivered', time: '' },
-              { step: 'Delivered', completed: order.status === 'delivered', time: order.status === 'delivered' ? 'Delivered' : '' }
+              { step: 'Delivered', completed: order.status === 'delivered', time: order.status === 'delivered' ? new Date(order.updated_at || order.created_at).toLocaleString() : '' }
             ]
           }))
           setOrders(formattedOrders)
@@ -118,6 +153,8 @@ function MyOrders() {
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading your orders...</p>
+          <p className="mt-2 text-sm text-gray-500">Network: {networkStatus}</p>
+          {currentUser?.id && <p className="mt-1 text-xs text-gray-400">User ID: {currentUser.id.slice(0, 8)}...</p>}
         </div>
       )
     }
@@ -126,8 +163,8 @@ function MyOrders() {
       return (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Active Orders</h3>
-          <p className="text-gray-600 mb-6">You have no pending, processing, or shipped orders. Check your delivered orders in Profile section!</p>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Orders Found</h3>
+          <p className="text-gray-600 mb-6">You have no orders yet. Start shopping to see your orders here!</p>
           <a href="/" className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
             Start Shopping
           </a>

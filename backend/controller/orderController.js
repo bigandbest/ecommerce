@@ -20,7 +20,7 @@ export const updateOrderStatus = async (req, res) => {
 
   const { error } = await supabase
     .from("orders")
-    .update({ status, adminnotes })
+    .update({ status, adminnotes, updated_at: new Date().toISOString() })
     .eq("id", id);
 
   if (error) return res.status(500).json({ success: false, error: error.message });
@@ -30,6 +30,7 @@ export const updateOrderStatus = async (req, res) => {
 /** Get orders for a specific user */
 export const getUserOrders = async (req, res) => {
   const { user_id } = req.params;
+  console.log('Getting orders for user_id:', user_id);
 
   const { data, error } = await supabase
     .from("orders")
@@ -37,7 +38,12 @@ export const getUserOrders = async (req, res) => {
     .eq("user_id", user_id)
     .order("created_at", { ascending: false });
 
-  if (error) return res.status(500).json({ success: false, error: error.message });
+  console.log('Database query result:', { data, error });
+  if (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+  console.log('Sending response with orders count:', data?.length || 0);
   return res.json({ success: true, orders: data });
 };
 
