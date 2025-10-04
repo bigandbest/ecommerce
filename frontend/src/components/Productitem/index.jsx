@@ -7,17 +7,23 @@ import IconButton from '@mui/material/IconButton';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-// import CompareArrowsIcon from '@mui/icons-material/CompareArrows'; // Removed compare feature
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useAuth } from '../../contexts/AuthContext';
-// 🎯 IMPORTED NEW FUNCTION
-import { getWishlistItems, addToWishlist, removeFromWishlist, addToCart, getProductEnquiryStatus } from '../../utils/supabaseApi'; 
+// 🎯 IMPORT NEW ENQUIRY CREATION FUNCTION
+import { 
+    getWishlistItems, 
+    addToWishlist, 
+    removeFromWishlist, 
+    addToCart, 
+    getProductEnquiryStatus, 
+    createSingleProductEnquiry // 🎯 IMPORTED
+} from '../../utils/supabaseApi'; 
 import './productGrid.css';
 
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
   backgroundColor: 'white',
   color: '#666',
-  '&:hover': {
+  '&:hover': {  
     backgroundColor: '#3f51b5',
     color: 'white',
   },
@@ -135,12 +141,48 @@ const ProductItem = ({ product }) => {
 
 
   const handleAddToCart = async () => {
-    // 🎯 CHANGE 1: If it's an enquiry product, redirect instead of adding to cart
+    // 🎯 CHANGE 1: If it's an enquiry product, create the enquiry and navigate
     if (isEnquiryProduct) {
-      navigate(`/enquiry-history`); // 🎯 Redirect to /enquiry-history
-      return;
+        if (!currentUser) {
+            alert("Please login to submit an enquiry.");
+            return;
+        }
+        
+        // Use cartLoading state to disable the button during submission
+        setCartLoading(true); 
+
+        try {
+            const result = await createSingleProductEnquiry({
+                user_id: currentUser.id,
+                // Using available user info and product details
+                name: currentUser.user_metadata?.name || currentUser.email, 
+                email: currentUser.email,
+                phone: currentUser.user_metadata?.phone || 'N/A', // Placeholder phone
+                message: `Quick enquiry for product: ${product.name} (ID: ${product.id})`,
+                product: {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1, 
+                },
+            });
+
+            if (result.success) {
+                // If successful, navigate as requested
+                navigate(`/enquiry-history`); 
+            } else {
+                alert(`Failed to submit enquiry: ${result.error}`);
+            }
+        } catch (error) {
+            alert("An unexpected error occurred during enquiry submission.");
+            console.error(error);
+        } finally {
+            setCartLoading(false);
+        }
+        
+        return; // Stop execution after enquiry attempt
     }
-    
+    
     if (!currentUser) {
       alert("Please login to add items to cart.");
       return;
@@ -283,7 +325,7 @@ const ProductItem = ({ product }) => {
         {discount && (
           <div className="product-tag absolute top-3 left-3 z-10">
             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">-{discount}%</span>
-          </div>
+            </div>
         )}
 
         <Link to={`/product/${id}`} className="block h-full">

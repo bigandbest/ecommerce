@@ -1382,6 +1382,54 @@ export async function getProductEnquiryStatus() {
   return { success: true, productEnquiryStatuses: data };
 }
 
+
+// This is the one <=====
+export async function createSingleProductEnquiry({
+  user_id,
+  name,
+  email,
+  phone,
+  message,
+  product, // Expects a single product object: { id, name, price, customization, quantity }
+}) {
+  // Ensure the essential product details are present before proceeding
+  if (!product || !product.id) {
+    return { success: false, error: 'Product details are required for a single-item enquiry.' };
+  }
+
+  // 1. Insert the main enquiry record
+  const { data: enquiry, error: enquiryError } = await supabase
+    .from("enquiries")
+    .insert([{ user_id, name, email, phone, message }])
+    .select()
+    .single();
+
+  if (enquiryError) {
+    return { success: false, error: enquiryError.message };
+  }
+
+  // 2. Prepare and insert the single enquiry item
+  const itemToInsert = {
+    enquiry_id: enquiry.id,
+    product_id: product.id,
+    product_name: product.name,
+    price: product.price,
+    quantity: product.quantity || 1, // Default to 1 if quantity is missing
+    customization: product.customization || null,
+  };
+
+  const { error: itemsError } = await supabase
+    .from("enquiry_items")
+    .insert([itemToInsert]);
+
+  if (itemsError) {
+    // Optional: Add logic here to delete the parent enquiry if item insertion fails
+    return { success: false, error: itemsError.message };
+  }
+  
+  return { success: true, enquiry };
+}
+
 // WEBSITE SETTINGS
 /**
  * Uploads an image for website settings (logo, banners, etc.)
