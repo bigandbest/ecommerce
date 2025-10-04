@@ -94,6 +94,23 @@ const AccountPage = () => {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Force refresh function
+  const forceRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  // Listen for order placement events
+  useEffect(() => {
+    const handleOrderPlaced = () => {
+      console.log('Account page: Order placed event received, refreshing orders...');
+      forceRefresh();
+    };
+
+    window.addEventListener('orderPlaced', handleOrderPlaced);
+    return () => window.removeEventListener('orderPlaced', handleOrderPlaced);
+  }, []);
 
   // Utility functions
   const showNotification = (message, type = "success") => {
@@ -140,15 +157,18 @@ const AccountPage = () => {
 
     // Fetch user orders
     fetchUserOrders();
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, refreshTrigger]);
 
   const fetchUserOrders = async () => {
     if (!currentUser?.id) return;
     
+    console.log('Account page: Fetching orders for user:', currentUser.id);
     setOrdersLoading(true);
     try {
       const { success, orders: fetchedOrders, error } = await getUserOrders(currentUser.id);
+      console.log('Account page API response:', { success, fetchedOrders, error });
       if (success && fetchedOrders) {
+        console.log('Account page: Setting orders, count:', fetchedOrders.length);
         setOrders(fetchedOrders);
       } else {
         console.error('Failed to fetch orders:', error);

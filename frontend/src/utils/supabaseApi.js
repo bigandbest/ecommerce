@@ -1090,11 +1090,11 @@ export async function removeFromWishlist(wishlist_item_id) {
 } */
 
 // --- ORDER MANAGEMENT ---
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://ecommerce-8342.onrender.com/api/order';
+const BASE_URL = 'https://ecommerce-8342.onrender.com/api/order';
 // ORDERS
 export async function getAllOrders() {
   try {
-    const res = await axios.get(`${BASE_URL}/all`);
+    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/order/all`);
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1104,7 +1104,7 @@ export async function getAllOrders() {
 // 2. Update Order Status (Admin)
 export async function updateOrderStatus(id, status, adminNotes = "") {
   try {
-    const res = await axios.put(`${BASE_URL}/status/${id}`, {
+    const res = await axios.put(`https://ecommerce-8342.onrender.com/api/order/status/${id}`, {
       status,
       adminnotes: adminNotes,
     });
@@ -1125,7 +1125,7 @@ export async function placeOrder(
   payment_method
 ) {
   try {
-    const res = await axios.post(`${BASE_URL}/place`, {
+    const res = await axios.post(`https://ecommerce-8342.onrender.com/api/order/place`, {
       user_id,
       items,
       subtotal,
@@ -1180,9 +1180,10 @@ export async function placeOrderWithDetailedAddress(
 // 5. Get Orders for a User
 export async function getUserOrders(user_id) {
   try {
-    const res = await axios.get(`${BASE_URL}/user/${user_id}`);
+    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/order/user/${user_id}`);
     return res.data;
   } catch (err) {
+    console.error('API Error:', err.response?.data || err.message);
     return { success: false, error: err.response?.data?.error || err.message };
   }
 }

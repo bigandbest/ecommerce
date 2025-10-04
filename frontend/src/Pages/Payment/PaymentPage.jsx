@@ -229,6 +229,12 @@ const PaymentPage = () => {
             setCartItems([]);
             setOrderDetails(orderResponse.order);
             setShowSuccessModal(true);
+            
+            // Dispatch event to notify other components about order placement
+            window.dispatchEvent(new CustomEvent('orderPlaced', { 
+              detail: { orderId: orderResponse.order.id } 
+            }));
+            console.log('Order placed successfully, event dispatched');
           } else {
             alert("Failed to place order: " + (orderResponse.error || "Unknown error"));
           }
