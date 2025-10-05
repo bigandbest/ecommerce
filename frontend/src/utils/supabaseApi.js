@@ -1417,6 +1417,7 @@ export async function createSingleProductEnquiry({
     price: product.price,
     quantity: product.quantity || 1, // Default to 1 if quantity is missing
     customization: product.customization || null,
+    product_image: product.image || null,
   };
 
   const { error: itemsError } = await supabase

@@ -27,7 +27,8 @@ const ProductCard = ({
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  const displayImage = second_preview_image || image;
+  // 🎯 Use this for the image to be saved
+  const displayImage = second_preview_image || image; 
   const actualProductId = product_id || id;
   
   // 🎯 EFFECT: Fetch the enquiry status for all products on mount
@@ -76,43 +77,44 @@ const ProductCard = ({
   // 🎯 NEW: Wrapper function for the button click (NOW HANDLES ENQUIRY CREATION)
   const handleButtonClick = async () => { // Made async
     if (!actualProductId) return;
-    
-    if (!currentUser) {
-        alert("Please login to proceed.");
-        return;
-    }
+    
+    if (!currentUser) {
+        alert("Please login to proceed.");
+        return;
+    }
 
     if (isEnquiryProduct) {
       // 🎯 ACTION: Create the single product enquiry
-        const productDetails = {
-            id: actualProductId,
-            name: name,
-            price: price,
-            // Assuming quantity is 1 and message is auto-generated for quick click
-            quantity: 1, 
-        };
+        const productDetails = {
+            id: actualProductId,
+            name: name,
+            price: price,
+            quantity: 1, 
+            // 🎯 ADDED IMAGE TO productDetails object
+            image: displayImage, 
+        };
 
-        setCartLoading(true); // Use cartLoading state to disable button while submitting
-        
-        const result = await createSingleProductEnquiry({
-            user_id: currentUser.id,
-            // Use current user details for the enquiry
-            name: currentUser.user_metadata?.name || currentUser.email, 
-            email: currentUser.email,
-            phone: currentUser.user_metadata?.phone || 'N/A',
-            message: `Quick enquiry submitted for product: ${name} (ID: ${actualProductId}).`,
-            product: productDetails,
-        });
+        setCartLoading(true); // Use cartLoading state to disable button while submitting
+        
+        const result = await createSingleProductEnquiry({
+            user_id: currentUser.id,
+            // Use current user details for the enquiry
+            name: currentUser.user_metadata?.name || currentUser.email, 
+            email: currentUser.email,
+            phone: currentUser.user_metadata?.phone || 'N/A',
+            message: `Quick enquiry submitted for product: ${name} (ID: ${actualProductId}).`,
+            product: productDetails,
+        });
 
-        setCartLoading(false);
+        setCartLoading(false);
 
-        if (result.success) {
-            alert("Enquiry submitted! Redirecting to your enquiry history.");
-            // 🎯 Navigate to the specified enquiry history page
-            navigate(`/enquiry-history`); 
-        } else {
-            alert(`Failed to submit enquiry: ${result.error}`);
-        }
+        if (result.success) {
+            alert("Enquiry submitted! Redirecting to your enquiry history.");
+            // 🎯 Navigate to the specified enquiry history page
+            navigate(`/enquiry-history`); 
+        } else {
+            alert(`Failed to submit enquiry: ${result.error}`);
+        }
 
     } else {
       // If ENQUIRY is false, proceed with cart logic
