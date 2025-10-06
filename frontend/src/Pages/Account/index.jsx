@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { updateUserProfileWithAddress, getUserOrders } from "../../utils/supabaseApi";
+import {
+  updateUserProfileWithAddress,
+  getUserOrders,
+} from "../../utils/supabaseApi";
 import { formatDateOnlyIST } from "../../utils/dateUtils";
 import supabase from "../../utils/supabase.ts";
 import {
@@ -96,20 +99,25 @@ const AccountPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  const [allOrders, setAllOrders] = useState([]);
+  const [allOrdersLoading, setAllOrdersLoading] = useState(false);
+
   // Force refresh function
   const forceRefresh = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   // Listen for order placement events
   useEffect(() => {
     const handleOrderPlaced = () => {
-      console.log('Account page: Order placed event received, refreshing orders...');
+      console.log(
+        "Account page: Order placed event received, refreshing orders..."
+      );
       forceRefresh();
     };
 
-    window.addEventListener('orderPlaced', handleOrderPlaced);
-    return () => window.removeEventListener('orderPlaced', handleOrderPlaced);
+    window.addEventListener("orderPlaced", handleOrderPlaced);
+    return () => window.removeEventListener("orderPlaced", handleOrderPlaced);
   }, []);
 
   // Utility functions
@@ -159,26 +167,68 @@ const AccountPage = () => {
     fetchUserOrders();
   }, [currentUser, navigate, refreshTrigger]);
 
+  // Fetch all orders for repeat order tab
+  useEffect(() => {
+    fetchAllOrders();
+  }, []);
+
   const fetchUserOrders = async () => {
     if (!currentUser?.id) return;
-    
-    console.log('Account page: Fetching orders for user:', currentUser.id);
+
+    console.log("Account page: Fetching orders for user:", currentUser.id);
     setOrdersLoading(true);
     try {
-      const { success, orders: fetchedOrders, error } = await getUserOrders(currentUser.id);
-      console.log('Account page API response:', { success, fetchedOrders, error });
+      const {
+        success,
+        orders: fetchedOrders,
+        error,
+      } = await getUserOrders(currentUser.id);
+      console.log("Account page API response:", {
+        success,
+        fetchedOrders,
+        error,
+      });
       if (success && fetchedOrders) {
-        console.log('Account page: Setting orders, count:', fetchedOrders.length);
+        console.log(
+          "Account page: Setting orders, count:",
+          fetchedOrders.length
+        );
         setOrders(fetchedOrders);
       } else {
-        console.error('Failed to fetch orders:', error);
+        console.error("Failed to fetch orders:", error);
         setOrders([]);
       }
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error("Error fetching orders:", error);
       setOrders([]);
     } finally {
       setOrdersLoading(false);
+    }
+  };
+
+  const fetchAllOrders = async () => {
+    setAllOrdersLoading(true);
+    try {
+      const response = await fetch(
+        "https://ecommerce-8342.onrender.com/api/order/all"
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+      const data = await response.json();
+      console.log("All orders API response:", data);
+      if (Array.isArray(data)) {
+        setAllOrders(data);
+      } else if (data && Array.isArray(data.orders)) {
+        setAllOrders(data.orders);
+      } else {
+        setAllOrders([]);
+      }
+    } catch (error) {
+      console.error("Error fetching all orders:", error);
+      setAllOrders([]);
+    } finally {
+      setAllOrdersLoading(false);
     }
   };
 
@@ -507,22 +557,33 @@ const AccountPage = () => {
                     <div>
                       <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                         <FaShoppingBag className="text-indigo-600" />
-                        My Orders (Delivered)
+                        My Orders (Delivered Products)
                       </h2>
-                      {ordersLoading ? (
+                      {allOrdersLoading ? (
                         <div className="text-center py-8">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                          <p className="mt-4 text-gray-600">Loading delivered orders...</p>
+                          <p className="mt-4 text-gray-600">
+                            Loading delivered orders...
+                          </p>
                         </div>
                       ) : (
                         <div>
-                          {orders.filter(order => order.status === 'delivered').length === 0 ? (
+                          {allOrders.filter(
+                            (order) =>
+                              order.status === "delivered" ||
+                              order.status === "Delivered"
+                          ).length === 0 ? (
                             <div className="text-center py-12">
                               <div className="text-6xl mb-4">📦</div>
-                              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Delivered Orders</h3>
-                              <p className="text-gray-600 mb-6">Your delivered orders will appear here once completed.</p>
-                              <Link 
-                                to="/MyOrders" 
+                              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                No Delivered Orders
+                              </h3>
+                              <p className="text-gray-600 mb-6">
+                                Your delivered orders will appear here once
+                                completed.
+                              </p>
+                              <Link
+                                to="/MyOrders"
                                 className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                               >
                                 View Active Orders
@@ -530,49 +591,78 @@ const AccountPage = () => {
                             </div>
                           ) : (
                             <div className="space-y-4">
-                              {orders.filter(order => order.status === 'delivered').slice(0, 5).map(order => (
-                                <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                  <div className="flex justify-between items-start mb-3">
-                                    <div>
-                                      <h4 className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h4>
-                                      <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString()}</p>
+                              {allOrders
+                                .filter(
+                                  (order) =>
+                                    order.status === "delivered" ||
+                                    order.status === "Delivered"
+                                )
+                                .slice(0, 5)
+                                .map((order) => (
+                                  <div
+                                    key={order.id}
+                                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                                  >
+                                    <div className="flex justify-between items-start mb-3">
+                                      <div>
+                                        <h4 className="font-semibold text-gray-900">
+                                          Order #{order.id.slice(0, 8)}
+                                        </h4>
+                                        <p className="text-sm text-gray-600">
+                                          {new Date(
+                                            order.created_at
+                                          ).toLocaleDateString()}
+                                        </p>
+                                      </div>
+                                      <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-green-100 text-green-800">
+                                        Delivered
+                                      </span>
                                     </div>
-                                    <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-green-100 text-green-800">
-                                      Delivered
-                                    </span>
-                                  </div>
-                                  <div className="mb-3">
-                                    <p className="text-sm text-gray-600 mb-2">Items: {order.order_items?.length || 0}</p>
-                                    <div className="flex flex-wrap gap-2">
-                                      {order.order_items?.slice(0, 3).map((item, idx) => (
-                                        <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">
-                                          {item.products?.name || 'Product'}
-                                        </span>
-                                      ))}
-                                      {order.order_items?.length > 3 && (
-                                        <span className="text-xs text-gray-500">+{order.order_items.length - 3} more</span>
-                                      )}
+                                    <div className="mb-3">
+                                      <p className="text-sm text-gray-600 mb-2">
+                                        Items: {order.order_items?.length || 0}
+                                      </p>
+                                      <div className="flex flex-wrap gap-2">
+                                        {order.order_items
+                                          ?.slice(0, 3)
+                                          .map((item, idx) => (
+                                            <span
+                                              key={idx}
+                                              className="text-xs bg-white px-2 py-1 rounded border"
+                                            >
+                                              {item.products?.name || "Product"}
+                                            </span>
+                                          ))}
+                                        {order.order_items?.length > 3 && (
+                                          <span className="text-xs text-gray-500">
+                                            +{order.order_items.length - 3} more
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-semibold text-gray-900">
+                                        ₹{order.total?.toLocaleString("en-IN")}
+                                      </span>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() =>
+                                            setSelectedOrder(order)
+                                          }
+                                          className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                        >
+                                          View Details
+                                        </button>
+                                        <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
+                                          Reorder
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-semibold text-gray-900">₹{order.total?.toLocaleString('en-IN')}</span>
-                                    <div className="flex gap-2">
-                                      <button 
-                                        onClick={() => setSelectedOrder(order)}
-                                        className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
-                                      >
-                                        View Details
-                                      </button>
-                                      <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
-                                        Reorder
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
+                                ))}
                               <div className="text-center pt-4">
-                                <Link 
-                                  to="/MyOrders" 
+                                <Link
+                                  to="/MyOrders"
                                   className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                                 >
                                   View Active Orders
@@ -741,20 +831,31 @@ const AccountPage = () => {
                     <div>
                       <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                         <FaHistory className="text-indigo-600" />
-                        Past Orders (Delivered)
+                        Past Orders (Delivered Products)
                       </h2>
-                      {ordersLoading ? (
+                      {allOrdersLoading ? (
                         <div className="text-center py-8">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                          <p className="mt-4 text-gray-600">Loading delivered orders...</p>
+                          <p className="mt-4 text-gray-600">
+                            Loading delivered orders...
+                          </p>
                         </div>
-                      ) : orders.filter(order => order.status === 'delivered').length === 0 ? (
+                      ) : allOrders.filter(
+                          (order) =>
+                            order.status === "delivered" ||
+                            order.status === "Delivered"
+                        ).length === 0 ? (
                         <div className="text-center py-12">
                           <div className="text-6xl mb-4">📦</div>
-                          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Delivered Orders Yet</h3>
-                          <p className="text-gray-600 mb-6">Your delivered orders will appear here for easy reordering!</p>
-                          <Link 
-                            to="/" 
+                          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                            No Delivered Orders Yet
+                          </h3>
+                          <p className="text-gray-600 mb-6">
+                            Your delivered orders will appear here for easy
+                            reordering!
+                          </p>
+                          <Link
+                            to="/"
                             className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                           >
                             Start Shopping
@@ -762,59 +863,86 @@ const AccountPage = () => {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {orders.filter(order => order.status === 'delivered').slice(0, 3).map(order => (
-                            <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                              <div className="flex justify-between items-start mb-3">
-                                <div>
-                                  <h4 className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h4>
-                                  <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString()}</p>
+                          {allOrders
+                            .filter(
+                              (order) =>
+                                order.status === "delivered" ||
+                                order.status === "Delivered"
+                            )
+                            .slice(0, 3)
+                            .map((order) => (
+                              <div
+                                key={order.id}
+                                className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                              >
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <h4 className="font-semibold text-gray-900">
+                                      Order #{order.id.slice(0, 8)}
+                                    </h4>
+                                    <p className="text-sm text-gray-600">
+                                      {new Date(
+                                        order.created_at
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-green-100 text-green-800">
+                                    Delivered
+                                  </span>
                                 </div>
-                                <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-green-100 text-green-800">
-                                  Delivered
-                                </span>
-                              </div>
-                              <div className="mb-3">
-                                <p className="text-sm text-gray-600 mb-2">Items: {order.order_items?.length || 0}</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {order.order_items?.slice(0, 3).map((item, idx) => (
-                                    <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">
-                                      {item.products?.name || 'Product'}
-                                    </span>
-                                  ))}
-                                  {order.order_items?.length > 3 && (
-                                    <span className="text-xs text-gray-500">+{order.order_items.length - 3} more</span>
-                                  )}
+                                <div className="mb-3">
+                                  <p className="text-sm text-gray-600 mb-2">
+                                    Items: {order.order_items?.length || 0}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {order.order_items
+                                      ?.slice(0, 3)
+                                      .map((item, idx) => (
+                                        <span
+                                          key={idx}
+                                          className="text-xs bg-white px-2 py-1 rounded border"
+                                        >
+                                          {item.products?.name || "Product"}
+                                        </span>
+                                      ))}
+                                    {order.order_items?.length > 3 && (
+                                      <span className="text-xs text-gray-500">
+                                        +{order.order_items.length - 3} more
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="font-semibold text-gray-900">
+                                    ₹{order.total?.toLocaleString("en-IN")}
+                                  </span>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => setSelectedOrder(order)}
+                                      className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                    >
+                                      View Details
+                                    </button>
+                                    <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
+                                      Reorder
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="flex justify-between items-center">
-                                <span className="font-semibold text-gray-900">₹{order.total?.toLocaleString('en-IN')}</span>
-                                <div className="flex gap-2">
-                                  <button 
-                                    onClick={() => setSelectedOrder(order)}
-                                    className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
-                                  >
-                                    View Details
-                                  </button>
-                                  <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
-                                    Reorder
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                            ))}
                           <div className="text-center pt-4">
-                            <button 
+                            <button
                               onClick={() => {
-                                setActiveHorizontalTab('repeat');
-                                setActiveVerticalTab('past-orders');
+                                setActiveHorizontalTab("repeat");
+                                setActiveVerticalTab("past-orders");
                               }}
                               className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mr-3"
                             >
                               <FaHistory className="mr-2" />
                               View All Delivered Orders
                             </button>
-                            <Link 
-                              to="/MyOrders" 
+                            <Link
+                              to="/MyOrders"
                               className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                             >
                               View Active Orders
@@ -864,8 +992,10 @@ const AccountPage = () => {
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
-                <h3 className="text-2xl font-bold text-gray-900">Order Details</h3>
-                <button 
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Order Details
+                </h3>
+                <button
                   onClick={() => setSelectedOrder(null)}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
@@ -873,13 +1003,15 @@ const AccountPage = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Order Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="font-semibold text-gray-700 mb-2">Order ID</h4>
-                  <p className="text-gray-900">#{selectedOrder.id.slice(0, 8)}</p>
+                  <p className="text-gray-900">
+                    #{selectedOrder.id.slice(0, 8)}
+                  </p>
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-700 mb-2">Status</h4>
@@ -888,35 +1020,63 @@ const AccountPage = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-700 mb-2">Order Date</h4>
-                  <p className="text-gray-900">{new Date(selectedOrder.created_at).toLocaleDateString()}</p>
+                  <h4 className="font-semibold text-gray-700 mb-2">
+                    Order Date
+                  </h4>
+                  <p className="text-gray-900">
+                    {new Date(selectedOrder.created_at).toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-700 mb-2">Payment Method</h4>
-                  <p className="text-gray-900">{selectedOrder.payment_method || 'N/A'}</p>
+                  <h4 className="font-semibold text-gray-700 mb-2">
+                    Payment Method
+                  </h4>
+                  <p className="text-gray-900">
+                    {selectedOrder.payment_method || "N/A"}
+                  </p>
                 </div>
               </div>
 
               {/* Items */}
               <div>
-                <h4 className="font-semibold text-gray-700 mb-4">Items Ordered</h4>
+                <h4 className="font-semibold text-gray-700 mb-4">
+                  Items Ordered
+                </h4>
                 <div className="space-y-3">
                   {selectedOrder.order_items?.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div
+                      key={idx}
+                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
+                    >
                       <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                         {item.products?.image ? (
-                          <img src={item.products.image} alt={item.products.name} className="w-full h-full object-cover" />
+                          <img
+                            src={item.products.image}
+                            alt={item.products.name}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <span className="text-2xl">📦</span>
                         )}
                       </div>
                       <div className="flex-1">
-                        <h5 className="font-semibold text-gray-900 leading-tight">{item.products?.name || 'Product'}</h5>
-                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                        <p className="text-sm text-gray-600">Price: ₹{item.price?.toLocaleString('en-IN')}</p>
+                        <h5 className="font-semibold text-gray-900 leading-tight">
+                          {item.products?.name || "Product"}
+                        </h5>
+                        <p className="text-sm text-gray-600">
+                          Quantity: {item.quantity}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Price: ₹{item.price?.toLocaleString("en-IN")}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-900">₹{(item.price * item.quantity)?.toLocaleString('en-IN')}</p>
+                        <p className="font-semibold text-gray-900">
+                          ₹
+                          {(item.price * item.quantity)?.toLocaleString(
+                            "en-IN"
+                          )}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -925,8 +1085,12 @@ const AccountPage = () => {
 
               {/* Address */}
               <div>
-                <h4 className="font-semibold text-gray-700 mb-2">Delivery Address</h4>
-                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedOrder.address || 'No address provided'}</p>
+                <h4 className="font-semibold text-gray-700 mb-2">
+                  Delivery Address
+                </h4>
+                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
+                  {selectedOrder.address || "No address provided"}
+                </p>
               </div>
 
               {/* Order Summary */}
@@ -934,15 +1098,19 @@ const AccountPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal:</span>
-                    <span className="text-gray-900">₹{selectedOrder.subtotal?.toLocaleString('en-IN')}</span>
+                    <span className="text-gray-900">
+                      ₹{selectedOrder.subtotal?.toLocaleString("en-IN")}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping:</span>
-                    <span className="text-gray-900">₹{selectedOrder.shipping?.toLocaleString('en-IN')}</span>
+                    <span className="text-gray-900">
+                      ₹{selectedOrder.shipping?.toLocaleString("en-IN")}
+                    </span>
                   </div>
                   <div className="flex justify-between font-bold text-lg border-t pt-2">
                     <span>Total:</span>
-                    <span>₹{selectedOrder.total?.toLocaleString('en-IN')}</span>
+                    <span>₹{selectedOrder.total?.toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               </div>

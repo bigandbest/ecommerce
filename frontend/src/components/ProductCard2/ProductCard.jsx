@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../contexts/AuthContext";
-// 🎯 Import both required functions
-import { addToCart, getProductEnquiryStatus } from "../../utils/supabaseApi"; 
+// 🎯 Import the new enquiry creation function
+import { addToCart, getProductEnquiryStatus, createSingleProductEnquiry } from "../../utils/supabaseApi"; 
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 const ProductCard = ({
@@ -27,7 +27,8 @@ const ProductCard = ({
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  const displayImage = second_preview_image || image;
+  // 🎯 Use this for the image to be saved
+  const displayImage = second_preview_image || image; 
   const actualProductId = product_id || id;
   
   // 🎯 EFFECT: Fetch the enquiry status for all products on mount
@@ -73,13 +74,48 @@ const ProductCard = ({
     }
   };
 
-  // 🎯 NEW: Wrapper function for the button click
-  const handleButtonClick = () => {
+  // 🎯 NEW: Wrapper function for the button click (NOW HANDLES ENQUIRY CREATION)
+  const handleButtonClick = async () => { // Made async
     if (!actualProductId) return;
+    
+    if (!currentUser) {
+        alert("Please login to proceed.");
+        return;
+    }
 
     if (isEnquiryProduct) {
-      // 🎯 FIX 2: Navigate to the specified enquiry history page
-      navigate(`/enquiry-history`); 
+      // 🎯 ACTION: Create the single product enquiry
+        const productDetails = {
+            id: actualProductId,
+            name: name,
+            price: price,
+            quantity: 1, 
+            // 🎯 ADDED IMAGE TO productDetails object
+            image: displayImage, 
+        };
+
+        setCartLoading(true); // Use cartLoading state to disable button while submitting
+        
+        const result = await createSingleProductEnquiry({
+            user_id: currentUser.id,
+            // Use current user details for the enquiry
+            name: currentUser.user_metadata?.name || currentUser.email, 
+            email: currentUser.email,
+            phone: currentUser.user_metadata?.phone || 'N/A',
+            message: `Quick enquiry submitted for product: ${name} (ID: ${actualProductId}).`,
+            product: productDetails,
+        });
+
+        setCartLoading(false);
+
+        if (result.success) {
+            alert("Enquiry submitted! Redirecting to your enquiry history.");
+            // 🎯 Navigate to the specified enquiry history page
+            navigate(`/enquiry-history`); 
+        } else {
+            alert(`Failed to submit enquiry: ${result.error}`);
+        }
+
     } else {
       // If ENQUIRY is false, proceed with cart logic
       handleAddToCart(actualProductId);
@@ -140,12 +176,12 @@ const ProductCard = ({
         onClick={handleButtonClick}
         disabled={cartLoading || !currentUser} 
         style={{ minHeight: 27 }}
-        className={`absolute bottom-17.5 right-0 border-2 rounded-md bg-white w-[65px] !h-5 text-center text-black text-sm font-bold ${ // 🎯 FIX 1: Increased width to w-[60px]
+        className={`absolute bottom-17.5 right-0 border-2 rounded-md bg-white w-[65px] !h-5 text-center text-black text-sm font-bold ${
           isEnquiryProduct ? "text-blue-500" : (cartAdded ? "text-green-400" : "text-pink-500")
         }`}
       >
         {/* 🎯 Conditionally render button text */}
-        {isEnquiryProduct ? "ENQUIRY" : (cartAdded ? "✔" : "ADD")}
+        {isEnquiryProduct ? (cartLoading ? "..." : "ENQUIRY") : (cartAdded ? "✔" : "ADD")}
       </button>
     </div>
   );
