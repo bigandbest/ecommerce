@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import HomeSlider from "../../components/HomeSlider";
+import MobileIntegratedBanner from "../../components/MobileIntegratedBanner/MobileIntegratedBanner";
 import Search from "../../components/Search";
 import { FaShippingFast } from "react-icons/fa";
 import Tabs from "@mui/material/Tabs";
@@ -14,6 +15,10 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import HomeFestivalGrid from "../../components/BBM Picks/PoweredBy.jsx";
 import FeaturedThisWeek from "../../components/BBM Picks/ShopByBrand.jsx";
+import BbmPicks from "../../components/BBM Picks/ShopByStore.jsx";
+import Stores from "../../components/BBM Picks/QuickPicks.jsx";
+import Quickyfy from "../../components/BBM Picks/BnB Expertise.jsx";
+import StoreNav from "../../components/StoreNav/StoreNav.jsx";
 import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
 import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
 import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
@@ -511,20 +516,50 @@ export const Home = () => {
   ];
 
   return (
-    <>
-      {/* Search Bar For mobile Screens */}
-
-
-      {/* Add spacer to push content below the search bar on mobile */}
-      {/* <div
-        className="mobile-search-spacer md:hidden"
-        style={{ height: "60px" }}
-      ></div> */}
-
-      <HomeSlider />
-      <FlashSale />
+    <div className="home-page-container">
+      {/* Banner Carousel - Mobile/Desktop */}
+      {isMobile ? <MobileIntegratedBanner /> : <HomeSlider />}
+      
+      {/* StoreNav Section - Wholesale, Bazaar, Qwik, Eato, Delivery */}
+      {isMobile && (
+        <div className="store-nav-section">
+          <StoreNav />
+        </div>
+      )}
+      
+      {/* Mobile Header Components below StoreNav */}
+      {isMobile && (
+        <>
+          <div className="mobile-header-sections">
+            <Stores title="BBM Picks" items={[
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Office" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpager-preview.jpg", label: "More" },
+            ]} />
+            <BbmPicks title="Recommended Store" items={[
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Packaging" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Essentia" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Plus" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "More" },
+            ]} />
+            <Quickyfy title="Quickyfy" items={[
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Packaging" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Essentia" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Plus" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "More" },
+            ]} />
+          </div>
+        </>
+      )}
+      
+      {/* Wholesale/Bazar/Eato sections moved below banner */}
       <HomeFestivalGrid />
       <FeaturedThisWeek />
+      <FlashSale />
 
       {/* === Offer Banners below Shop By Category === */}
       <OfferBannerSlider  count={1}/>
@@ -860,7 +895,7 @@ export const Home = () => {
       </div> */}
 
       <ProductsNew />
-    </>
+    </div>
   );
 };
 

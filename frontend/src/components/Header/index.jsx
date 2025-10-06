@@ -480,18 +480,7 @@ const Header = () => {
 
                 <Navigation className="hidden md:block flex-shrink-1" />
 
-                <button
-                  className="border-0 rounded-lg md:flex items-center text-xs text-black hover:text-blue-700 transition-colors  
-             px-2  md:mx-0 md:px-4 w-auto max-w-[160px] overflow-hidden whitespace-nowrap hidden "
-                  onClick={() => { setShowModal(true), setModalMode("visibility") }}
-                >
-                  <Link className="flex items-center space-x-1">
-                    <MapPinned className="size-5 md:size-4" />
-                    <span className="truncate text-xs flex">
-                      <span className="">Location</span>
-                    </span>
-                  </Link>
-                </button>
+
 
                 {/* Business Partner Button */}
                 <Link
@@ -503,10 +492,7 @@ const Header = () => {
                 </Link>
               </div>
 
-              {/* Search Bar - desktop only */}
-              <div className="hidden md:block w-[250px] flex-shrink-0">
-                <Search />
-              </div>
+
 
               {/* Action Icons */}
               <div className="flex flex-shrink-3 items-center ml-auto md:ml-4 space-x-1">
@@ -605,17 +591,13 @@ const Header = () => {
                     <div>
                       <button
                         onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                        className="flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                        className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors group"
                       >
-                        <FaRegUser className="mr-1" />
-                        <span>
-                          Hello{" "}
-                          {currentUser.name ||
-                            currentUser.user_metadata?.name ||
-                            currentUser.email ||
-                            "User"}
-                          !
-                        </span>
+                        <img 
+                          src="/user-logo.svg" 
+                          alt="User Profile" 
+                          className="w-8 h-8 text-gray-700 group-hover:text-blue-600 transition-colors"
+                        />
                       </button>
 
                       {userDropdownOpen && (
@@ -626,10 +608,12 @@ const Header = () => {
                           {/* Profile Section */}
                           <div className="bg-white rounded-lg p-4 mb-2 mx-2 mt-2 shadow-sm">
                             <div className="flex items-center">
-                              <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-3">
-                                <span className="text-lg font-bold text-gray-600">
-                                  {(currentUser?.name || currentUser?.user_metadata?.name || 'U').charAt(0).toUpperCase()}
-                                </span>
+                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-3 border border-gray-200">
+                                <img 
+                                  src="/user-logo.svg" 
+                                  alt="User Profile" 
+                                  className="w-8 h-8 text-gray-600"
+                                />
                               </div>
                               <div>
                                 <h3 className="text-base font-semibold text-gray-900">

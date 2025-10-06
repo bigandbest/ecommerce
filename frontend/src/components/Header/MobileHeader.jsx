@@ -88,8 +88,8 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     return null;
   }
     return (
-        <header className="bg-white header-container">
-            <div className="flex items-center w-full p-0 shadow-sm h-13 justify-between">
+        <header className="bg-white header-container shadow-sm sticky top-0 z-50">
+            <div className="flex items-center w-full p-0 h-13 justify-between">
                 {/* Hamburger icon */}
                 <button className="p-2">
                     <AlignLeft size={24} onClick={toggleMobileMenu} />
@@ -116,7 +116,7 @@ const MobileHeader = ({ toggleMobileMenu }) => {
                     </Link>
                     <Link
                         to="/cart"
-                        className="flex items-center  rounded-lg hover:bg-gray-100 transition-colors group"
+                        className="flex items-center rounded-lg hover:bg-gray-100 transition-colors group"
                     >
                         <div className="relative">
                             <StyledBadge badgeContent={cartCount} color="secondary">
@@ -126,36 +126,23 @@ const MobileHeader = ({ toggleMobileMenu }) => {
                     </Link>
                     <button
                         onClick={() => { currentUser ? navigate("/MobileAccount") : navigate("/login") }}
-                        className="border px-2 w-[90px] rounded text-sm bg-gray-300 border-gray-400 shadow-md hover:shadow-inner transition-shadow"
-                        style={{ minHeight: 27 }}
+                        className="flex items-center justify-center p-2 w-12 h-10 rounded-lg bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-colors"
                     >
-                        {currentUser ? `Hello ${currentUser.name.split(" ")[0]}!` : "Signin"}
+                        {currentUser ? (
+                            <img 
+                                src="/user-logo.svg" 
+                                alt="User Profile" 
+                                className="w-6 h-6 text-gray-700"
+                            />
+                        ) : (
+                            <span className="text-xs font-medium text-gray-700">Sign</span>
+                        )}
                     </button>
 
                 </div>
             </div>
 
-            {/* Address selector */}
-            <button
-                className="border-0 rounded-lg flex items-center text-xs text-blue-700 hover:text-blue-700 transition-colors md:mx-0 md:px-4 w-full overflow-hidden whitespace-nowrap md:hidden "
-                onClick={() => {
-                    setShowModal(true);
-                    setModalMode("visibility");
-                }}
-            >
-                <Link className="flex items-center align-middle space-x-1">
-                    <MapPin className="size-4 md:size-4 text-black" />
-                    <span className="truncate text-xs flex">
-                        Select Delivery Address <ChevronRight size={16} />
-                        {selectedAddress ? (
-                            <span>
-                                {selectedAddress.city} {selectedAddress.state}{" "}
-                                {selectedAddress.postal_code}
-                            </span>
-                        ) : null}
-                    </span>
-                </Link>
-            </button>
+
         </header>
     );
 };

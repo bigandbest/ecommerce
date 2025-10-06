@@ -15,6 +15,7 @@ const HomeSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentSlideColor, setCurrentSlideColor] = useState('#667eea');
 
   // Fetch hero banners from Supabase
   useEffect(() => {
@@ -45,6 +46,66 @@ const HomeSlider = () => {
   }, []);
   
 
+  const extractDominantColor = (imageUrl) => {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 50;
+          canvas.height = 50;
+          ctx.drawImage(img, 0, 0, 50, 50);
+          
+          const imageData = ctx.getImageData(0, 0, 50, 50);
+          const data = imageData.data;
+          
+          const colorMap = new Map();
+          
+          for (let i = 0; i < data.length; i += 4) {
+            const r = Math.floor(data[i] / 32) * 32;
+            const g = Math.floor(data[i + 1] / 32) * 32;
+            const b = Math.floor(data[i + 2] / 32) * 32;
+            const alpha = data[i + 3];
+            
+            if (alpha < 128) continue;
+            
+            const colorKey = `${r},${g},${b}`;
+            colorMap.set(colorKey, (colorMap.get(colorKey) || 0) + 1);
+          }
+          
+          let dominantColor = '#667eea';
+          let maxCount = 0;
+          
+          for (const [color, count] of colorMap) {
+            if (count > maxCount) {
+              maxCount = count;
+              const [r, g, b] = color.split(',').map(Number);
+              
+              const enhancedR = Math.min(255, Math.max(50, r + 20));
+              const enhancedG = Math.min(255, Math.max(50, g + 20));
+              const enhancedB = Math.min(255, Math.max(50, b + 20));
+              
+              dominantColor = `rgb(${enhancedR}, ${enhancedG}, ${enhancedB})`;
+            }
+          }
+          
+          setCurrentSlideColor(dominantColor);
+        } catch (error) {
+          console.log('Color extraction failed, using fallback');
+          setCurrentSlideColor('#667eea');
+        }
+      };
+      img.onerror = () => {
+        setCurrentSlideColor('#667eea');
+      };
+      img.src = imageUrl;
+    } catch (error) {
+      setCurrentSlideColor('#667eea');
+    }
+  };
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -57,7 +118,15 @@ const HomeSlider = () => {
   }, []);
 
   return (
-    <div className="home-slider rounded-2xl">
+    <div 
+      className="home-slider rounded-2xl"
+      style={{
+        background: `linear-gradient(135deg, ${currentSlideColor}20 0%, ${currentSlideColor}15 50%, ${currentSlideColor}10 100%)`,
+        transition: 'background 1s cubic-bezier(0.4, 0, 0.2, 1)',
+        padding: '8px',
+        borderRadius: '20px'
+      }}
+    >
       {loading ? (
         <div className="loading-container">
           <div className="spinner"></div>
@@ -87,7 +156,18 @@ const HomeSlider = () => {
             } : false}
             loop={true}
             modules={[Navigation, Pagination, Autoplay]}
-            onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex)}
+            onSlideChange={(swiper) => {
+              setCurrentSlide(swiper.realIndex);
+              const activeSlide = banners[swiper.realIndex];
+              if (activeSlide?.imageUrl) {
+                extractDominantColor(activeSlide.imageUrl);
+              }
+            }}
+            onSwiper={(swiper) => {
+              if (banners.length > 0) {
+                extractDominantColor(banners[0].imageUrl);
+              }
+            }}
             className="main-slider"
           >
             {banners.map((banner) => (

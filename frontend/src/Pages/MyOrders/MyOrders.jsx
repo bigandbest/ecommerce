@@ -57,7 +57,7 @@ function MyOrders() {
         const { success, orders: fetchedOrders, error } = await getUserOrders(currentUser.id)
         if (success && fetchedOrders) {
           const formattedOrders = fetchedOrders
-            .filter(order => order.status !== 'cancelled') // Show all orders except cancelled
+            .filter(order => order.status !== 'cancelled' && order.status !== 'delivered') // Hide delivered and cancelled orders from tracking
             .map(order => ({
             id: order.id,
             status: order.status || 'pending',
@@ -116,7 +116,7 @@ function MyOrders() {
         const { success, orders: fetchedOrders } = await getUserOrders(currentUser.id)
         if (success && fetchedOrders) {
           const formattedOrders = fetchedOrders
-            .filter(order => order.status !== 'cancelled') // Show all orders except cancelled
+            .filter(order => order.status !== 'cancelled' && order.status !== 'delivered') // Hide delivered and cancelled orders from tracking
             .map(order => ({
             id: order.id,
             status: order.status || 'pending',
