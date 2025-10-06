@@ -506,10 +506,7 @@ const Header = () => {
                 </Link>
               </div>
 
-              {/* Search Bar - desktop only */}
-              <div className="hidden md:block w-[250px] flex-shrink-0">
-                <Search />
-              </div>
+
 
               {/* Action Icons */}
               <div className="flex flex-shrink-3 items-center ml-auto md:ml-4 space-x-1">
@@ -608,7 +605,7 @@ const Header = () => {
                     <div>
                       <button
                         onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                        className="flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                        className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors group"
                       >
                         <ProfileAvatar
                           imageUrl={

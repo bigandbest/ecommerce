@@ -63,6 +63,28 @@ function MyOrders() {
         } = await getUserOrders(currentUser.id);
         if (success && fetchedOrders) {
           const formattedOrders = fetchedOrders
+            .filter(order => order.status !== 'cancelled' && order.status !== 'delivered') // Hide delivered and cancelled orders from tracking
+            .map(order => ({
+            id: order.id,
+            status: order.status || 'pending',
+            items: order.order_items?.map(item => item.products?.name || 'Product') || [],
+            total: order.total || 0,
+            subtotal: order.subtotal || 0,
+            shipping: order.shipping || 0,
+            date: order.created_at,
+            estimatedDelivery: order.created_at,
+            address: order.address || 'No address provided',
+            payment_method: order.payment_method || 'Unknown',
+            order_items: order.order_items || [],
+            trackingSteps: [
+              { step: 'Order Placed', completed: true, time: new Date(order.created_at).toLocaleString() },
+              { step: 'Processing', completed: ['processing', 'shipped', 'delivered'].includes(order.status), time: '' },
+              { step: 'Shipped', completed: ['shipped', 'delivered'].includes(order.status), time: '' },
+              { step: 'Out for Delivery', completed: order.status === 'delivered', time: '' },
+              { step: 'Delivered', completed: order.status === 'delivered', time: order.status === 'delivered' ? new Date(order.updated_at || order.created_at).toLocaleString() : '' }
+            ]
+          }))
+          setOrders(formattedOrders)
             .filter(
               (order) =>
                 order.status !== "cancelled" && order.status !== "Delivered"
@@ -157,6 +179,28 @@ function MyOrders() {
         );
         if (success && fetchedOrders) {
           const formattedOrders = fetchedOrders
+            .filter(order => order.status !== 'cancelled' && order.status !== 'delivered') // Hide delivered and cancelled orders from tracking
+            .map(order => ({
+            id: order.id,
+            status: order.status || 'pending',
+            items: order.order_items?.map(item => item.products?.name || 'Product') || [],
+            total: order.total || 0,
+            subtotal: order.subtotal || 0,
+            shipping: order.shipping || 0,
+            date: order.created_at,
+            estimatedDelivery: order.created_at,
+            address: order.address || 'No address provided',
+            payment_method: order.payment_method || 'Unknown',
+            order_items: order.order_items || [],
+            trackingSteps: [
+              { step: 'Order Placed', completed: true, time: new Date(order.created_at).toLocaleString() },
+              { step: 'Processing', completed: ['processing', 'shipped', 'delivered'].includes(order.status), time: '' },
+              { step: 'Shipped', completed: ['shipped', 'delivered'].includes(order.status), time: '' },
+              { step: 'Out for Delivery', completed: order.status === 'delivered', time: '' },
+              { step: 'Delivered', completed: order.status === 'delivered', time: order.status === 'delivered' ? new Date(order.updated_at || order.created_at).toLocaleString() : '' }
+            ]
+          }))
+          setOrders(formattedOrders)
             .filter(
               (order) =>
                 order.status !== "cancelled" && order.status !== "Delivered"

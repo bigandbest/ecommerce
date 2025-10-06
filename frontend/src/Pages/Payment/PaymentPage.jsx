@@ -99,49 +99,11 @@ const PaymentPage = () => {
     console.log("Data at payment time:", { orderAddress, mapSelection });
     setPaymentInProgress(true);
 
-    const { deliverableItems, undeliverableItems, error } = await checkCartAvailability();
-
-    if (error) {
-      alert(error);
-      setPaymentInProgress(false);
-      return;
-    }
-
-    // Case 1: All items are deliverable
-    if (undeliverableItems.length === 0 && deliverableItems.length > 0) {
-      const subtotal = deliverableItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-      const shippingCost = subtotal > 1000 ? 0 : 50;
-      const grandTotal = subtotal + shippingCost;
-      await initiatePayment(deliverableItems, subtotal, shippingCost, grandTotal);
-    }
-
-    // Case 2: Mix of items
-    else if (undeliverableItems.length > 0 && deliverableItems.length > 0) {
-      const itemNamesToRemove = undeliverableItems.map(item => `- ${item.name}`).join('\n');
-      const userConfirmed = window.confirm(
-        `The following items "cannot be delivered at your selected address" and will be removed:\n\n${itemNamesToRemove}\n\nDo you want to continue with the remaining items?`
-      );
-
-      if (userConfirmed) {
-        const deletionPromises = undeliverableItems.map(item => removeCartItem(item.cart_item_id));
-        await Promise.all(deletionPromises);
-        setCartItems(deliverableItems);
-
-        const newSubtotal = deliverableItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-        const newShippingCost = newSubtotal > 1000 ? 0 : 50;
-        const newGrandTotal = newSubtotal + newShippingCost;
-
-        // FIXED: Pass the CORRECT items and RECALCULATED totals to the payment function
-        await initiatePayment(deliverableItems, newSubtotal, newShippingCost, newGrandTotal);
-      }
-    }
-
-    // Case 3: All items are undeliverable
-    else {
-      alert("None of the items in your cart can be delivered to this address. Please change your address or modify your cart.");
-      setPaymentInProgress(false);
-      navigate('/cart');
-    }
+    // Skip availability check - allow all items to be deliverable
+    const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const shippingCost = subtotal > 1000 ? 0 : 50;
+    const grandTotal = subtotal + shippingCost;
+    await initiatePayment(cartItems, subtotal, shippingCost, grandTotal);
 
     setPaymentInProgress(false);
   };

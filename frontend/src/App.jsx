@@ -142,7 +142,7 @@ const ConditionalLayout = ({ children }) => {
   return (
     <>
       {!isDashboardPage && <AnnouncementBar />}
-      {!isDashboardPage && (
+      {!isDashboardPage && location.pathname !== '/' && (
         <>
           {isMobile ? <MobileHeader toggleMobileMenu={toggleMobileMenu} /> : <Header />}
           <div className="!sticky top-0">
@@ -157,6 +157,18 @@ const ConditionalLayout = ({ children }) => {
           <MobileCategoriesBar />
           <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen} />
+        </>
+      )}
+      {!isDashboardPage && location.pathname === '/' && isMobile && (
+        <MobileHeader toggleMobileMenu={toggleMobileMenu} />
+      )}
+      {!isDashboardPage && location.pathname === '/' && !isMobile && (
+        <>
+          <Header />
+          <StoreNav />
+          <Stores title="BBM Picks" items={Seconddata} />
+          <BbmPicks title="Recommended Store" items={data} />
+          <Quickyfy title="Quickyfy" items={Thirddata} />
         </>
       )}
       <LocationModal />

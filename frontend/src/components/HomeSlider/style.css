@@ -5,7 +5,22 @@
   margin: auto;
   margin-top: 3px;
   margin-bottom: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.home-slider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0%, transparent 50%, rgba(255, 255, 255, 0.04) 100%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 20px;
 }
 
 .main-slider {
@@ -31,11 +46,13 @@
 
 .slider-image {
   width: 100%;
-   height: auto; /* new */
+  height: auto;
   max-height: none;
-  object-fit: cover; /* prevent cutting */
+  object-fit: cover;
   display: block;
   margin: 0 auto;
+  border-radius: 16px;
+  transition: all 0.6s ease;
 }
 
 @media (max-width: 768px) {
@@ -134,34 +151,42 @@
 
 /* Custom swiper pagination styles */
 .home-slider .swiper-pagination-bullet {
-  width: 10px;
-  height: 10px;
-  background: white;
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.7);
   opacity: 0.6;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .home-slider .swiper-pagination-bullet-active {
   opacity: 1;
   background: white;
+  transform: scale(1.2);
+  border-color: rgba(255, 255, 255, 0.8);
 }
 
 /* Navigation buttons */
 .home-slider .swiper-button-next,
 .home-slider .swiper-button-prev {
   color: white;
-  background: rgba(0, 0, 0, 0.3);
-  width: 40px;
-  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .home-slider .swiper-button-next:hover,
 .home-slider .swiper-button-prev:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .home-slider .swiper-button-next:after,
