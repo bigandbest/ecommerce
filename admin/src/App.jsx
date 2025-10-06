@@ -61,6 +61,7 @@ import AddBannerGroup from "./Pages/AddBanners/AddBannerGroup.jsx";
 import AddBannerGroupProducts from "./Pages/AddBanners/AddBannerGroupProducts.jsx";
 import UniqueSection from "./Pages/UniqueSection/UniqueSection.jsx";
 import UniqueSectionProducts from "./Pages/UniqueSection/UniqueSectionProduct.jsx";
+import BbmDost from "./Pages/BbmDost/BbmDost.jsx";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -307,6 +308,10 @@ function App() {
         {
           path: "/unique-sections/sections/:id",
           element: <UniqueSectionProducts />,
+        },
+        {
+          path: "/bbm-dost",
+          element: <BbmDost />,
         },
       ],
     },

@@ -38,7 +38,8 @@ import addBannerRoutes from './routes/addBannerRoutes.js';
 import addBannerGroupRoutes from './routes/addBannerGroupRoutes.js';
 import addBannerGroupProductRoutes from './routes/addBannerGroupProductRoutes.js';
 import uniqueSectionRoutes from './routes/uniqueSectionRoutes.js';
-import uniqueSectionProductRoutes from './routes/uniqueSectionProductRoutes.js'
+import uniqueSectionProductRoutes from './routes/uniqueSectionProductRoutes.js';
+import bbmDostRoutes from './routes/bbmDostRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -114,6 +115,7 @@ app.use("/api/banner-groups", addBannerGroupRoutes);
 app.use("/api/banner-group-products", addBannerGroupProductRoutes);
 app.use("/api/unique-sections", uniqueSectionRoutes);
 app.use("/api/unique-sections-products", uniqueSectionProductRoutes);
+app.use("/api/bbm-dost", bbmDostRoutes);
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

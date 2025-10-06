@@ -62,6 +62,7 @@ import MapLocationPage from "./components/MapLocationPage/MapLocationPage .jsx";
 import AddressSelectionPage from "./components/AddressSelectionPage/AddressSelectionPage.jsx";
 import DetailPage from "./Pages/NewSectionGroupDetailPage/DetailPage.jsx";
 import ProductListingPage from "./Pages/NewProductListingPage/ProductListingPage.jsx";
+import BbmDost from "./Pages/BbmDost/BbmDost.jsx"; // Import BbmDost component
 
 
 // Protected route component
@@ -190,6 +191,7 @@ function App() {
                     />
                     <Route path={"/login"} exact={true} element={<Login />} />
                     <Route path={"/signup"} exact={true} element={<Signup />} />
+                    <Route path={"/bbm-dost"} exact={true} element={<BbmDost />} />
                     <Route
                       path={"/reset-password"}
                       exact={true}

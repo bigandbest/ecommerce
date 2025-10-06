@@ -139,6 +139,11 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/brands",
     },
     {
+      title: "BBM Dost",
+      icon: <FaList />, 
+      path: "/bbm-dost",
+    },
+    {
       title: "Quick Picks",
       icon: <FaList />,
       path: "/quick-picks",

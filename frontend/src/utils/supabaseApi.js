@@ -1521,6 +1521,64 @@ export async function updateMultiplePromotionalSettings(settings) {
   return { success: true };
 }
 
+// BBM Dost 
+const API_BASE_URL = "https://ecommerce-8342.onrender.com/api/bbm-dost";
+
+// ✅ 1. Add (Create) a new BBM Dost
+export const addBbmDost = async (dostData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/add`, dostData);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding BBM Dost:", error);
+    throw error.response?.data || error.message;
+  }
+};
+
+// ✅ 2. Get all BBM Dost entries
+export const getAllBbmDosts = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/all`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all BBM Dosts:", error);
+    throw error.response?.data || error.message;
+  }
+};
+
+// ✅ 3. Get a single BBM Dost by ID
+export const getBbmDostById = async (id) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching BBM Dost by ID:", error);
+    throw error.response?.data || error.message;
+  }
+};
+
+// ✅ 4. Update BBM Dost by ID
+export const updateBbmDost = async (id, updateData) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/${id}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating BBM Dost:", error);
+    throw error.response?.data || error.message;
+  }
+};
+
+// ✅ 5. Delete BBM Dost by ID
+export const deleteBbmDost = async (id) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting BBM Dost:", error);
+    throw error.response?.data || error.message;
+  }
+};
+
 // USER PROFILE WITH DETAILED ADDRESS MANAGEMENT
 
 /**
