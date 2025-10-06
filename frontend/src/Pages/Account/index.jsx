@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import {
@@ -21,11 +21,18 @@ import {
 } from "react-icons/fa";
 import AddressManager from "../../components/AddressManager";
 import ComingSoonPlaceholder from "../../components/ComingSoonPlaceholder";
+import ProfileImageUpload from "../../components/ProfileImageUpload";
 import { useLocation } from "react-router-dom";
 
 const AccountPage = () => {
-  const { currentUser, logout, resetPassword, updatePassword, setCurrentUser } =
-    useAuth();
+  const {
+    currentUser,
+    logout,
+    resetPassword,
+    updatePassword,
+    setCurrentUser,
+    refreshUserProfile,
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state || {};
@@ -82,6 +89,10 @@ const AccountPage = () => {
     phone: currentUser?.phone || currentUser?.user_metadata?.phone || "",
   });
 
+  const [profileImageUrl, setProfileImageUrl] = useState(
+    currentUser?.user_metadata?.photo_url || currentUser?.photo_url || null
+  );
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -106,6 +117,7 @@ const AccountPage = () => {
   const forceRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
+  setAllOrders;
 
   // Listen for order placement events
   useEffect(() => {
@@ -163,8 +175,9 @@ const AccountPage = () => {
       }
     }
 
-    // Fetch user orders
+    // Fetch user orders and profile
     fetchUserOrders();
+    fetchUserProfile();
   }, [currentUser, navigate, refreshTrigger]);
 
   // Fetch all orders for repeat order tab
@@ -229,6 +242,32 @@ const AccountPage = () => {
       setAllOrders([]);
     } finally {
       setAllOrdersLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", currentUser.id)
+        .single();
+
+      if (data && !error) {
+        console.log("Fetched user profile:", data);
+        setProfileImageUrl(data.photo_url);
+        setProfileData((prev) => ({
+          ...prev,
+          name: data.name || prev.name,
+          phone: data.phone || prev.phone,
+        }));
+      } else {
+        console.error("Error fetching user profile:", error);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
     }
   };
 
@@ -358,6 +397,21 @@ const AccountPage = () => {
     navigate("/");
   };
 
+  const handleImageUpdate = async (imageUrl, updatedUser) => {
+    console.log("handleImageUpdate called with:", { imageUrl, updatedUser });
+    setProfileImageUrl(imageUrl);
+
+    // Refresh the user profile from the database to get the latest data
+    if (refreshUserProfile) {
+      await refreshUserProfile();
+    }
+
+    // Also refetch local profile data
+    setTimeout(() => {
+      fetchUserProfile();
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
@@ -436,6 +490,19 @@ const AccountPage = () => {
                         <FaUserEdit className="text-indigo-600" />
                         Edit Profile
                       </h2>
+
+                      {/* Profile Image Upload Section */}
+                      <div className="mb-8 text-center">
+                        <h3 className="text-lg font-medium mb-4">
+                          Profile Picture
+                        </h3>
+                        <ProfileImageUpload
+                          currentImageUrl={profileImageUrl}
+                          onImageUpdate={handleImageUpdate}
+                          size="xl"
+                        />
+                      </div>
+
                       <form
                         onSubmit={handleProfileUpdate}
                         className="space-y-4"
