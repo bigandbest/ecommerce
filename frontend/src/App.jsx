@@ -153,6 +153,7 @@ const ConditionalLayout = ({ children }) => {
           <Stores title="BBM Picks" items={Seconddata} />
           <BbmPicks title="Recommended Store" items={data} />
           <Quickyfy title="Quickyfy" items={Thirddata} />
+          <SubStoreNav />
           <MobileCategoriesBar />
           <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen} />

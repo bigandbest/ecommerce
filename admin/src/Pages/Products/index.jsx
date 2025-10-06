@@ -113,6 +113,7 @@ const ProductsPage = () => {
     uom: "",
     is_last_section: false,
     second_preview_image: "",
+    enquiry: false,
   });
   const itemsPerPage = 10;
   const itemsPerLoad = 10;
@@ -442,6 +443,7 @@ const ProductsPage = () => {
       uom: "",
       is_last_section: false,
       second_preview_image: "",
+      enquiry: false,
     });
     setModalOpen(true);
   };
@@ -835,6 +837,12 @@ const ProductsPage = () => {
                   style={{ textAlign: "center", padding: "12px 8px" }}
                   className="text-gray-800 dark:text-gray-200 font-semibold"
                 >
+                  Enquiry
+                </th>
+                <th   // enquiry action button toggle
+                  style={{ textAlign: "center", padding: "12px 8px" }}
+                  className="text-gray-800 dark:text-gray-200 font-semibold"
+                >
                   Actions
                 </th>
               </tr>
@@ -1167,6 +1175,15 @@ const ProductsPage = () => {
                         : "-"}
                     </div>
                   </td>
+                  <td style={{ textAlign: "center", padding: "8px" }}>
+                    <Badge
+                      color={product.enquiry ? "yellow" : "gray"}
+                      variant="light"
+                      size="sm"
+                    >
+                      {product.enquiry ? "Yes" : "No"}
+                    </Badge>
+                  </td>                                           {/* to here */}
                   <td style={{ textAlign: "center", padding: "8px" }}>
                     <Group position="center" spacing={4}>
                       <ActionIcon
@@ -1802,6 +1819,14 @@ const ProductsPage = () => {
             checked={newProduct.is_last_section}
             onChange={(e) =>
               setNewProduct({ ...newProduct, is_last_section: e.currentTarget.checked })
+            }
+            color="green"
+          />
+          <Switch
+            label="Activate Enquiry"
+            checked={newProduct.enquiry}
+            onChange={(e) =>
+              setNewProduct({ ...newProduct, enquiry: e.currentTarget.checked })
             }
             color="green"
           />
