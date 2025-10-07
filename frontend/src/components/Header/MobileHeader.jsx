@@ -11,6 +11,7 @@ import {
     getCartItems,
 } from "../../utils/supabaseApi";
 import { useNotifications } from "../../contexts/NotificationContext";
+import supabase from "../../utils/supabase.ts";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
     "& .MuiBadge-badge": {
@@ -28,6 +29,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const MobileHeader = ({ toggleMobileMenu }) => {
     const { currentUser } = useAuth();
     const [cartCount, setCartCount] = useState(0);
+    const [profileImageUrl, setProfileImageUrl] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const { selectedAddress, setShowModal, setModalMode } = useLocationContext();
     const location = useLocation();
@@ -37,6 +39,29 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     useEffect(()=>{
         fetchNotifications();
     })
+
+    // Fetch user profile image
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (!currentUser?.id) {
+                setProfileImageUrl(null);
+                return;
+            }
+            try {
+                const { data, error } = await supabase
+                    .from("users")
+                    .select("photo_url")
+                    .eq("id", currentUser.id)
+                    .single();
+                if (data && !error) {
+                    setProfileImageUrl(data.photo_url);
+                }
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+        };
+        fetchUserProfile();
+    }, [currentUser]);
 
     useEffect(() => {
         async function fetchCart() {
@@ -126,14 +151,22 @@ const MobileHeader = ({ toggleMobileMenu }) => {
                     </Link>
                     <button
                         onClick={() => { currentUser ? navigate("/MobileAccount") : navigate("/login") }}
-                        className="flex items-center justify-center p-2 w-12 h-10 rounded-lg bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-colors"
+                        className="flex items-center justify-center p-2 w-12 h-10 rounded-lg bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-colors overflow-hidden"
                     >
                         {currentUser ? (
-                            <img 
-                                src="/user-logo.svg" 
-                                alt="User Profile" 
-                                className="w-6 h-6 text-gray-700"
-                            />
+                            profileImageUrl || currentUser?.photo_url || currentUser?.user_metadata?.photo_url ? (
+                                <img 
+                                    src={profileImageUrl || currentUser?.photo_url || currentUser?.user_metadata?.photo_url} 
+                                    alt="User Profile" 
+                                    className="w-full h-full object-cover rounded"
+                                />
+                            ) : (
+                                <img 
+                                    src="/user-logo.svg" 
+                                    alt="User Profile" 
+                                    className="w-6 h-6 text-gray-700"
+                                />
+                            )
                         ) : (
                             <span className="text-xs font-medium text-gray-700">Sign</span>
                         )}

@@ -203,6 +203,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Refresh user profile from database
+  const refreshUserProfile = async () => {
+    if (!currentUser?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+      
+      if (data && !error) {
+        setCurrentUser(prev => ({
+          ...prev,
+          ...data,
+          photo_url: data.photo_url
+        }));
+      }
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
+    }
+  };
+
   const value = {
     currentUser,
     userRole,
@@ -215,7 +238,8 @@ export const AuthProvider = ({ children }) => {
     logout: logoutUser,
     resetPassword,
     updatePassword,
-    setCurrentUser
+    setCurrentUser,
+    refreshUserProfile
   };
 
   return (

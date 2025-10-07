@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import SkeletonAccountPage from "../../components/SekeletonAccountPage/SkeletonAccountPage";
+import supabase from "../../utils/supabase.ts";
 import {
   User,
   Wallet,
@@ -33,14 +34,36 @@ const AccountLink = ({ to, icon: Icon, children }) => (
 function MobileAccountPage() {
   const { currentUser, logout } = useAuth(); // Get currentUser for name and avatar
   const [loading, setLoading] = useState(true);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
   const navigate = useNavigate();
 
-  // This hook must run before the loading check
+  // Fetch user profile data
   useEffect(() => {
-    // Simulate loading delay for 2 seconds
-    const timer = setTimeout(() => setLoading(false), 2000); // Changed to 2000ms
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchUserProfile = async () => {
+      if (!currentUser?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("photo_url")
+          .eq("id", currentUser.id)
+          .single();
+
+        if (data && !error) {
+          setProfileImageUrl(data.photo_url);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [currentUser]);
 
 
   useEffect(() => {
@@ -71,12 +94,20 @@ function MobileAccountPage() {
         {/* Profile Header */}
         <div className="p-3 mt-12 bg-white rounded-xl shadow-sm mobile-profile-header">
           <div className="flex items-start space-x-3">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200">
-              <img 
-                src="/user-logo.svg" 
-                alt="User Profile" 
-                className="w-8 h-8 text-gray-600"
-              />
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200 overflow-hidden">
+              {profileImageUrl || currentUser?.photo_url || currentUser?.user_metadata?.photo_url ? (
+                <img 
+                  src={profileImageUrl || currentUser?.photo_url || currentUser?.user_metadata?.photo_url} 
+                  alt="User Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img 
+                  src="/user-logo.svg" 
+                  alt="User Profile" 
+                  className="w-8 h-8 text-gray-600"
+                />
+              )}
             </div>
             <div className="flex-1 overflow-hidden">
               <h1 className="text-base font-bold text-gray-900 break-words leading-tight">
