@@ -129,7 +129,7 @@ const MobileIntegratedBanner = () => {
 
   return (
     <div 
-      className="relative w-full min-h-[380px] overflow-hidden transition-all duration-1000 ease-out"
+      className="relative w-full min-h-[320px] overflow-hidden transition-all duration-1000 ease-out"
       style={{
         background: `linear-gradient(135deg, ${currentSlideColor} 0%, ${currentSlideColor}e6 30%, ${currentSlideColor}cc 70%, ${currentSlideColor}99 100%)`,
       }}
@@ -165,30 +165,30 @@ const MobileIntegratedBanner = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="relative z-20 px-4 pb-2 mb-1">
+      <div className="relative z-20 px-4 pb-1">
         <form onSubmit={handleSearch} className="w-full">
           <div 
-            className="relative flex items-center bg-white/95 rounded-2xl px-5 py-4 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 backdrop-blur-sm"
+            className="relative flex items-center bg-white/95 rounded-2xl px-5 py-3 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 backdrop-blur-sm"
             style={{
               boxShadow: `0 8px 25px ${currentSlideColor}25, inset 0 1px 0 rgba(255, 255, 255, 0.9)`,
               border: `1px solid ${currentSlideColor}20`,
             }}
           >
-            <Search size={22} className="text-indigo-600 mr-4 flex-shrink-0" />
+            <Search size={20} className="text-indigo-600 mr-3 flex-shrink-0" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Restaurant name or a dish..."
-              className="flex-1 border-none outline-none text-lg text-gray-800 bg-transparent placeholder-gray-500"
+              className="flex-1 border-none outline-none text-base text-gray-800 bg-transparent placeholder-gray-500"
             />
-            <Mic size={22} className="text-indigo-600 ml-4 flex-shrink-0 cursor-pointer p-1.5 rounded-full hover:bg-indigo-100 transition-all" />
+            <Mic size={20} className="text-indigo-600 ml-3 flex-shrink-0 cursor-pointer p-1 rounded-full hover:bg-indigo-100 transition-all" />
           </div>
         </form>
       </div>
 
       {/* Banner Carousel */}
-      <div className="relative w-full h-64 z-10 flex items-end">
+      <div className="relative w-full h-56 z-10 flex items-end mt-2">
         {banners.length > 0 ? (
           <Swiper
             navigation={false}
