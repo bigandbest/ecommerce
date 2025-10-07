@@ -19,6 +19,7 @@ import BbmPicks from "../../components/BBM Picks/ShopByStore.jsx";
 import Stores from "../../components/BBM Picks/QuickPicks.jsx";
 import Quickyfy from "../../components/BBM Picks/BnB Expertise.jsx";
 import StoreNav from "../../components/StoreNav/StoreNav.jsx";
+import SubStoreNav from "../../components/SubStoreNav/SubStoreNav.jsx";
 import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
 import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
 import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
@@ -522,6 +523,10 @@ export const Home = () => {
       
       {/* Wholesale/Bazar/Eato sections */}
       <HomeFestivalGrid />
+      
+      {/* SubStore Navigation */}
+      <SubStoreNav />
+      
       <FeaturedThisWeek />
       <FlashSale />
 
