@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import HomeSlider from "../../components/HomeSlider";
-import MobileIntegratedBanner from "../../components/MobileIntegratedBanner/MobileIntegratedBanner";
+import MobileBannerCarousel from "../../components/MobileBannerCarousel/MobileBannerCarousel.jsx";
 import Search from "../../components/Search";
 import { FaShippingFast } from "react-icons/fa";
 import Tabs from "@mui/material/Tabs";
@@ -518,45 +518,9 @@ export const Home = () => {
   return (
     <div className="home-page-container">
       {/* Banner Carousel - Mobile/Desktop */}
-      {isMobile ? <MobileIntegratedBanner /> : <HomeSlider />}
+      {isMobile ? <MobileBannerCarousel /> : <HomeSlider />}
       
-      {/* StoreNav Section - Wholesale, Bazaar, Qwik, Eato, Delivery */}
-      {isMobile && (
-        <div className="store-nav-section">
-          <StoreNav />
-        </div>
-      )}
-      
-      {/* Mobile Header Components below StoreNav */}
-      {isMobile && (
-        <>
-          <div className="mobile-header-sections">
-            <Stores title="BBM Picks" items={[
-              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Office" },
-              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
-              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
-              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
-              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpager-preview.jpg", label: "More" },
-            ]} />
-            <BbmPicks title="Recommended Store" items={[
-              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
-              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Packaging" },
-              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Essentia" },
-              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Plus" },
-              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "More" },
-            ]} />
-            <Quickyfy title="Quickyfy" items={[
-              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
-              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Packaging" },
-              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Essentia" },
-              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Plus" },
-              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "More" },
-            ]} />
-          </div>
-        </>
-      )}
-      
-      {/* Wholesale/Bazar/Eato sections moved below banner */}
+      {/* Wholesale/Bazar/Eato sections */}
       <HomeFestivalGrid />
       <FeaturedThisWeek />
       <FlashSale />

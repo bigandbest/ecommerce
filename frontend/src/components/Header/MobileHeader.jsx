@@ -32,7 +32,7 @@ const MobileHeader = ({ toggleMobileMenu }) => {
     const { selectedAddress, setShowModal, setModalMode } = useLocationContext();
     const location = useLocation();
     const navigate = useNavigate();
-    const { unread, fetchNotifications } = useNotifications();
+    const { unread = new Set(), fetchNotifications = () => {} } = useNotifications() || {};
 
     useEffect(()=>{
         fetchNotifications();
