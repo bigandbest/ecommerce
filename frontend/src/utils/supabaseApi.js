@@ -2657,4 +2657,48 @@ export async function deleteSubStore(id) {
   return true;
 }
 
+// Upload user avatar
+export const uploadUserAvatar = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const response = await fetch('/api/business/upload-avatar', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Upload failed: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// Remove user avatar
+export const removeUserAvatar = async () => {
+  try {
+    const response = await fetch('/api/business/remove-avatar', {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Remove failed: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
 /* this is a testing commit */

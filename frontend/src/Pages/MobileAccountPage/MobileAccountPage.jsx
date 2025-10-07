@@ -71,10 +71,12 @@ function MobileAccountPage() {
         {/* Profile Header */}
         <div className="p-3 mt-12 bg-white rounded-xl shadow-sm mobile-profile-header">
           <div className="flex items-start space-x-3">
-            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="font-medium text-base text-gray-600">
-                {currentUser?.name ? currentUser.name[0].toUpperCase() : <User />}
-              </span>
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200">
+              <img 
+                src="/user-logo.svg" 
+                alt="User Profile" 
+                className="w-8 h-8 text-gray-600"
+              />
             </div>
             <div className="flex-1 overflow-hidden">
               <h1 className="text-base font-bold text-gray-900 break-words leading-tight">
