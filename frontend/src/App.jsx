@@ -20,6 +20,8 @@ import SubCategoryPage from "./Pages/SubCategoryPage/SubCategoryPage.jsx";
 import Search from "./components/Search/index.jsx";
 import MobileBannerCarousel from './components/MobileBannerCarousel/MobileBannerCarousel.jsx';
 import MobileCategoriesBar from "./components/CategoriesBar/MobileCategoriesBar.jsx";
+import { NotificationProvider } from "./contexts/NotificationContext.jsx";
+import PaymentPage from "./Pages/Payment/PaymentPage.jsx";
 
 import CustomPrinting from "./Pages/CustomPrinting/index.jsx";
 import MyOrders from "./Pages/MyOrders/MyOrders.jsx";
@@ -45,6 +47,22 @@ import LocationModal from "./components/LocationModal/LocationModal.jsx";
 import MainSearchBar from "./components/MainSearchBar/MainSearchBar.jsx";
 import ConditionalMobileCategoriesBar from "./components/CategoriesBar/ConditionalMobileCategoriesBar.jsx";
 import MobileHeader from "./components/Header/MobileHeader.jsx";
+import StoreNav from "./components/StoreNav/StoreNav.jsx";
+import SubStoreNav from "./components/SubStoreNav/SubStoreNav.jsx";
+import BbmPicks from "./components/BBM Picks/ShopByStore.jsx";
+import Stores from "./components/BBM Picks/QuickPicks.jsx";
+import Quickyfy from "./components/BBM Picks/BnB Expertise.jsx";
+/* import OfferBannerSlider from "./components/NewSection/OfferBannerSlider.jsx";
+import CategoryOfferBanner from "./components/NewSection/CategoryOfferBanner.jsx";
+import GroupBannerSlider from "./components/NewSection/GroupBannerSlider.jsx"; */
+import AllCategoriesPage from "./Pages/AllCategories/AllCategoriesPage.jsx";
+import NewCategoryDivisionPage from "./Pages/New/NewCategoryDivisionPage.jsx";
+import Notifications from "./Pages/Notifications/Notifications.jsx";
+import MapLocationPage from "./components/MapLocationPage/MapLocationPage .jsx";
+import AddressSelectionPage from "./components/AddressSelectionPage/AddressSelectionPage.jsx";
+import DetailPage from "./Pages/NewSectionGroupDetailPage/DetailPage.jsx";
+import ProductListingPage from "./Pages/NewProductListingPage/ProductListingPage.jsx";
+
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -61,8 +79,17 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-function App() {
+// Component to conditionally render header and other components
+const ConditionalLayout = ({ children }) => {
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Toggle function to open/close mobile sidebar menu
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev);
+  };
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -72,20 +99,85 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const banners = [
-    {
-      id: 1,
-      title: 'Dry Fruits Sale',
-      imageUrl: 'https://your-image-url.com/slide1.jpg',
-      link: '/dryfruits',
-    },
-    {
-      id: 2,
-      title: 'New Offers',
-      imageUrl: 'https://your-image-url.com/slide2.jpg',
-      link: '/offers',
-    },
+  // Check if current route is any account/dashboard page
+  const isDashboardPage = location.pathname === '/MyOrders' || 
+                         location.pathname === '/account' || 
+                         location.pathname === '/MobileAccount' || 
+                         location.pathname === '/wishlist' || 
+                         location.pathname === '/enquiry-history' || 
+                         location.pathname === '/custom-printing' || 
+                         location.pathname === '/Notifications' || 
+                         location.pathname === '/contact-us' || 
+                         location.pathname === '/about-us' || 
+                         location.pathname === '/faq' || 
+                         location.pathname === '/shipping-returns' || 
+                         location.pathname === '/terms-of-service' || 
+                         location.pathname === '/privacy-policy' ||
+                         location.pathname === '/coming-soon' ||
+                         location.pathname.includes('/wallet') ||
+                         location.pathname.includes('/refund');
+
+  const data = [
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Packaging" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Essentia" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Plus" },
+    { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "More" },
   ];
+  const Seconddata = [
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Office" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
+    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpager-preview.jpg", label: "More" },
+  ];
+  const Thirddata = [
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Packaging" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Essentia" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Plus" },
+    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "More" },
+  ];
+
+  return (
+    <>
+      {!isDashboardPage && <AnnouncementBar />}
+      {!isDashboardPage && location.pathname !== '/' && (
+        <>
+          {isMobile ? <MobileHeader toggleMobileMenu={toggleMobileMenu} /> : <Header />}
+          <div className="!sticky top-0">
+            <MainSearchBar />
+          </div>
+          <StoreNav />
+          <MobileBannerCarousel />
+          <Stores title="BBM Picks" items={Seconddata} />
+          <BbmPicks title="Recommended Store" items={data} />
+          <Quickyfy title="Quickyfy" items={Thirddata} />
+          <SubStoreNav />
+          <MobileCategoriesBar />
+          <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen} />
+        </>
+      )}
+      {!isDashboardPage && location.pathname === '/' && isMobile && (
+        <MobileHeader toggleMobileMenu={toggleMobileMenu} />
+      )}
+      {!isDashboardPage && location.pathname === '/' && !isMobile && (
+        <>
+          <Header />
+          <StoreNav />
+          <Stores title="BBM Picks" items={Seconddata} />
+          <BbmPicks title="Recommended Store" items={data} />
+          <Quickyfy title="Quickyfy" items={Thirddata} />
+        </>
+      )}
+      <LocationModal />
+      {children}
+    </>
+  );
+};
+
+function App() {
   return (
     <>
       <AuthProvider>
@@ -231,6 +323,167 @@ function App() {
                 <WhatsAppWidget />
                 <Footer />
               </BrowserRouter>
+              <NotificationProvider>
+                <DynamicHead />
+                <BrowserRouter>
+                  <ConditionalLayout>
+                  <Routes>
+                    <Route path={"/"} exact={true} element={<Home />} />
+                    <Route
+                      path={"/productListing"}
+                      exact={true}
+                      element={<ProductListing />}
+                    />
+                    <Route
+                      path={"/product/:id"}
+                      exact={true}
+                      element={<ProductDetails />}
+                    />
+                    <Route path={"/login"} exact={true} element={<Login />} />
+                    <Route path={"/signup"} exact={true} element={<Signup />} />
+                    <Route
+                      path={"/reset-password"}
+                      exact={true}
+                      element={<ResetPassword />}
+                    />
+                    <Route
+                      path={"checkout/select-location"}
+                      exact={true}
+                      element={<MapLocationPage />}
+                    />
+                    <Route
+                      path={"/checkout/confirm-address"}
+                      exact={true}
+                      element={<AddressSelectionPage />}
+                    />
+                    <Route path="/checkout/payment" element={<PaymentPage />} />
+                    <Route
+                      path={"/about-us"}
+                      exact={true}
+                      element={<AboutUs />}
+                    />
+                    <Route
+                      path={"/all"}
+                      exact={true}
+                      element={<AllCategoriesPage />}
+                    />
+                    <Route
+                      path={"/contact-us"}
+                      exact={true}
+                      element={<ContactUs />}
+                    />
+                    <Route
+                      path={"/Notifications"}
+                      exact={true}
+                      element={<Notifications />}
+                    />
+                    <Route path={"/cart"} exact={true} element={<Cart />} />
+                    <Route
+                      path={"/custom-printing"}
+                      exact={true}
+                      element={<CustomPrinting />}
+                    />
+                    {<Route
+                      path="/privacy-policy"
+                      element={<PrivacyPolicy />}
+                    />}
+                    <Route
+                      path={"/terms-of-service"}
+                      exact={true}
+                      element={<TermsOfService />}
+                    />
+                    <Route path={"/faq"} exact={true} element={<FAQ />} />
+                    <Route
+                      path={"/MyOrders"}
+                      exact={true}
+                      element={<MyOrders />}
+                    />
+                    <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} />
+                    {/* <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} /> */}
+                    <Route path="/:section/:id" element={<DetailPage />} />
+                    <Route
+                      path={"/BusinessPartner"}
+                      exact={true}
+                      element={<BusinessPartnerLogin />}
+                    />
+                    <Route
+                      path={"/BusinessPartnerSignup"}
+                      exact={true}
+                      element={<BusinessPartnerSignup />}
+                    />
+                    <Route
+                      path="/subcategories/:categoryName"
+                      element={<SubCategoryPage />}
+                    />
+                    <Route
+                      path="/subcategories"
+                      element={<SubCategoryPage />}
+                    />
+                    <Route
+                      path={"/shipping-returns"}
+                      exact={true}
+                      element={<ShippingReturns />}
+                    />
+                    <Route
+                      path={"/account"}
+                      exact={true}
+                      element={
+                        <ProtectedRoute>
+                          <Account />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={"/MobileAccount"}
+                      exact={true}
+                      element={
+                        <ProtectedRoute>
+                          <MobileAccountPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/ProductLisingPage/:Name/:id" element={<ProductListingPage />} />
+                    <Route path="/ProductLisingPage/:Name" element={<ProductListingPage />} />
+                    <Route
+                      path={"/wishlist"}
+                      exact={true}
+                      element={
+                        <ProtectedRoute>
+                          <Wishlist />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={"/enquiry-history"}
+                      exact={true}
+                      element={
+                        <ProtectedRoute>
+                          <EnquiryHistory />
+                        </ProtectedRoute>
+                      }
+                    />{" "}
+                    {/* Add protected route for EnquiryHistory */}
+                    <Route
+                      path={"/coming-soon"}
+                      exact={true}
+                      element={<ComingSoon />}
+                    />{" "}
+                    {/* Add route for ComingSoon */}
+                    {/* Fallback 404 route */}
+                    <Route
+                      path="*"
+                      element={
+                        <div style={{ padding: 40, textAlign: "center" }}>
+                          <h2>404 - Page Not Found</h2>
+                        </div>
+                      }
+                    />
+                  </Routes>
+                  </ConditionalLayout>
+                  <WhatsAppWidget />
+                  <Footer />
+                </BrowserRouter>
+              </NotificationProvider>
             </PromotionalProvider>
           </SettingsProvider>
         </LocationProvider>

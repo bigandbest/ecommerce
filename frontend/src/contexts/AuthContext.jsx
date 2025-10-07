@@ -32,7 +32,8 @@ export const AuthProvider = ({ children }) => {
         setCurrentUser({ 
           ...user, 
           name,
-          email: user.email // Explicitly ensure email is available
+          email: user.email, // Explicitly ensure email is available
+          avatar: user.user_metadata?.avatar || null
         });
         setLoading(false);
       } else {
@@ -50,7 +51,8 @@ export const AuthProvider = ({ children }) => {
         setCurrentUser({ 
           ...user, 
           name,
-          email: user.email // Explicitly ensure email is available
+          email: user.email, // Explicitly ensure email is available
+          avatar: user.user_metadata?.avatar || null
         });
       } else {
         setCurrentUser(null);
@@ -73,9 +75,10 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser({ 
         ...user, 
         name,
-        email: user.email // Explicitly ensure email is available
+        email: user.email, // Explicitly ensure email is available
+        avatar: user.user_metadata?.avatar || null
       });
-      return { success: true, user: { ...user, name, email: user.email } };
+      return { success: true, user: { ...user, name, email: user.email, avatar: user.user_metadata?.avatar || null } };
     } catch (err) {
       setError(err.message);
       return { success: false, error: err.message };

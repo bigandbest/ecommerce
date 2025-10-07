@@ -2,6 +2,12 @@ import { supabase } from '../config/supabaseClient.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { setSessionCookie, clearSessionCookie } from '../utils/cookieUtils.js';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const signup = async (req, res) => {
   const { first_name, last_name, phone_no,email, pan, gstin, adhaar_no, business_type } = req.body;
@@ -65,5 +71,85 @@ export const logout = (req, res) => {
 
 export const getMe = (req, res) => {
   res.json({ user: req.user });
+};
+
+// Multer configuration for avatar upload
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed.'));
+    }
+  }
+});
+
+export const uploadAvatar = upload.single('avatar');
+
+export const updateUserAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const userId = req.user.id;
+    const file = req.file;
+    const fileName = `avatar_${userId}_${Date.now()}.${file.mimetype.split('/')[1]}`;
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true
+      });
+
+    if (uploadError) {
+      return res.status(500).json({ error: 'Failed to upload image' });
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(fileName);
+
+    // Update user record
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ avatar: publicUrl })
+      .eq('id', userId);
+
+    if (updateError) {
+      return res.status(500).json({ error: 'Failed to update user profile' });
+    }
+
+    res.json({ success: true, avatarUrl: publicUrl });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const removeUserAvatar = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Update user record to remove avatar
+    const { error } = await supabase
+      .from('users')
+      .update({ avatar: null })
+      .eq('id', userId);
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to remove avatar' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 

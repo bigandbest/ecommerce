@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import HomeSlider from "../../components/HomeSlider";
+import MobileIntegratedBanner from "../../components/MobileIntegratedBanner/MobileIntegratedBanner";
 import Search from "../../components/Search";
 import { FaShippingFast } from "react-icons/fa";
 import Tabs from "@mui/material/Tabs";
@@ -7,8 +8,27 @@ import Tab from "@mui/material/Tab";
 import { useAuth } from "../../contexts/AuthContext";
 import ProductsSlider from "../../components/ProductsSlider";
 import { useLocationContext } from "../../contexts/LocationContext.jsx";
-import VideoBannerSlider  from '../../components/HomeSlider/VideoSlider.jsx'
+import VideoBannerSlider from '../../components/HomeSlider/VideoSlider.jsx'
 import ProductsNew from "../LastMobileProducts/LastMobileProducts.jsx";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+import HomeFestivalGrid from "../../components/BBM Picks/PoweredBy.jsx";
+import FeaturedThisWeek from "../../components/BBM Picks/ShopByBrand.jsx";
+import BbmPicks from "../../components/BBM Picks/ShopByStore.jsx";
+import Stores from "../../components/BBM Picks/QuickPicks.jsx";
+import Quickyfy from "../../components/BBM Picks/BnB Expertise.jsx";
+import StoreNav from "../../components/StoreNav/StoreNav.jsx";
+import ProductGrid3X3 from "../../components/NewSection/ProductGrid3X3.jsx";
+import EigthProductSection from "../../components/NewSection/EigthProductSection.jsx";
+import ProductGrid2X2 from "../../components/NewSection/ProductGrid2X2.jsx";
+import BannerImagesSlider from "../../components/NewSection/BannerImagesSlider.jsx";
+import SummerBigSaleBanner from "../../components/NewSection/SummerBigSaleBanner.jsx";
+import ProductBannerSlider from "../../components/NewSection/ProductBannerSlider.jsx";
+import OfferBannerSlider from "../../components/NewSection/OfferBannerSlider.jsx"; // First one
+import CategoryOfferBanner from "../../components/NewSection/CategoryOfferBanner.jsx"; // Second one
+import GroupBannerSlider from "../../components/NewSection/GroupBannerSlider.jsx"; // Third one
+
 
 // Import Swiper styles
 import "swiper/css";
@@ -117,34 +137,34 @@ export const Home = () => {
               selectedAddress.latitude,
               selectedAddress.longitude
             );
-            /* console.log("Selected Address:", selectedAddress); */
-          } else {
-            productFetchFn = getAllProducts;
-          }
-        } catch (err) {
-          console.error("Error determining product fetch method:", err);
+          /* console.log("Selected Address:", selectedAddress); */
+        } else {
           productFetchFn = getAllProducts;
         }
-        
-        const [
-          { success: prodSuccess, products: prodData },
-          { success: catSuccess, categories: catData },
-          { success: banSuccess, banners: banData },
-        ] = await Promise.all([
-          productFetchFn(),
-          getAllCategories(),
-          getAllBanners(),
-        ]);
-        setProducts(
-          prodSuccess && prodData
+      } catch (err) {
+        console.error("Error determining product fetch method:", err);
+        productFetchFn = getAllProducts;
+      }
+
+      const [
+        { success: prodSuccess, products: prodData },
+        { success: catSuccess, categories: catData },
+        { success: banSuccess, banners: banData },
+      ] = await Promise.all([
+        productFetchFn(),
+        getAllCategories(),
+        getAllBanners(),
+      ]);
+      setProducts(
+        prodSuccess && prodData
           ? prodData.map((p) => ({ ...p, id: p.id || p.product_id }))
           : []
-        );
-        /* console.log("Fetching nearby products using address:", products); */
-        setCategories(catSuccess && catData ? catData : []);
-        setBanners(banSuccess && banData ? banData : []);
-        setLoading(false);
-      }
+      );
+      /* console.log("Fetching nearby products using address:", products); */
+      setCategories(catSuccess && catData ? catData : []);
+      setBanners(banSuccess && banData ? banData : []);
+      setLoading(false);
+    }
 
     fetchAllData();
     async function fetchShippingBanner() {
@@ -156,22 +176,20 @@ export const Home = () => {
     fetchShippingBanner();
   }, [selectedAddress]);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchShipping = async () => {
       try {
         setLoading(true);
-        const result = await getshipping(); 
-        console.log("resultshipping", result);
+        const result = await getshipping();
+        /* console.log("resultshipping", result); */
         if (result.success && Array.isArray(result.banners)) {
-          const shipBanner = result.banners.filter(b => b.active && b.position === 'hero' && !b.is_mobile);
+          const shipBanner = result.banners.filter(b => b.active);
           setShippingBanners(shipBanner.map(b => ({
             id: b.id,
             title: b.title,
-            description: b.description,
             imageUrl: b.image || b.image_url,
-            link: b.link || '#',
           })));
-          console.log("Shipping Banners:", shipBanner);
+          /* console.log("Shipping Banners:", shipBanner); */
         } else {
           setShippingBanners([]);
         }
@@ -184,16 +202,16 @@ useEffect(() => {
     };
     fetchShipping();
   }, []);
-  
 
-  const getProductsByCategory = (category) => {
+
+  /* const getProductsByCategory = (category) => {
     return products
       .filter(
         (product) =>
           (product.category || "").toLowerCase() === category.toLowerCase()
       )
       .slice(0, 8);
-  };
+  }; */
 
   const popularProducts = products
     .filter((product) => product.popular)
@@ -250,14 +268,14 @@ useEffect(() => {
   const [isMobile, setIsMobile] = useState(false);
 
   // Search handler
-  const handleSearchSubmit = (e) => {
+  /* const handleSearchSubmit = (e) => {
     if (e) e.preventDefault();
     if (searchQuery.trim()) {
       navigate(
         `/productListing?search=${encodeURIComponent(searchQuery.trim())}`
       );
     }
-  };
+  }; */
 
   useEffect(() => {
     const handleResize = () => {
@@ -290,28 +308,371 @@ useEffect(() => {
     };
   }, []);
 
+  const sectionData = [
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    /* {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    }, */
+  ];
+  const sectionData2 = [
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+  ];
+  const sectionData3 = [
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Trending Now",
+      products: [
+        {
+          label: "Smart Watches",
+          tagline: "Bestseller",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Shoes",
+          tagline: "New Arrival",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+    {
+      title: "Best quality",
+      products: [
+        {
+          label: "Men's Jeans",
+          tagline: "Most-loved",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's Ethnic Sets",
+          tagline: "Best Picks",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Men's T-shirts",
+          tagline: "Top-rated",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+        {
+          label: "Skipping Ropes",
+          tagline: "Hot Deal",
+          image: "https://i.postimg.cc/B6gYq8Gk/Candle6.jpg",
+        },
+      ],
+    },
+  ];
+
   return (
-    <>
-      {/* Search Bar For mobile Screens */}
+    <div className="home-page-container">
+      {/* Banner Carousel - Mobile/Desktop */}
+      {isMobile ? <MobileIntegratedBanner /> : <HomeSlider />}
       
-
-      {/* Add spacer to push content below the search bar on mobile */}
-      {/* <div
-        className="mobile-search-spacer md:hidden"
-        style={{ height: "60px" }}
-      ></div> */}
-
-      <HomeSlider />
+      {/* StoreNav Section - Wholesale, Bazaar, Qwik, Eato, Delivery */}
+      {isMobile && (
+        <div className="store-nav-section">
+          <StoreNav />
+        </div>
+      )}
+      
+      {/* Mobile Header Components below StoreNav */}
+      {isMobile && (
+        <>
+          <div className="mobile-header-sections">
+            <Stores title="BBM Picks" items={[
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Office" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
+              { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpager-preview.jpg", label: "More" },
+            ]} />
+            <BbmPicks title="Recommended Store" items={[
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Packaging" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Essentia" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Plus" },
+              { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "More" },
+            ]} />
+            <Quickyfy title="Quickyfy" items={[
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Packaging" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Essentia" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Plus" },
+              { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "More" },
+            ]} />
+          </div>
+        </>
+      )}
+      
+      {/* Wholesale/Bazar/Eato sections moved below banner */}
+      <HomeFestivalGrid />
+      <FeaturedThisWeek />
       <FlashSale />
 
+      {/* === Offer Banners below Shop By Category === */}
+      <OfferBannerSlider  count={1}/>
+      <CategoryOfferBanner  count={1}/>
+      <GroupBannerSlider  count={1}/>
+
+       <BannerImagesSlider
+        count={1}         
+        bannerUrl="https://i.postimg.cc/W4pL05Hw/Opening-Soon.png"
+      />      {/* Opening soon */} {/* Change count to adjust the no.s of sections */}
+
+      {/* ================== PROMOTIONAL BANNER ================== */}
+      {/* Desktop version (lg and up) */}
+
+      <section className="!p-5 bg-white md:hidden md:justify-center">
+        {shippingBanners && shippingBanners.length > 0 ? (
+          <div className="w-full h-full border-0 rounded relative">
+            <Slider
+              dots={true}
+              infinite={true}
+              speed={500}
+              slidesToShow={1}
+              slidesToScroll={1}
+              arrows={false}
+              autoplay={true}
+              autoplaySpeed={4000}
+              className="rounded-lg"
+            >
+              {shippingBanners.map((banner) => (
+                <a
+                  href={banner.link}
+                  key={banner.id}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative block"
+                >
+                  <img
+                    src={banner.imageUrl}
+                    alt={banner.title}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  {/* Optional overlay with title and description */}
+                  {/* {(banner.title || banner.description) && (
+                    <div className="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white p-3 rounded">
+                      {banner.title && <h3 className="font-bold">{banner.title}</h3>}
+                      {banner.description && (
+                        <p className="text-sm mt-1">{banner.description}</p>
+                      )}
+                    </div>
+                  )} */}
+                </a>
+              ))}
+            </Slider>
+          </div>
+        ) : (
+          <></>
+        )}
+      </section>
+
+      <VideoBannerSlider />
+      <ProductGrid3X3 />
+      <SummerBigSaleBanner />   {/* Summer Big Sale */} 
+      
+      <EigthProductSection sectionCount={1} startIndex={0} />   {/* Section 1,2.. change coung */}
+      
+      
+      <div className="p-4 bg-white md:hidden">
+        {sectionData.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div>                   {/* Best Quality and Trending Now */}
+       <ProductBannerSlider
+        count={1}
+        bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
+      /> 
+
+      {/* <EigthProductSection sectionCount={3} startIndex={2} /> */}
+      {/* <ProductBannerSlider
+        count={1}
+        bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
+      /> */}
+      {/* <EigthProductSection sectionCount={1} startIndex={5} /> */}
+
+      {/* <div className="p-4 bg-white md:hidden">
+        {sectionData2.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div> */}
+
+      {/* <EigthProductSection sectionCount={2} startIndex={6} /> */}
+
       {/* Popular Products Section */}
-      <section className="bg-white sm:!py-10 !py-0 mt-0">
-        <div className="container px-4">
+      <section className="bg-white sm:!py-10 !py-0 mt-0 md:flex md:justify-center">
+        <div className="px-2 md:container md:px-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex-1">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-1 mt-5">
+            <div className="w-full flex items-center justify-between ">
+              <h2 className="text-xl sm:text-2xl font-semibold mt-5">
                 Popular Products
               </h2>
+              <a
+                href="/productListing"
+                className="text-sm text-blue-600 hover:underline mt-5 items-center flex align-middle"
+              >
+                View All
+              </a>
             </div>
             {/* <div className="w-full md:w-auto md:flex-1">
               <ProductTabs />
@@ -330,8 +691,8 @@ useEffect(() => {
       </section>
 
       {/* Latest Products Section */}
-      <section className="sm:!py-10 !py-0  bg-white">
-        <div className="container px-4">
+      <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
+        <div className="px-2 md:container md:px-10">
           <div className="flex items-center justify-between ">
             <h2 className="text-xl sm:text-2xl font-semibold">
               Latest Products
@@ -353,69 +714,22 @@ useEffect(() => {
           />
         </div>
       </section>
+      {/* <ProductBannerSlider
+        count={1}
+        bannerUrl="https://i.postimg.cc/hv8MvxF5/Explore-More-now-1.png"
+      /> */}
 
-      {/* ================== PROMOTIONAL BANNER ================== */}
-{/* Desktop version (lg and up) */}
+      {/* <div className="p-4 bg-white md:hidden">
+        {sectionData3.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div> */}
 
- <section className="py-4 bg-white">
-        <div className="container px-4">
-          <div className="promotional-banner w-full lg:w-[95%] mx-auto relative overflow-hidden rounded-xl shadow-lg">
-            {shippingBanner ? (
-              // If an active shipping banner exists, render it
-                <div className="shipping-banner-container">
-                <a href={shippingBanner.link || '#'} target="_blank" rel="noopener noreferrer">
-                  <picture>
-                    {shippingBanner.mobile_image_url && (
-                      <source media="(max-width: 767px)" srcSet={shippingBanner.mobile_image_url} />
-                    )}
-                    <img 
-                      src={shippingBanner.image_url} 
-                      alt={shippingBanner.title} 
-                    />
-                  </picture>
-                </a>
-              </div>
-              // <a href={shippingBanner.link || '#'} target="_blank" rel="noopener noreferrer">
-              //   <picture>
-              //     {shippingBanner.mobile_image_url && (
-              //       <source media="(max-width: 767px)" srcSet={shippingBanner.mobile_image_url} />
-              //     )}
-              //     <img 
-              //       src={shippingBanner.image_url} 
-              //       alt={shippingBanner.title} 
-              //       className="w-full h-auto"
-              //     />
-              //   </picture>
-              // </a>
-            ) : (
-              // Otherwise, render the default content (your original banner)
-              <div className="bg-gradient-to-r from-orange-100 via-red-50 to-orange-100 border-2 border-red-200">
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                  <div className="absolute -top-10 -left-10 w-56 h-56 bg-red-400 rounded-full blur-3xl" />
-                  <div className="absolute -bottom-10 -right-10 w-56 h-56 bg-orange-300 rounded-full blur-3xl" />
-                </div>
-                <div className="relative z-10 flex items-center justify-between py-6 px-8">
-                  {/* ... your original default banner content ... */}
-                   <div className="flex items-center gap-5">
-                      <div className="w-16 h-16 flex items-center justify-center rounded-full bg-red-500">
-                        <FaShippingFast className="text-white text-2xl" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-red-800 mb-1">
-                          {getPromoSetting("promo_shipping_title", "Free Shipping")}
-                        </h3>
-                        <p className="text-sm font-semibold text-red-600">Shop now</p>
-                      </div>
-                    </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-
-{/* <section className="hidden md:block py-4 bg-white">
+      {/* <section className="hidden md:block py-4 bg-white">
   <div className="container px-4">
     <div className="promotional-banner w-full lg:w-[95%] mx-auto
                     relative overflow-hidden rounded-xl shadow-lg
@@ -463,23 +777,19 @@ useEffect(() => {
   </div>
 </section> */}
 
-{/* Mobile version (below lg) */}
-{/* <section className="md:hidden w-full">
+      {/* Mobile version (below lg) */}
+      {/* <section className="md:hidden w-full">
   <img
     src={promoImage}
     alt="Special Mobile Offer"
     className="w-full h-auto object-cover"
   />
 </section> */}
-{/* ========================================================= */}
-
-
-
-      <VideoBannerSlider/>
+      {/* ========================================================= */}
 
       {/* Featured Products Section */}
-      <section className="sm:!py-10 !py-0  bg-white">
-        <div className="container px-4">
+      <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
+        <div className="px-2 md:container md:px-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-semibold">
               Featured Products
@@ -502,12 +812,12 @@ useEffect(() => {
         </div>
       </section>
 
-      {dynamicSections.map(
+      {dynamicSections.slice(0, 4).map(
         ({ key, label, products }, index) =>
           products.length > 0 && (
             <React.Fragment key={key}>
-              <section className="sm:!py-10 !py-0  bg-white">
-                <div className="container px-4">
+              <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
+                <div className="px-2 md:container md:px-10">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl sm:text-2xl font-semibold">
                       {label}
@@ -529,43 +839,63 @@ useEffect(() => {
                   />
                 </div>
               </section>
-
-              {/* Insert PromoBanner every 2 sections */}
-
-              {/* <section className="py-4 bg-white">
-        <div className="container px-4">
-          <div className="shipping-banner w-full lg:w-[90%] mx-auto py-4 px-4 sm:px-6 border-2 border-red-200 rounded-lg shadow-sm bg-gradient-to-r from-red-50 to-white">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <FaShippingFast className="text-3xl sm:text-4xl text-red-500" />
-                <span className="text-base sm:text-lg font-semibold uppercase">
-                  {getPromoSetting("promo_shipping_title", "Free Shipping")}
-                </span>
-              </div>
-
-              <div className="text-center sm:text-left">
-                <p className="font-medium text-sm sm:text-base">
-                  {getPromoSetting(
-                    "promo_shipping_description",
-                    "Free delivery on your first order and over ₹500"
-                  )}
-                </p>
-              </div>
-
-              <p className="font-bold text-lg sm:text-xl text-red-600">
-                {getPromoSetting("promo_shipping_amount", "Only ₹500/-")}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section> */}
-              
-              {/* {(index + 1) % 2 === 0 && <PromoBanner />} */}
             </React.Fragment>
           )
       )}
-        <ProductsNew/>
-    </>
+
+      {/* <div className="p-4 bg-white md:hidden">
+        {sectionData2.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div> */}
+
+      {dynamicSections.slice(4).map(
+        ({ key, label, products }, index) =>
+          products.length > 0 && (
+            <React.Fragment key={key}>
+              <section className="sm:!py-10 !py-0 md:flex md:justify-center bg-white">
+                <div className="px-2 md:container md:px-10">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl sm:text-2xl font-semibold">
+                      {label}
+                    </h2>
+                    <a
+                      href="/productListing"
+                      className="text-sm text-blue-600 hover:underline text-center flex items-center align-middle"
+                    >
+                      View All
+                    </a>
+                  </div>
+
+                  <ProductsSlider
+                    products={products}
+                    slidesPerViewMobile={2.5}
+                    slidesPerViewTablet={2.5}
+                    slidesPerViewDesktop={4}
+                    slidesPerViewLarge={5}
+                  />
+                </div>
+              </section>
+            </React.Fragment>
+          )
+      )}
+
+      {/* <div className="p-4 bg-white md:hidden">
+        {sectionData2.map((section, idx) => (
+          <ProductGrid2X2
+            key={idx}
+            title={section.title}
+            products={section.products}
+          />
+        ))}
+      </div> */}
+
+      <ProductsNew />
+    </div>
   );
 };
 

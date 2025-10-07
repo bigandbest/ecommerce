@@ -19,6 +19,7 @@ import { MdSort } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useLocationContext } from "../../contexts/LocationContext.jsx";
+import { ChevronDown } from "lucide-react";
 
 import {
   getAllProducts,
@@ -27,6 +28,11 @@ import {
   getProductsByGroupName,
   getNearbyProducts,
   getDefaultUserAddress,
+  gettingProductsByGroupName,
+  gettingProductsByCategoryName,
+  gettingProductsBySubcategoryName,
+  getAllGroups,
+  getAllSubcategories
 } from "../../utils/supabaseApi";
 
 const ProductListing = () => {
@@ -50,41 +56,107 @@ const ProductListing = () => {
   const group = queryParams.get("group");
   const search = queryParams.get("search")?.toLowerCase() || "";
 
+
   const { selectedAddress } = useLocationContext();
 
   const sortMenuOpen = Boolean(sortAnchorEl);
   const filterMenuOpen = Boolean(filterAnchorEl);
 
+  const params = new URLSearchParams(location.search);
+  const groupName = params.get("group");
+  const subcategoryName = params.get("subcategory");
+  const categoryName = params.get("category");
+  const initialGroupName = params.get("group");
+  const initialSubcategoryName = params.get("subcategory");
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const [subcategories, setSubcategories] = useState([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(initialSubcategoryName);
+  const [selectedGroup, setSelectedGroup] = useState(initialGroupName);
+
+  useEffect(() => {
+    const fetchSubs = async () => {
+      const { success, subcategories } = await getAllSubcategories();
+      if (success) {
+        // filter subcategories under the selected category
+        const filtered = subcategories.filter(
+          (sub) => sub.categories?.name === categoryName
+        );
+        setSubcategories(filtered);
+      }
+    };
+    if (categoryName) fetchSubs();
+  }, [categoryName]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const { success, groups } = await getAllGroups();
+      if (success) {
+        const filtered = groups.filter(
+          (g) => g.subcategories?.name === selectedSubcategory
+        );
+        setGroups(filtered);
+
+        // reset group selection if it doesn't belong
+        if (!filtered.find((g) => g.name === selectedGroup)) {
+          setSelectedGroup(filtered[0]?.name || null);
+        }
+      }
+    };
+    if (selectedSubcategory) fetchGroups();
+  }, [selectedSubcategory]);
+
+  const [groups, setGroups] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const { success, groups } = await getAllGroups();
+      if (success) {
+        // filter only groups under the current subcategory
+        const filtered = groups.filter(
+          (g) => g.subcategories?.name === subcategoryName
+        );
+        setGroups(filtered);
+      }
+    };
+    if (subcategoryName) fetchGroups();
+  }, [subcategoryName]);
+
+
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
       let productsResult;
-
-      if(selectedAddress===null){
-        productsResult = await getAllProducts();
-      }
-
       const address = selectedAddress;
       const lat = address?.latitude;
       const lon = address?.longitude;
       const hasCoords = lat && lon;
 
-      if (group) {
-        productsResult = hasCoords
-          ? await getProductsByGroupName(group, lat, lon)
-          : await getAllProducts();
-      } else if (subcategory) {
-        productsResult = hasCoords
-          ? await getProductsBySubcategoryName(subcategory, lat, lon)
-          : await getAllProducts();
-      } else if (category) {
-        productsResult = hasCoords
-          ? await getProductsByCategoryName(category, lat, lon)
-          : await getAllProducts();
+      if (!hasCoords) {
+        if (group) {
+          productsResult = await gettingProductsByGroupName(group);
+        } else if (subcategory) {
+          productsResult = await gettingProductsBySubcategoryName(subcategory);
+        } else if (category) {
+          productsResult = await gettingProductsByCategoryName(category);
+          console.log(productsResult)
+        } else {
+          productsResult = await getAllProducts();
+        }
       } else {
-        productsResult = hasCoords
-          ? await getNearbyProducts(lat, lon)
-          : await getAllProducts();
+        if (group) {
+          productsResult = await getProductsByGroupName(group, lat, lon);
+        } else if (subcategory) {
+          productsResult = await getProductsBySubcategoryName(subcategory, lat, lon);
+        } else if (category) {
+          productsResult = await getProductsByCategoryName(category, lat, lon);
+        } else {
+          productsResult = await getNearbyProducts(lat, lon);
+        }
       }
 
       const { success, products } = productsResult;
@@ -217,8 +289,85 @@ const ProductListing = () => {
         <Search />
       </div> */}
       {/* this div is only for spacing between search bar and product list */}
-     {/*  <div className="mt-5 h-12 md:hidden"></div> */}
-      <section className=" bg-gray-50 product-section">
+      {/*  <div className="mt-5 h-12 md:hidden"></div> */}
+      <section className=" bg-gray-50 product-section !pt-2">
+
+        <div className="w-full flex items-center gap-4 overflow-x-auto hide-scrollbar mb-6">
+          {groups.map((grp) => (
+            <div
+              key={grp.id}
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => {
+                window.location.href = `/productListing?group=${encodeURIComponent(grp.name)}&subcategory=${encodeURIComponent(subcategoryName)}&category=${encodeURIComponent(categoryName)}`;
+              }}
+            >
+              <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                <img
+                  src={grp.image_url}
+                  alt={grp.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="text-[10px] text-center mt-1 line-clamp-1">{grp.name}</p>
+            </div>
+          ))}
+        </div>
+
+
+        {/* Mobile filter button - visible only on small screens */}
+        <div className="flex justify-between md:hidden w-20 py-2">
+          <Button
+            variant="outlined"
+            startIcon={<FaFilter />}
+            onClick={toggleSidebar}
+            fullWidth
+            className="!border-gray-300 !w-20 !max-h-[44px] !text-gray-700"
+          >
+            Filters
+          </Button>
+
+          {/* Name is Category but it will be connected to sub catgories */}
+          {/* Category / Subcategory Dropdown */}
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="outlined"
+              onClick={handleClick}
+              fullWidth
+              className="!border-gray-300 !rounded-full !px-4 !py-2 !text-gray-800 !bg-gradient-to-r !from-gray-50 !to-gray-100 !shadow-sm hover:!from-gray-100 hover:!to-gray-200 !flex justify-between transition-all duration-200"
+            >
+              <span className="truncate max-w-[160px] font-medium">
+                {selectedSubcategory || "✨ Select Subcategory"}
+              </span>
+              <ChevronDown className="ml-2 flex-shrink-0 text-gray-600" />
+            </Button>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              PaperProps={{
+                className:
+                  "!rounded-xl !shadow-lg !bg-white !p-1 transition-all duration-200 !max-h-[250px] !overflow-y-auto hide-scrollbar",
+              }}
+            >
+              {subcategories.map((sub) => (
+                <MenuItem
+                  key={sub.id}
+                  onClick={() => {
+                    setSelectedSubcategory(sub.name);
+                    handleClose();
+                  }}
+                  className="!rounded-lg !px-4 !py-2 hover:!bg-indigo-50 hover:!text-indigo-600 truncate max-w-[220px] text-sm font-medium transition-colors"
+                >
+                  {sub.name}
+                </MenuItem>
+              ))}
+            </Menu>
+          </div>
+
+        </div>
+
+
         <div className="w-full px-4">
           <Breadcrumbs aria-label="breadcrumb" className="text-sm flex-wrap">
             <Link
@@ -235,46 +384,46 @@ const ProductListing = () => {
             {category && !subcategory && !group
               ? null
               : category && (
-                  <Link
-                    underline="hover"
-                    color="inherit"
-                    href={`/productListing?category=${encodeURIComponent(
-                      category
-                    )}`}
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    <span className="text-xs sm:text-sm">
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </span>
-                  </Link>
-                )}
+                <Link
+                  underline="hover"
+                  color="inherit"
+                  href={`/productListing?category=${encodeURIComponent(
+                    category
+                  )}`}
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <span className="text-xs sm:text-sm">
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </span>
+                </Link>
+              )}
             {/* Subcategory link if present and not the last item */}
             {subcategory && !group
               ? null
               : subcategory && (
-                  <Link
-                    underline="hover"
-                    color="inherit"
-                    href={`/productListing?subcategory=${encodeURIComponent(
-                      subcategory
-                    )}&category=${encodeURIComponent(category)}`}
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    <span className="text-xs sm:text-sm">
-                      {subcategory.charAt(0).toUpperCase() +
-                        subcategory.slice(1)}
-                    </span>
-                  </Link>
-                )}
+                <Link
+                  underline="hover"
+                  color="inherit"
+                  href={`/productListing?subcategory=${encodeURIComponent(
+                    subcategory
+                  )}&category=${encodeURIComponent(category)}`}
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <span className="text-xs sm:text-sm">
+                    {subcategory.charAt(0).toUpperCase() +
+                      subcategory.slice(1)}
+                  </span>
+                </Link>
+              )}
             {/* Final breadcrumb item (not a link) */}
             <span className="text-xs sm:text-sm font-medium">
               {group
                 ? group.charAt(0).toUpperCase() + group.slice(1)
                 : subcategory
-                ? subcategory.charAt(0).toUpperCase() + subcategory.slice(1)
-                : category
-                ? category.charAt(0).toUpperCase() + category.slice(1)
-                : "All Products"}
+                  ? subcategory.charAt(0).toUpperCase() + subcategory.slice(1)
+                  : category
+                    ? category.charAt(0).toUpperCase() + category.slice(1)
+                    : "All Products"}
             </span>
           </Breadcrumbs>
           <h1 className="text-xl sm:text-2xl font-bold mt-3 mb-5">
@@ -284,19 +433,6 @@ const ProductListing = () => {
 
         <div className="bg-white mt-4 shadow-sm product-listing-bg-white">
           <div className="w-full product-listing-main-wrapper">
-            {/* Mobile filter button - visible only on small screens */}
-            <div className="block md:hidden w-full mb-4">
-              <Button
-                variant="outlined"
-                startIcon={<FaFilter />}
-                onClick={toggleSidebar}
-                fullWidth
-                className="!border-gray-300 !text-gray-700"
-              >
-                Show Filters
-              </Button>
-            </div>
-
             <div className="product-listing-container">
               {/* Sidebar - hidden on mobile, shown as drawer */}
               <div className="hidden md:block product-listing-sidebar">
@@ -339,33 +475,29 @@ const ProductListing = () => {
                   <div className="flex items-center gap-2">
                     <IconButton
                       onClick={() => setItemView("list")}
-                      className={`!p-2 ${
-                        itemView === "list" ? "!bg-blue-100" : ""
-                      }`}
+                      className={`!p-2 ${itemView === "list" ? "!bg-blue-100" : ""
+                        }`}
                       aria-label="List view"
                     >
                       <ImMenu
-                        className={`${
-                          itemView === "list"
-                            ? "text-blue-600"
-                            : "text-gray-600"
-                        }`}
+                        className={`${itemView === "list"
+                          ? "text-blue-600"
+                          : "text-gray-600"
+                          }`}
                       />
                     </IconButton>
 
                     <IconButton
                       onClick={() => setItemView("grid")}
-                      className={`!p-2 ${
-                        itemView === "grid" ? "!bg-blue-100" : ""
-                      }`}
+                      className={`!p-2 ${itemView === "grid" ? "!bg-blue-100" : ""
+                        }`}
                       aria-label="Grid view"
                     >
                       <IoGrid
-                        className={`${
-                          itemView === "grid"
-                            ? "text-blue-600"
-                            : "text-gray-600"
-                        }`}
+                        className={`${itemView === "grid"
+                          ? "text-blue-600"
+                          : "text-gray-600"
+                          }`}
                       />
                     </IconButton>
 
@@ -455,14 +587,14 @@ const ProductListing = () => {
                       >
                         {itemView === "grid"
                           ? currentItems.map((item) => (
-                              <ProductItem key={item.id} product={item} />
-                            ))
+                            <ProductItem key={item.id} product={item} />
+                          ))
                           : currentItems.map((item) => (
-                              <ProductitemListView
-                                key={item.id}
-                                product={item}
-                              />
-                            ))}
+                            <ProductitemListView
+                              key={item.id}
+                              product={item}
+                            />
+                          ))}
                       </div>
                     )}
                   </>

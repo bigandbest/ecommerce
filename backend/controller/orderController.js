@@ -1,5 +1,6 @@
 // controllers/orderController.js
 import { supabase } from "../config/supabaseClient.js";
+import crypto from "crypto";
 
 /** Get all orders (admin usage) */
 export const getAllOrders = async (req, res) => {
@@ -19,7 +20,7 @@ export const updateOrderStatus = async (req, res) => {
 
   const { error } = await supabase
     .from("orders")
-    .update({ status, adminnotes })
+    .update({ status, adminnotes, updated_at: new Date().toISOString() })
     .eq("id", id);
 
   if (error) return res.status(500).json({ success: false, error: error.message });
@@ -29,6 +30,7 @@ export const updateOrderStatus = async (req, res) => {
 /** Get orders for a specific user */
 export const getUserOrders = async (req, res) => {
   const { user_id } = req.params;
+  console.log('Getting orders for user_id:', user_id);
 
   const { data, error } = await supabase
     .from("orders")
@@ -36,7 +38,12 @@ export const getUserOrders = async (req, res) => {
     .eq("user_id", user_id)
     .order("created_at", { ascending: false });
 
-  if (error) return res.status(500).json({ success: false, error: error.message });
+  console.log('Database query result:', { data, error });
+  if (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+  console.log('Sending response with orders count:', data?.length || 0);
   return res.json({ success: true, orders: data });
 };
 
@@ -71,7 +78,6 @@ export const placeOrder = async (req, res) => {
   return res.json({ success: true, order });
 };
 
-/** Place order with detailed structured address */
 export const placeOrderWithDetailedAddress = async (req, res) => {
   const {
     user_id,
@@ -79,20 +85,25 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     subtotal,
     shipping,
     total,
-    detailedAddress,
+    detailedAddress,    // The manually selected address
     payment_method,
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
+    gpsLocation,        // 👈 The new GPS data from the map selection
   } = req.body;
 
-  /* console.log("Order Inserting With:", {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-  }); */
 
+  const generatedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .digest("hex");
 
+  if (generatedSignature !== razorpay_signature) {
+  return res.status(400).json({ success: false, error: "Invalid signature" });
+}
+
+  // This part remains the same, creating a string from the manual address
   const addressString = [
     detailedAddress.houseNumber && detailedAddress.streetAddress
       ? `${detailedAddress.houseNumber} ${detailedAddress.streetAddress}`
@@ -114,8 +125,9 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     subtotal,
     shipping,
     total,
-    address: addressString,
+    address: addressString, // The formatted manual address
     payment_method,
+    // Fields from the manually selected address
     shipping_house_number: detailedAddress.houseNumber,
     shipping_street_address: detailedAddress.streetAddress,
     shipping_suite_unit_floor: detailedAddress.suiteUnitFloor,
@@ -126,9 +138,14 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     shipping_postal_code: detailedAddress.postalCode,
     shipping_country: detailedAddress.country || "India",
     shipping_landmark: detailedAddress.landmark,
+    // Razorpay details
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
+    // 👇 New fields from the GPS map selection
+    shipping_latitude: gpsLocation?.latitude || null,
+    shipping_longitude: gpsLocation?.longitude || null,
+    shipping_gps_address: gpsLocation?.formatted_address || null,
   };
 
   const { data: order, error: orderError } = await supabase
@@ -137,7 +154,10 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     .select()
     .single();
 
-  if (orderError) return res.status(500).json({ success: false, error: orderError.message });
+  if (orderError) {
+    console.error("Supabase order insert error:", orderError);
+    return res.status(500).json({ success: false, error: orderError.message });
+  }
 
   const orderItemsToInsert = items.map((item) => ({
     order_id: order.id,
@@ -150,8 +170,13 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     .from("order_items")
     .insert(orderItemsToInsert);
 
-  if (itemsError) return res.status(500).json({ success: false, error: itemsError.message });
+  if (itemsError) {
+    // Optional: You might want to delete the order if item insertion fails (rollback)
+    console.error("Supabase order items insert error:", itemsError);
+    return res.status(500).json({ success: false, error: itemsError.message });
+  }
 
+  // Clear the user's cart after successful order placement
   await supabase.from("cart_items").delete().eq("user_id", user_id);
 
   return res.json({ success: true, order });

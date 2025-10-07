@@ -17,9 +17,29 @@ const MainSearchBar = () => {
 
     // If user is on mobile and on /subcategories page (any category), hide the search bar
     if (isMobile && location.pathname.startsWith("/subcategories")) return null;
+    if(location.pathname.startsWith("/category")) return null;
+    if(location.pathname.startsWith("/ProductLisingPage")) return null;
+    if (location.pathname.startsWith("/b&b")) return null;
+    if (location.pathname.startsWith("/quick-pick")) return null;
+    if (location.pathname.startsWith("/saving-zone")) return null;
+    if (location.pathname == "/all") {
+    return null;
+  }
+    if (location.pathname == "/Notifications") {
+    return null;
+  }
+    if (location.pathname == "/MobileAccount") {
+    return null;
+  }
+    if (location.pathname == "/wishlist") {
+    return null;
+  }
+    if (location.pathname == "/cart") {
+    return null;
+  }
 
     return (
-        <div className="mobile-search-bar-container w-full px-5 py-4 pt-5 ">
+        <div className="mobile-search-bar-container w-full px-2 py-1 ">
             <Search />
         </div>
     );

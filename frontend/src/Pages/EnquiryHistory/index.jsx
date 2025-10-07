@@ -285,20 +285,41 @@ const EnquiryHistory = () => {
                               {enquiry.enquiry_items.map((item, index) => (
                                 <div
                                   key={index}
-                                  className="flex justify-between items-center"
+                                  className="flex justify-between items-center gap-3"
                                 >
-                                  <div>
-                                    <span className="font-medium">
-                                      {item.product_name}
-                                    </span>
-                                    {item.customization && (
-                                      <span className="text-sm text-gray-600 ml-2">
-                                        ({item.customization})
-                                      </span>
+                                  {/* Left side: Image and Product Info */}
+                                  <div className="flex items-center gap-3 flex-1">
+                                    {/* Product Image */}
+                                    {item.product_image && (
+                                      <div className="w-16 h-16 flex-shrink-0 bg-white rounded-md overflow-hidden border border-gray-200">
+                                        <img
+                                          src={item.product_image}
+                                          alt={item.product_name}
+                                          className="w-full h-full object-cover"
+                                          onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://placehold.co/64x64?text=Product';
+                                          }}
+                                        />
+                                      </div>
                                     )}
+                                    
+                                    {/* Product Name and Customization */}
+                                    <div className="flex-1">
+                                      <span className="font-medium block">
+                                        {item.product_name}
+                                      </span>
+                                      {item.customization && (
+                                        <span className="text-sm text-gray-600 block mt-1">
+                                          ({item.customization})
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div className="text-right">
-                                    <div>Qty: {item.quantity}</div>
+
+                                  {/* Right side: Quantity and Price */}
+                                  <div className="text-right flex-shrink-0">
+                                    <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
                                     <div className="font-medium">
                                       {enquiry.type === "custom_printing" &&
                                       item.price > 0 ? (

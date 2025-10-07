@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BsShop } from "react-icons/bs";
-import { MapPinned } from "lucide-react";
+import { MapPinned, Heart } from "lucide-react";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
@@ -15,7 +15,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import CategoriesMenu from "../CategoriesMenu";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { MdClose } from "react-icons/md";
-import { ArrowDown, User } from "lucide-react";
+import { ArrowDown, User,ClipboardList } from "lucide-react";
 import { FaHome } from "react-icons/fa";
 import {
   MdCategory,
@@ -40,14 +40,14 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const CategoriesBar = () => {
+const CategoriesBar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   const [categories, setCategories] = useState([]);
   const [mobileCategories, setMobileCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasAnnouncementBar, setHasAnnouncementBar] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  /* const [mobileMenuOpen, setMobileMenuOpen] = useState(false); */
   const [allCategories, setAllCategories] = useState([]); // For mobile menu
   const [openSubmenu, setOpenSubmenu] = useState([]); // For mobile menu category/subcategory expansion
   const { currentUser, logout } = useAuth();
@@ -468,25 +468,23 @@ const CategoriesBar = () => {
 
   // Add handler for bottom nav menu
   const handleBottomMenu = (type) => {
-    if (type === "menu") {
+    /* if (type === "menu") {
       setMobileMenuOpen(true);
       setOpenSubmenu([]); // Collapse all categories when Menu is pressed
-    }
+    } */
     if (type === "category") {
-      setMobileMenuOpen(true);
+      /* setMobileMenuOpen(true);
       setOpenSubmenu((prev) =>
         prev.includes("shop-by-category") ? prev : [...prev, "shop-by-category"]
-      );
+      ); */
+      navigate("/subcategories");
     }
     if (type === "home") navigate("/");
+    if (type === "wishlist") navigate("/wishlist");
+    if (type === "Enquiry") navigate("/enquiry-history");
     if (type === "cart") navigate("/cart");
-    if (type === "Login") {
-      if (currentUser) {
-        navigate("/MobileAccount");
-      } else {
-        navigate("/login");
-      }
-    }
+    if (type === "Login") navigate("/login");
+    if (type === "all") navigate("/all");
   };
 
   return (
@@ -1141,11 +1139,11 @@ const CategoriesBar = () => {
                 </ul>
               </li>
 
-              <li>
+              {/* <li>
                 <Link to="/BusinessPartner" onClick={closeMobileMenu}>
                   E-Haat
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link to="/BusinessPartner" onClick={closeMobileMenu}>
                   Business Partner
@@ -1298,8 +1296,8 @@ const CategoriesBar = () => {
         </button>
         <button
           className="mobile-bottom-nav-btn"
-          aria-label="Category"
-          onClick={() => handleBottomMenu("category")}
+          aria-label="all"
+          onClick={() => handleBottomMenu("all")}
           style={{
             background: "none",
             border: "none",
@@ -1311,12 +1309,12 @@ const CategoriesBar = () => {
           }}
         >
           <MdCategory size={22} />
-          <span style={{ fontSize: "11px" }}>Category</span>
+          <span style={{ fontSize: "11px" }}>All</span>
         </button>
         <button
           className="mobile-bottom-nav-btn"
-          aria-label="Cart"
-          onClick={() => handleBottomMenu("cart")}
+          aria-label="wishlist"
+          onClick={() => handleBottomMenu("wishlist")}
           style={{
             background: "none",
             border: "none",
@@ -1327,17 +1325,18 @@ const CategoriesBar = () => {
             padding: 0,
           }}
         >
-          <StyledBadge badgeContent={cartCount} color="secondary">
+          {/* <StyledBadge badgeContent={cartCount} color="secondary">
             <MdOutlineShoppingCart size={22} />
-          </StyledBadge>
+          </StyledBadge> */}
+          <Heart />
 
-          <span style={{ fontSize: "11px" }}>Cart</span>
+          <span style={{ fontSize: "11px" }}>Wishlist</span>
         </button>
 
         <button
           className="mobile-bottom-nav-btn"
-          aria-label="Menu"
-          onClick={() => handleBottomMenu("Login")}
+          aria-label="Enquiry"
+          onClick={() => handleBottomMenu("Enquiry")}
           style={{
             background: "none",
             border: "none",
@@ -1348,8 +1347,8 @@ const CategoriesBar = () => {
             padding: 0,
           }}
         >
-          <User size={22} />
-          <span style={{ fontSize: "11px" }}>Account</span>
+          <ClipboardList size={22} />
+          <span style={{ fontSize: "11px" }}>Enquiry</span>
         </button>
       </div>
 

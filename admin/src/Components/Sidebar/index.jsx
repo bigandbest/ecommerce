@@ -11,7 +11,7 @@ import {
   RiShutDownLine,
   RiPrinterFill,
 } from "react-icons/ri";
-import { FaUsers, FaAngleDown, FaList, FaPlus, FaTag, FaDatabase } from "react-icons/fa";
+import { FaUsers, FaAngleDown, FaList, FaPlus, FaTag, FaTrademark, FaDatabase } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { HiArchive } from "react-icons/hi";
 import { MdCategory } from "react-icons/md";
@@ -118,6 +118,31 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/storage/enhanced",
       description: "Manage storage usage and files",
     },
+    {
+      title: "B&B",
+      icon: <FaList />,
+      path: "/b&b",
+    },
+    {
+      title: "AddBanners",
+      icon: <FaPlus />,
+      path: "/add-banner",
+    },
+    {
+      title: "UniqueSections",
+      icon: <FaPlus />,
+      path: "/unique-sections",
+    },
+    {
+      title: "Brands",
+      icon: <FaTrademark />,
+      path: "/brands",
+    },
+    {
+      title: "Quick Picks",
+      icon: <FaList />,
+      path: "/quick-picks",
+    },
     // {
     //   title: "Orders",
     //   icon: <FaList />,
@@ -146,6 +171,36 @@ const Sidebar = ({ isOpen = true }) => {
       title: "Warehouses",
       icon: <FaList />,
       path: "/warehouselist",
+    },
+    {
+      title: "Shop By Stores",
+      icon: <FaList />,
+      path: "/recommended-stores",
+    },
+    {
+      title: "Corporate Celebration",
+      icon: <FaList />,
+      path: "/saving-zone",
+    },
+    {
+      title: "Section",
+      icon: <FaList />,
+      path: "/section",
+    },
+    {
+      title: "Sub-Section",
+      icon: <FaList />,
+      path: "/sub-section",
+    },
+    {
+      title: "You May Like",
+      icon: <FaTrademark />,
+      path: "/youMayLikeProducts/:id",
+    },
+    {
+      title: "Notifications",
+      icon: <RiSettings4Fill />,
+      path: "/notifications",
     },
     {
       title: "Settings",

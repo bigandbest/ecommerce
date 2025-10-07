@@ -169,7 +169,7 @@ button,
 a.btn,
 input[type="button"],
 input[type="submit"] {
-  min-height: 44px;
+  min-height: 20px;
   min-width: 44px;
   touch-action: manipulation;
 }
@@ -376,7 +376,7 @@ img {
   a, 
   input[type="button"], 
   input[type="submit"] {
-    min-height: 44px;
+    min-height: 20px;
     min-width: 44px;
   }
   
@@ -562,5 +562,28 @@ textarea:focus-visible {
   .blog-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1rem;
+  }
+}
+
+/* Mobile Account Page Fixes */
+@media (max-width: 767px) {
+  /* Mobile account page container */
+  .mobile-account-container {
+    padding: 0.75rem !important;
+  }
+  
+  /* Profile header fixes */
+  .mobile-profile-header h1 {
+    font-size: 1rem !important;
+    line-height: 1.3 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+  }
+  
+  /* Account links */
+  .mobile-account-link {
+    padding: 0.875rem !important;
+    font-size: 0.9rem !important;
   }
 }

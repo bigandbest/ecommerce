@@ -53,6 +53,8 @@ const VideoBannerSlider = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  if(!isMobile) return null
+
   return (
     <div className="w-full flex justify-center items-center ">
       {loading ? (
@@ -72,6 +74,9 @@ const VideoBannerSlider = () => {
           <Swiper
             navigation={!isMobile}
             pagination={{ clickable: true, dynamicBullets: true }}
+            spaceBetween={isMobile ? 6 : 0}
+            slidesPerView={isMobile ? 1.1 : 1}
+            centeredSlides={isMobile}
             autoplay={
               videos.length > 1
                 ? {
@@ -88,7 +93,7 @@ const VideoBannerSlider = () => {
               w-full 
               md:w-[90%] 
               mx-auto 
-              max-h-[600px] 
+              max-h-[500px] 
               md:max-h-[500px] 
               min-h-[250px]
               overflow-hidden

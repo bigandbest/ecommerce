@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useLocation } from "react-router-dom";
-import { getAllBanners } from '../../utils/supabaseApi.js';
+import { getAllBanners } from "../../utils/supabaseApi.js";
 
 const MobileBannerCarousel = () => {
   const { pathname } = useLocation();
@@ -19,6 +19,15 @@ const MobileBannerCarousel = () => {
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on("select", onSelect);
+
+    // ✅ Auto-play every 2 seconds
+    const interval = setInterval(() => {
+      if (emblaApi) {
+        emblaApi.scrollNext();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [emblaApi, onSelect]);
 
   // Fetch banners on mount
@@ -28,14 +37,18 @@ const MobileBannerCarousel = () => {
         setLoading(true);
         const result = await getAllBanners();
         if (result.success && Array.isArray(result.banners)) {
-          const heroBanners = result.banners.filter(b => b.active && b.position === 'hero' && b.is_mobile);
-          setBanners(heroBanners.map(b => ({
-            id: b.id,
-            title: b.title,
-            description: b.description,
-            imageUrl: b.image || b.image_url,
-            link: b.link || '#',
-          })));
+          const heroBanners = result.banners.filter(
+            (b) => b.active && b.position === "hero" && b.is_mobile
+          );
+          setBanners(
+            heroBanners.map((b) => ({
+              id: b.id,
+              title: b.title,
+              description: b.description,
+              imageUrl: b.image || b.image_url,
+              link: b.link || "#",
+            }))
+          );
         } else {
           setBanners([]);
         }
@@ -50,44 +63,49 @@ const MobileBannerCarousel = () => {
     fetchBanners();
   }, []);
 
-  if (pathname !== "/" || banners.length === 0 || loading || error) return null;
+  if (pathname !== "/") return null;
 
   return (
-    <div className="block md:hidden mt-5 mx-1">
+    <div className="block md:hidden mt-2 mx-1">
       <div className="overflow-hidden rounded-xl shadow-lg" ref={emblaRef}>
         <div className="flex">
-          {banners.map((banner, index) => (
-            <a
-              key={banner.id || index}
-              href={banner.link}
-              className="min-w-0 flex-[0_0_100%]"
-            >
+          {loading ? (
+            <div className="min-w-0 flex-[0_0_100%]">
+              <div className="w-full h-[150px] bg-gray-200 animate-pulse rounded-xl" />
+            </div>
+          ) : error || banners.length === 0 ? (
+            <div className="min-w-0 flex-[0_0_100%]">
               <img
-                src={banner.imageUrl}
-                alt={banner.title || `Slide ${index + 1}`}
-                className="w-full h-[150px] object-cover object-center rounded-xl"
-
-                onError={(e) => {
-                  e.target.src = "https://placehold.co/600x200?text=No+Image";
-                }}
+                src="https://placehold.co/600x200?text=No+Image"
+                alt="No Banner"
+                className="w-full h-[150px] object-cover rounded-xl"
               />
-            </a>
-          ))}
+            </div>
+          ) : (
+            banners.map((banner, index) => (
+              <a
+                key={banner.id || index}
+                href={banner.link}
+                className="min-w-0 flex-[0_0_100%]"
+              >
+                <img
+                  src={banner.imageUrl}
+                  srcSet={`${banner.imageUrl}?w=400 400w, ${banner.imageUrl}?w=800 800w`}
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  alt={banner.title || `Slide ${index + 1}`}
+                  className="w-full h-[150px] object-cover object-center rounded-xl"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  onError={(e) => {
+                    e.target.src =
+                      "https://placehold.co/600x200?text=No+Image";
+                  }}
+                />
+              </a>
+            ))
+          )}
         </div>
       </div>
-
-      {/* Pagination Dots */}
-      {/* <div className="flex justify-center mt-2 space-x-2">
-        {banners.map((_, index) => (
-          <button
-            key={index}
-            className={`w-2 h-2 rounded-full ${
-              selectedIndex === index ? "bg-black" : "bg-gray-400"
-            }`}
-            onClick={() => emblaApi && emblaApi.scrollTo(index)}
-          />
-        ))}
-      </div> */}
     </div>
   );
 };

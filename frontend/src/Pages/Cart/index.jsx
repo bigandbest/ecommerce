@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCartItems, updateCartItem, removeCartItem, clearCart, createEnquiry, placeOrderWithDetailedAddress } from '../../utils/supabaseApi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MdDelete } from 'react-icons/md';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
@@ -22,6 +22,7 @@ const Cart = () => {
   const [enquiryStatus, setEnquiryStatus] = useState(null); // success | error | null
   const [enquiryLoading, setEnquiryLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const navigate = useNavigate();
 
   /* console.log(currentUser) */
 
@@ -31,11 +32,70 @@ const Cart = () => {
       setLoading(true);
       const { success, cartItems, error } = await getCartItems(user_id);
       setCartItems(success && cartItems ? cartItems : []);
-      /* console.log(cartItems) */
       setLoading(false);
     }
-    fetchCart();
+    if (user_id) {
+      fetchCart();
+    } else {
+      setLoading(false);
+      setCartItems([]);
+    }
   }, [user_id]);
+
+
+  // ✅ NEW: Updated checkout logic
+  const handleProceedToCheckout = async () => {
+    // Basic check for an empty cart
+    if (cartItems.length === 0) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    // Separate items into in-stock and out-of-stock
+    const inStockItems = cartItems.filter(item => item.in_stock);
+    const outOfStockItems = cartItems.filter(item => !item.in_stock);
+
+    // --- Case 1: All items are out of stock ---
+    if (inStockItems.length === 0 && outOfStockItems.length > 0) {
+      alert("All items in your cart are out of stock. Please add available products to proceed.");
+      return; // Stop the process
+    }
+
+    // --- Case 2: A mix of in-stock and out-of-stock items ---
+    if (inStockItems.length > 0 && outOfStockItems.length > 0) {
+      // Use window.confirm to give the user a choice
+      const userConfirmed = window.confirm(
+        "Some items in your cart are out of stock and will be removed automatically. Do you want to continue?"
+      );
+
+      if (userConfirmed) {
+        setLoading(true); // Show a loading state
+
+        // Create an array of promises, one for each item to be deleted
+        const deletionPromises = outOfStockItems.map(item =>
+          removeCartItem(item.cart_item_id)
+        );
+
+        // Use Promise.all to wait for all deletions to complete concurrently
+        await Promise.all(deletionPromises);
+
+        // Update the cart state locally to only show the in-stock items
+        setCartItems(inStockItems);
+        window.dispatchEvent(new Event('cartUpdated')); // Notify other components like the header
+
+        setLoading(false);
+        navigate('/checkout/select-location'); // Proceed to the next step
+      } else {
+        // User clicked "Cancel", so we do nothing and they stay on the cart page
+        return;
+      }
+    }
+
+    // --- Default Case: All items are in stock ---
+    if (outOfStockItems.length === 0) {
+      navigate('/checkout/select-location');
+    }
+  };
 
 
   /* console.log(cartItems) */
@@ -61,7 +121,7 @@ const Cart = () => {
       }));
 
       const res = await axios.post(
-        "https://ecommerce-wvkv.onrender.com/api/check/check-cart-availability",
+        "https://ecommerce-8342.onrender.com/api/check/check-cart-availability",
         {
           latitude,
           longitude,
@@ -190,7 +250,7 @@ const Cart = () => {
 
     try {
       // Step 1: Create order from backend
-      const res = await axios.post("https://ecommerce-wvkv.onrender.com/api/payment/create-order", {
+      const res = await axios.post("https://ecommerce-8342.onrender.com/api/payment/create-order", {
         amount: grandTotal
       });
 
@@ -225,9 +285,9 @@ const Cart = () => {
             razorpay_signature,
           } = response;
 
-         /*  console.log(response) */
+          /*  console.log(response) */
           // Step 3: Verify payment signature before saving order
-          const verification = await axios.post("https://ecommerce-wvkv.onrender.com/api/payment/verify-payment", {
+          const verification = await axios.post("https://ecommerce-8342.onrender.com/api/payment/verify-payment", {
             razorpay_payment_id,
             razorpay_order_id,
             razorpay_signature,
@@ -360,12 +420,14 @@ const Cart = () => {
       message: '', // Optionally add a message field
       cartItems
     });
+    /* console.log("Data being sent to createEnquiry:", enquiry); */
     if (success) {
       setEnquiryStatus('success');
       await clearCart(user_id);
       setCartItems([]);
     } else {
       setEnquiryStatus('error');
+      console.error(error)
     }
     setEnquiryLoading(false);
   };
@@ -402,73 +464,112 @@ const Cart = () => {
 
                 <div className="divide-y">
                   {cartItems.map(item => (
-                    <div key={item.cart_item_id} className="p-3 sm:p-4 cart-item">
+                    <div key={item.cart_item_id} className={`p-3 sm:p-4 cart-item ${!item.in_stock ? 'opacity-60' : ''}`}>
                       {/* Mobile Layout */}
                       <div className="block sm:hidden">
-                        {/* Mobile: Image and Details Row */}
-                        <div className="flex items-start gap-3 mb-3">
-                          <div className="cart-product-image flex-shrink-0">
+                        {/* Mobile: Image, Details, Quantity, and Price in a single row */}
+                        <div className="flex items-center justify-between gap-3 py-2 border-b border-gray-200">
+
+                          {/* Product Image */}
+                          <div className="cart-product-image flex-shrink-0 w-12 h-12">
                             <img
                               src={item.image}
                               alt={item.name}
+                              className="w-full h-full object-cover rounded-md"
                               loading="lazy"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = `https://placehold.co/200x200/f0f0f0/666?text=${encodeURIComponent(item.name.charAt(0))}`;
+                                e.target.src = `https://placehold.co/200x200/f0f0f0/666?text=${encodeURIComponent(
+                                  item.name.charAt(0)
+                                )}`;
                               }}
                             />
-                          </div>
-
-                          <div className="flex-grow min-w-0">
-                            <h3 className="font-medium text-gray-900 mb-1 line-clamp-2 product-name text-sm">{item.name}</h3>
-                            <p className="text-xs text-gray-600 mb-1">Category: {item.category}</p>
-                            {item.customization && (
-                              <p className="text-xs text-gray-600 mb-1 line-clamp-1">Customization: {item.customization}</p>
+                            {!item.in_stock && (
+                              <div className="out-of-stock-overlay">
+                                <span>Out of Stock</span>
+                              </div>
                             )}
-                            <p className="text-sm font-medium text-gray-900">₹{item.price.toFixed(2)}</p>
                           </div>
-                        </div>
 
-                        {/* Mobile: Quantity and Total Row */}
-                        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2">
+                          {/* Product Details */}
+                          <div className="flex flex-col flex-grow min-w-0">
+                            <h3 className="text-gray-900 line-clamp-2 product-name text-xs leading-snug">
+                              {item.name}
+                            </h3>
+                            <p className="text-xs text-gray-600">
+                              {item.uom || "1 Variable"}
+                            </p>
+                            {item.customization && (
+                              <p className="text-xs text-gray-500 line-clamp-1">
+                                Customization: {item.customization}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Quantity Controls - Fixed size & compact */}
+                          <div
+                            className="flex-shrink-0 flex items-center justify-center border border-pink-400 rounded-md overflow-hidden"
+                            style={{ height: "26px", width: "70px" }} // fixed size of box
+                          >
+                            {/* Minus */}
                             <button
-                              onClick={() => updateQuantity(item.cart_item_id, item.quantity - 1)}
-                              className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors bg-white"
-                              disabled={item.quantity <= 1}
+                              onClick={() =>
+                                updateQuantity(item.cart_item_id, item.quantity - 1)
+                              }
+                              disabled={item.quantity <= 1 || !item.in_stock}
+                              className="flex items-center justify-center text-pink-500 font-medium disabled:text-gray-300 disabled:cursor-not-allowed"
+                              style={{
+                                width: "20px",
+                                height: "26px",
+                                fontSize: "14px",
+                                lineHeight: "1",
+                              }}
                             >
                               -
                             </button>
-                            <input
-                              type="number"
-                              min="1"
-                              value={item.quantity}
-                              onChange={(e) => {
-                                const newQty = parseInt(e.target.value);
-                                if (newQty > 0) updateQuantity(item.cart_item_id, newQty);
-                              }}
-                              className="w-12 h-8 border border-gray-300 rounded text-center text-sm focus:outline-none focus:border-blue-500"
-                            />
+
+                            {/* Quantity */}
+                            <span
+                              className="flex items-center justify-center font-medium text-gray-800 bg-white"
+                              style={{ width: "30px", height: "26px", fontSize: "12px" }}
+                            >
+                              {item.quantity}
+                            </span>
+
+                            {/* Plus */}
                             <button
-                              onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
-                              className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors bg-white"
+                              onClick={() =>
+                                updateQuantity(item.cart_item_id, item.quantity + 1)
+                              }
+                              disabled={!item.in_stock}
+                              className="flex items-center justify-center text-pink-500 font-medium"
+                              style={{
+                                width: "20px",
+                                height: "26px",
+                                fontSize: "14px",
+                                lineHeight: "1",
+                              }}
                             >
                               +
                             </button>
                           </div>
 
-                          <div className="text-right">
-                            <p className="font-medium text-gray-900 mb-1">₹{(item.price * item.quantity).toFixed(2)}</p>
+                          {/* Price + Remove */}
+                          <div className="text-right ml-2">
+                            <p className="font-medium text-gray-900 text-sm">
+                              ₹{(item.price * item.quantity).toFixed(2)}
+                            </p>
                             <button
                               onClick={() => removeItem(item.cart_item_id)}
-                              className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm transition-colors"
+                              className="text-red-500 hover:text-red-700 flex items-center justify-end gap-1 text-xs transition-colors"
                             >
-                              <MdDelete size={14} />
+                              <MdDelete size={12} />
                               Remove
                             </button>
                           </div>
                         </div>
                       </div>
+
 
                       {/* Desktop Layout */}
                       <div className="hidden sm:flex items-start sm:items-center gap-4">
@@ -483,6 +584,11 @@ const Cart = () => {
                               e.target.src = `https://placehold.co/200x200/f0f0f0/666?text=${encodeURIComponent(item.name.charAt(0))}`;
                             }}
                           />
+                          {!item.in_stock && (
+                            <div className="out-of-stock-overlay">
+                              <span>Out of Stock</span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Product Details */}
@@ -500,7 +606,7 @@ const Cart = () => {
                           <button
                             onClick={() => updateQuantity(item.cart_item_id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                            disabled={item.quantity <= 1}
+                            disabled={item.quantity <= 1 || !item.in_stock}
                           >
                             -
                           </button>
@@ -516,6 +622,7 @@ const Cart = () => {
                           />
                           <button
                             onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
+                            disabled={!item.in_stock}
                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                           >
                             +
@@ -583,39 +690,16 @@ const Cart = () => {
                   </div>
                 </div>
 
-                {orderAddress && (
-                  <div className="border p-3 rounded mb-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold">Delivery Address</h3>
-                      <button
-                        className="text-blue-600 text-sm underline"
-                        onClick={() => {
-                          setModalMode("order");
-                          setShowModal(true);
-                        }}
-                      >
-                        Change Address
-                      </button>
-                    </div>
-                    <div className="text-sm mt-2">
-                      <p className="font-medium">{orderAddress.address_name}</p>
-                      <p>{orderAddress.street_address}</p>
-                      <p>{orderAddress.state} - {orderAddress.postal_code}</p>
-                    </div>
-                  </div>
-                )}
 
                 <div className="space-y-4">
                   <button
-                    onClick={handleRazorpayPayment}
+                    onClick={handleProceedToCheckout}
                     className={`block w-full bg-primary text-white text-center py-3 px-4 rounded-md hover:bg-primary-dark transition duration-200 ${enquiryLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                     style={{ backgroundColor: "#3f51b5" }}
                     disabled={enquiryLoading}
                   >
-                    Place an Order
+                    Select Delivery Address
                   </button>
-
-
 
                   {/* <button
                     onClick={handleSendEnquiry}
@@ -630,14 +714,14 @@ const Cart = () => {
                   )}
                   {enquiryStatus === 'error' && (
                     <div className="text-red-600 text-center mt-2">Failed to send enquiry. Please try again.</div>
-                  )}
+                  )} */}
 
-                  <div className="flex items-center justify-center gap-2 text-gray-600">
+                  {/* <div className="flex items-center justify-center gap-2 text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                     </svg>
                     <span className="text-sm">Secure Checkout</span>
-                  </div> */}
+                  </div>  */}
                 </div>
 
                 {/* Payment Methods */}
