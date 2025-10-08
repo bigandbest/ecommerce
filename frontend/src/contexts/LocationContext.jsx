@@ -113,7 +113,29 @@ export const LocationProvider = ({ children }) => {
         async (position) => {
           const { latitude, longitude } = position.coords;
           try {
-            // Fallback solution without OpenCage API
+            // Reverse geocoding using Nominatim API
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            const locationData = {
+              address_name: data.display_name || "Current Location",
+              postal_code: data.address?.postcode || "",
+              state: data.address?.state || "",
+              city: data.address?.city || data.address?.town || data.address?.village || "Current Location",
+              street_address: data.address?.road || `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`,
+              latitude,
+              longitude,
+              formatted_address: data.display_name || `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`,
+              is_geolocation: true,
+            };
+            setSelectedAddress(locationData);
+            setCurrentLocationAddress(locationData.formatted_address);
+            setLocationCleared(false);
+            resolve(locationData);
+          } catch (error) {
+            // Fallback if API fails
             const locationData = {
               address_name: "Current Location",
               postal_code: "",
@@ -129,8 +151,6 @@ export const LocationProvider = ({ children }) => {
             setCurrentLocationAddress(locationData.formatted_address);
             setLocationCleared(false);
             resolve(locationData);
-          } catch (error) {
-            reject(error);
           } finally {
             setLocationLoading(false);
           }
