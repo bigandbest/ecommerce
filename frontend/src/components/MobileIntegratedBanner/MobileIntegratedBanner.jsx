@@ -150,22 +150,22 @@ const MobileIntegratedBanner = () => {
             border: `1px solid ${currentSlideColor}50`
           }}
         >
-          <MapPin size={16} className="flex-shrink-0 bg-white/20 p-1.5 rounded-full" />
+          <MapPin size={20} className="flex-shrink-0 bg-white/20 p-2 rounded-full" />
           <div className="flex flex-col items-start flex-1 text-left">
             <span className="text-sm font-bold leading-none mb-1">Home</span>
             <span className="text-xs opacity-90 leading-none max-w-[250px] truncate">
               {selectedAddress 
-                ? `${selectedAddress.city}, ${selectedAddress.state}` 
+                ? `${selectedAddress.city}, ${selectedAddress.state}${selectedAddress.postal_code ? ` - ${selectedAddress.postal_code}` : ''}` 
                 : "37/1, Central Road Uttarpara..."
               }
             </span>
           </div>
-          <ChevronDown size={16} className="flex-shrink-0 opacity-80 bg-white/15 p-1 rounded-full transition-transform duration-300 hover:rotate-180" />
+          <ChevronDown size={20} className="flex-shrink-0 opacity-80 bg-white/15 p-1.5 rounded-full transition-transform duration-300 hover:rotate-180" />
         </button>
       </div>
 
       {/* Search Bar */}
-      <div className="relative z-20 px-4 pb-1">
+      <div className="relative z-20 px-4">
         <form onSubmit={handleSearch} className="w-full">
           <div 
             className="relative flex items-center bg-white/95 rounded-2xl px-5 py-3 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 backdrop-blur-sm"
@@ -188,7 +188,7 @@ const MobileIntegratedBanner = () => {
       </div>
 
       {/* Banner Carousel */}
-      <div className="relative w-full h-56 z-10 flex items-end mt-2">
+      <div className="relative w-full h-56 z-10 flex items-end -mt-8">
         {banners.length > 0 ? (
           <Swiper
             navigation={false}
