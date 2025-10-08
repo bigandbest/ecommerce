@@ -179,7 +179,7 @@ const MobileIntegratedBanner = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Restaurant name or a dish..."
+              placeholder="Electronics, Grocery..."
               className="flex-1 border-none outline-none text-base text-gray-800 bg-transparent placeholder-gray-500"
             />
             <Mic size={20} className="text-indigo-600 ml-3 flex-shrink-0 cursor-pointer p-1 rounded-full hover:bg-indigo-100 transition-all" />

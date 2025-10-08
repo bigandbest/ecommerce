@@ -44,7 +44,7 @@ export default function SubStoreNav({ onClick }) {
   }
 
   return (
-    <div className="flex overflow-x-auto whitespace-nowrap py-2 px-2 gap-0 hide-scrollbar md:hidden">
+    <div className="flex overflow-x-auto whitespace-nowrap -mt-20 px-2 gap-0 hide-scrollbar md:hidden">
       {subStores.map((subStore) => {
         // Assuming 'subStore' objects have a 'link' property for navigation
         const isActive = location.pathname === subStore.link; // Check for active link

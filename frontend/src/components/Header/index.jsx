@@ -997,14 +997,14 @@ const Header = () => {
           <Link className="flex items-center align-middle space-x-1">
             <MapPin className="size-4 md:size-4 text-black" />
             <span className="truncate text-xs flex">
-              Select Delivery Address <ChevronRight size={16} />
               {selectedAddress ? (
                 <span>
-                  {selectedAddress.city} {selectedAddress.state}{" "}
-                  {selectedAddress.postal_code}
+                  {selectedAddress.address_name || "Home"}
+                  <br />
+                  {selectedAddress.city || selectedAddress.state} {selectedAddress.postal_code}
                 </span>
               ) : (
-                <></>
+                <span>Select Delivery Address <ChevronRight size={16} /></span>
               )}
             </span>
           </Link>

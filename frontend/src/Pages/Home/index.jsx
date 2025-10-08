@@ -117,6 +117,7 @@ export const Home = () => {
   const [shippingBanners, setShippingBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [shippingBanner, setShippingBanner] = useState(null);
+  const [error, setError] = useState(null);
   /* const [defaultAddress, setDefaultAddress] = useState(null); */
 
   // Search state
@@ -519,15 +520,16 @@ export const Home = () => {
   return (
     <div className="home-page-container">
       {/* Banner Carousel - Mobile/Desktop */}
+      <SubStoreNav />
       {isMobile ? <MobileBannerCarousel /> : <HomeSlider />}
       
       {/* Wholesale/Bazar/Eato sections */}
       <HomeFestivalGrid />
       
-      {/* SubStore Navigation */}
-      <SubStoreNav />
-      
       <FeaturedThisWeek />
+      
+      {/* SubStore Navigation */}
+      
       <FlashSale />
 
       {/* === Offer Banners below Shop By Category === */}
@@ -535,11 +537,11 @@ export const Home = () => {
       <CategoryOfferBanner  count={1}/>
       <GroupBannerSlider  count={1}/>
 
-       <BannerImagesSlider
+      <BannerImagesSlider
         count={1}         
         bannerUrl="https://i.postimg.cc/W4pL05Hw/Opening-Soon.png"
-      />      {/* Opening soon */} {/* Change count to adjust the no.s of sections */}
-
+      />       {/* Opening soon */} {/* Change count to adjust the no.s of sections */}
+      
       {/* ================== PROMOTIONAL BANNER ================== */}
       {/* Desktop version (lg and up) */}
 
