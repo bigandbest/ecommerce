@@ -94,25 +94,25 @@ function MyOrders() {
                 {
                   step: "Processing",
                   completed: ["processing", "shipped", "delivered"].includes(
-                    order.status
+                    order.status.toLowerCase()
                   ),
                   time: "",
                 },
                 {
                   step: "Shipped",
-                  completed: ["shipped", "delivered"].includes(order.status),
+                  completed: ["shipped", "delivered"].includes(order.status.toLowerCase()),
                   time: "",
                 },
                 {
                   step: "Out for Delivery",
-                  completed: order.status === "delivered",
+                  completed: order.status.toLowerCase() === "delivered",
                   time: "",
                 },
                 {
                   step: "Delivered",
-                  completed: order.status === "delivered",
+                  completed: order.status.toLowerCase() === "delivered",
                   time:
-                    order.status === "delivered"
+                    order.status.toLowerCase() === "delivered"
                       ? new Date(
                           order.updated_at || order.created_at
                         ).toLocaleString()
@@ -188,25 +188,25 @@ function MyOrders() {
                 {
                   step: "Processing",
                   completed: ["processing", "shipped", "delivered"].includes(
-                    order.status
+                    order.status.toLowerCase()
                   ),
                   time: "",
                 },
                 {
                   step: "Shipped",
-                  completed: ["shipped", "delivered"].includes(order.status),
+                  completed: ["shipped", "delivered"].includes(order.status.toLowerCase()),
                   time: "",
                 },
                 {
                   step: "Out for Delivery",
-                  completed: order.status === "delivered",
+                  completed: order.status.toLowerCase() === "delivered",
                   time: "",
                 },
                 {
                   step: "Delivered",
-                  completed: order.status === "delivered",
+                  completed: order.status.toLowerCase() === "delivered",
                   time:
-                    order.status === "delivered"
+                    order.status.toLowerCase() === "delivered"
                       ? new Date(
                           order.updated_at || order.created_at
                         ).toLocaleString()
@@ -228,7 +228,11 @@ function MyOrders() {
     if (loading) {
       return (
         <div className="loading-container">
-          <div className="loading-spinner"></div>
+          <div className="modern-loader">
+            <div className="loader-circle"></div>
+            <div className="loader-circle"></div>
+            <div className="loader-circle"></div>
+          </div>
           <p>Loading your orders...</p>
         </div>
       );
@@ -273,7 +277,15 @@ function MyOrders() {
               <div className="items-list">
                 {order.order_items?.slice(0, 1).map((item, idx) => (
                   <div key={idx} className="order-item">
-                    <div className="order-item-image"></div>
+                    <div className="order-item-image">
+                      <img 
+                        src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
+                        alt={item.products?.name || "Product"}
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/40x40?text=📦';
+                        }}
+                      />
+                    </div>
                     <div className="item-details">
                       <p className="item-name">
                         {item.products?.name || "Product"}
@@ -285,7 +297,12 @@ function MyOrders() {
                   </div>
                 )) || (
                   <div className="order-item">
-                    <div className="order-item-image"></div>
+                    <div className="order-item-image">
+                      <img 
+                        src="https://via.placeholder.com/40x40?text=📦" 
+                        alt="Product"
+                      />
+                    </div>
                     <div className="item-details">
                       <p className="item-name">Product Details</p>
                       <p className="item-qty">Loading...</p>
@@ -406,7 +423,11 @@ function MyOrders() {
     if (historyLoading) {
       return (
         <div className="loading-container">
-          <div className="loading-spinner"></div>
+          <div className="modern-loader">
+            <div className="loader-circle"></div>
+            <div className="loader-circle"></div>
+            <div className="loader-circle"></div>
+          </div>
           <p>Loading order history...</p>
         </div>
       );
@@ -444,12 +465,43 @@ function MyOrders() {
             </div>
 
             <div className="order-items">
-              <h4>Items:</h4>
-              <ul>
-                {order.items.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
-              </ul>
+              <h4>Items ({order.order_items?.length || 0})</h4>
+              <div className="items-list">
+                {order.order_items?.slice(0, 1).map((item, idx) => (
+                  <div key={idx} className="order-item">
+                    <div className="order-item-image">
+                      <img 
+                        src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
+                        alt={item.products?.name || "Product"}
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/40x40?text=📦';
+                        }}
+                      />
+                    </div>
+                    <div className="item-details">
+                      <p className="item-name">
+                        {item.products?.name || "Product"}
+                      </p>
+                      <p className="item-qty">
+                        Qty: {item.quantity} | ₹{item.price?.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="order-item">
+                    <div className="order-item-image">
+                      <img 
+                        src="https://via.placeholder.com/40x40?text=📦" 
+                        alt="Product"
+                      />
+                    </div>
+                    <div className="item-details">
+                      <p className="item-name">Product Details</p>
+                      <p className="item-qty">Loading...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="order-actions">
@@ -505,32 +557,36 @@ function MyOrders() {
       </div>
 
       <div className="orders-tabs">
-        <button
-          className={`tab-button ${activeTab === "tracking" ? "active" : ""}`}
-          onClick={() => setActiveTab("tracking")}
-        >
-          Tracking
-        </button>
-        <button
-          className={`tab-button ${activeTab === "history" ? "active" : ""}`}
-          onClick={() => setActiveTab("history")}
-        >
-          History
-        </button>
-        <button
-          className={`tab-button ${activeTab === "returns" ? "active" : ""}`}
-          onClick={() => setActiveTab("returns")}
-        >
-          Returns
-        </button>
-        <button
-          className={`tab-button ${
-            activeTab === "notifications" ? "active" : ""
-          }`}
-          onClick={() => setActiveTab("notifications")}
-        >
-          Notifications
-        </button>
+        <div className="tab-row">
+          <button
+            className={`tab-button ${activeTab === "tracking" ? "active" : ""}`}
+            onClick={() => setActiveTab("tracking")}
+          >
+            Tracking
+          </button>
+          <button
+            className={`tab-button ${activeTab === "history" ? "active" : ""}`}
+            onClick={() => setActiveTab("history")}
+          >
+            History
+          </button>
+        </div>
+        <div className="tab-row">
+          <button
+            className={`tab-button ${activeTab === "returns" ? "active" : ""}`}
+            onClick={() => setActiveTab("returns")}
+          >
+            Returns
+          </button>
+          <button
+            className={`tab-button ${
+              activeTab === "notifications" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("notifications")}
+          >
+            Notifications
+          </button>
+        </div>
       </div>
 
       <div className="orders-content">
@@ -602,12 +658,24 @@ function MyOrders() {
               <div className="order-detail-section">
                 <h3>Items</h3>
                 {selectedOrder.order_items?.map((item, idx) => (
-                  <div key={idx} className="order-item-detail">
-                    <p>
-                      <strong>{item.products?.name || "Product"}</strong>
-                    </p>
-                    <p>Quantity: {item.quantity}</p>
-                    <p>Price: ₹{item.price?.toLocaleString()}</p>
+                  <div key={idx} className="order-item-detail flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                      <img 
+                        src={item.products?.image || 'https://via.placeholder.com/64x64?text=📦'} 
+                        alt={item.products?.name || "Product"}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/64x64?text=📦';
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p>
+                        <strong>{item.products?.name || "Product"}</strong>
+                      </p>
+                      <p>Quantity: {item.quantity}</p>
+                      <p>Price: ₹{item.price?.toLocaleString()}</p>
+                    </div>
                   </div>
                 ))}
               </div>

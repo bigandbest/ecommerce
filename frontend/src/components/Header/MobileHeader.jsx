@@ -133,7 +133,7 @@ const MobileHeader = ({ toggleMobileMenu }) => {
                         <button className="p-2">
                             <Bell size={27} />
                             {unread.size > 0 && (
-                                <span className="absolute top-2 right-41 flex items-center justify-center align-middle w-[13px] h-[13px] bg-red-500 text-white text-xs font-bold rounded-full">
+                                <span className="absolute top-1 right-30 flex items-center justify-center align-middle w-[13px] h-[13px] bg-red-500 text-white text-xs font-bold rounded-full">
                                     {unread.size}
                                 </span>
                             )}
@@ -151,14 +151,14 @@ const MobileHeader = ({ toggleMobileMenu }) => {
                     </Link>
                     <button
                         onClick={() => { currentUser ? navigate("/MobileAccount") : navigate("/login") }}
-                        className="flex items-center justify-center p-2 w-12 h-10 rounded-lg bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-colors overflow-hidden"
+                        className="flex items-center justify-center p-2 w-12 h-12 rounded-full overflow-hidden"
                     >
                         {currentUser ? (
                             profileImageUrl || currentUser?.photo_url || currentUser?.user_metadata?.photo_url ? (
                                 <img 
                                     src={profileImageUrl || currentUser?.photo_url || currentUser?.user_metadata?.photo_url} 
                                     alt="User Profile" 
-                                    className="w-full h-full object-cover rounded"
+                                    className="w-full h-full object-cover rounded-lg"
                                 />
                             ) : (
                                 <img 

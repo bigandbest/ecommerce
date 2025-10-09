@@ -605,7 +605,7 @@ const Header = () => {
                     <div>
                       <button
                         onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                        className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors group"
+                        className="flex items-center transition-colors group"
                       >
                         <ProfileAvatar
                           imageUrl={
