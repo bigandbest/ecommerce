@@ -16,28 +16,30 @@ import orderRoutes from "./routes/orderRoutes.js";
 import orderItemsRoutes from "./routes/orderItemsRoutes.js";
 import checkCartAvailabilityRoute from "./routes/checkCartAvailabilityRoute.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-import notificationRoutes from "./routes/notificationRoutes.js"
-import bnbRoutes from './routes/b&bRoutes.js';
-import bnbGroupRoutes from './routes/b&bGroupRoutes.js';
-import bnbGroupProductRoutes from './routes/b&bGroupProductRoutes.js'
-import brandRoutes from './routes/brandRoutes.js';
-import brandProductsRoutes from './routes/brandProducts.js'
-import recommendedStoreRoutes from './routes/recommendedStoreRoutes.js';
-import productRecommendedStoreRoutes from './routes/productRecommendedStoreRoutes.js';
-import quickPickRoutes from './routes/quickPickRoutes.js';
-import quickPickGroupRoutes from './routes/quickPickGroupRoutes.js';
-import quickPickGroupProductRoutes from './routes/quickPickGroupProductRoutes.js';
-import savingZoneRoutes from './routes/savingZoneRoutes.js';
-import savingZoneGroupRoutes from './routes/savingZoneGroupRoutes.js';
-import savingZoneGroupProductRoutes from './routes/savingZoneGroupProductRoutes.js'
-import storeRoutes from './routes/storeRoute.js';
-import subStoreRoutes from './routes/subStoreRoute.js';
-import YouMayLikeProductRoutes from './routes/youMayLikeRoutes.js';
-import addBannerRoutes from './routes/addBannerRoutes.js';
-import addBannerGroupRoutes from './routes/addBannerGroupRoutes.js';
-import addBannerGroupProductRoutes from './routes/addBannerGroupProductRoutes.js';
-import uniqueSectionRoutes from './routes/uniqueSectionRoutes.js';
-import uniqueSectionProductRoutes from './routes/uniqueSectionProductRoutes.js'
+import notificationRoutes from "./routes/notificationRoutes.js";
+import bnbRoutes from "./routes/b&bRoutes.js";
+import bnbGroupRoutes from "./routes/b&bGroupRoutes.js";
+import bnbGroupProductRoutes from "./routes/b&bGroupProductRoutes.js";
+import brandRoutes from "./routes/brandRoutes.js";
+import brandProductsRoutes from "./routes/brandProducts.js";
+import recommendedStoreRoutes from "./routes/recommendedStoreRoutes.js";
+import productRecommendedStoreRoutes from "./routes/productRecommendedStoreRoutes.js";
+import quickPickRoutes from "./routes/quickPickRoutes.js";
+import quickPickGroupRoutes from "./routes/quickPickGroupRoutes.js";
+import quickPickGroupProductRoutes from "./routes/quickPickGroupProductRoutes.js";
+import savingZoneRoutes from "./routes/savingZoneRoutes.js";
+import savingZoneGroupRoutes from "./routes/savingZoneGroupRoutes.js";
+import savingZoneGroupProductRoutes from "./routes/savingZoneGroupProductRoutes.js";
+import storeRoutes from "./routes/storeRoute.js";
+import subStoreRoutes from "./routes/subStoreRoute.js";
+import YouMayLikeProductRoutes from "./routes/youMayLikeRoutes.js";
+import addBannerRoutes from "./routes/addBannerRoutes.js";
+import addBannerGroupRoutes from "./routes/addBannerGroupRoutes.js";
+import addBannerGroupProductRoutes from "./routes/addBannerGroupProductRoutes.js";
+import uniqueSectionRoutes from "./routes/uniqueSectionRoutes.js";
+import uniqueSectionProductRoutes from "./routes/uniqueSectionProductRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
+import returnOrderRoutes from "./routes/returnOrderRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -113,6 +115,7 @@ app.use("/api/banner-groups", addBannerGroupRoutes);
 app.use("/api/banner-group-products", addBannerGroupProductRoutes);
 app.use("/api/unique-sections", uniqueSectionRoutes);
 app.use("/api/unique-sections-products", uniqueSectionProductRoutes);
-
+app.use("/api/user", profileRoutes);
+app.use("/api/return-orders", returnOrderRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

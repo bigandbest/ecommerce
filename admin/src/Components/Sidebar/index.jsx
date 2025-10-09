@@ -11,7 +11,15 @@ import {
   RiShutDownLine,
   RiPrinterFill,
 } from "react-icons/ri";
-import { FaUsers, FaAngleDown, FaList, FaPlus, FaTag, FaTrademark, FaDatabase } from "react-icons/fa";
+import {
+  FaUsers,
+  FaAngleDown,
+  FaList,
+  FaPlus,
+  FaTag,
+  FaTrademark,
+  FaDatabase,
+} from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { HiArchive } from "react-icons/hi";
 import { MdCategory } from "react-icons/md";
@@ -93,7 +101,7 @@ const Sidebar = ({ isOpen = true }) => {
     {
       title: "Products",
       icon: <HiArchive />,
-    
+
       path: "/products",
     },
     {
@@ -140,7 +148,7 @@ const Sidebar = ({ isOpen = true }) => {
     },
     {
       title: "BBM Dost",
-      icon: <FaList />, 
+      icon: <FaList />,
       path: "/bbm-dost",
     },
     {
@@ -171,6 +179,11 @@ const Sidebar = ({ isOpen = true }) => {
       title: "Orders",
       icon: <FaList />,
       path: "/AdminOrders",
+    },
+    {
+      title: "Return Orders",
+      icon: <FaList />,
+      path: "/return-orders",
     },
     {
       title: "Warehouses",

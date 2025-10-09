@@ -2,7 +2,6 @@ import supabase from "./supabase.ts";
 //Video Banner
 // Get all video banners
 
-
 export async function getAllVideoBanners() {
   const { data, error } = await supabase.from("video_banner").select();
   if (error) return { success: false, error: error.message };
@@ -10,8 +9,6 @@ export async function getAllVideoBanners() {
   // Do NOT call getPublicUrl again — just return the data directly
   return { success: true, videoBanners: data };
 }
-
-
 
 // PRINT REQUESTS
 /**
@@ -146,8 +143,9 @@ export async function createPrintRequestWithEnquiry({
     }
 
     // 2. Create corresponding enquiry for chat functionality
-    const enquiryMessage = `Custom printing request for ${productType}\n\nDetails:\n- Size: ${size}\n- Color: ${color}\n- Quantity: ${quantity}\n- Position: ${position}\n- Estimated Price: ₹${totalPrice || 0
-      }\n\nImage: ${imageUrl || "No image uploaded"}`;
+    const enquiryMessage = `Custom printing request for ${productType}\n\nDetails:\n- Size: ${size}\n- Color: ${color}\n- Quantity: ${quantity}\n- Position: ${position}\n- Estimated Price: ₹${
+      totalPrice || 0
+    }\n\nImage: ${imageUrl || "No image uploaded"}`;
 
     const enquiryData = {
       user_id: userId,
@@ -299,7 +297,8 @@ export async function getActiveShippingBanner() {
     .limit(1)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is not an error here
+  if (error && error.code !== "PGRST116") {
+    // PGRST116 means no rows found, which is not an error here
     return { success: false, error: error.message };
   }
 
@@ -353,8 +352,7 @@ export async function addShippingBanner(banner, imageFile) {
     .from("shipping_banners")
     .insert([bannerToInsert])
     .select();
-  if (insertError)
-    return { success: false, error: insertError.message };
+  if (insertError) return { success: false, error: insertError.message };
   return { success: true, banner: data };
 }
 
@@ -365,7 +363,7 @@ export async function updateShippingBanner(id, banner, imageFile) {
     const { error: deactivateError } = await supabaseAdmin
       .from("shipping_banners")
       .update({ active: false })
-      .neq('id', id);
+      .neq("id", id);
     if (deactivateError)
       return { success: false, error: deactivateError.message };
   }
@@ -516,7 +514,6 @@ export async function getActiveCategories() {
   if (error) return { success: false, error: error.message };
   return { success: true, categories: data };
 }
-
 
 export async function addCategory(category) {
   const { data, error } = await supabase
@@ -685,10 +682,12 @@ export async function gettingProductsBySubcategoryName(subcategoryName) {
   // Step 2: Fetch products by subcategory ID
   const { data, error } = await supabase
     .from("products")
-    .select(`
+    .select(
+      `
       *,
       subcategories(id, name, categories(id, name, active))
-    `)
+    `
+    )
     .eq("subcategory_id", subcategoryId)
     .order("created_at", { ascending: false });
 
@@ -755,7 +754,8 @@ export async function gettingProductsByCategoryName(categoryName) {
     .limit(1);
 
   if (categoryError) return { success: false, error: categoryError.message };
-  if (!categories || categories.length === 0) return { success: true, products: [] };
+  if (!categories || categories.length === 0)
+    return { success: true, products: [] };
 
   const categoryId = categories[0].id;
 
@@ -773,10 +773,12 @@ export async function gettingProductsByCategoryName(categoryName) {
   // Step 3: Fetch products with subcategory_id IN (subcategoryIds)
   const { data, error } = await supabase
     .from("products")
-    .select(`
+    .select(
+      `
       *,
       subcategories(id, name, categories(id, name, active))
-    `)
+    `
+    )
     .in("subcategory_id", subcategoryIds)
     .order("created_at", { ascending: false });
 
@@ -828,10 +830,12 @@ export async function gettingProductsByGroupName(groupName) {
   // Step 2: Fetch products by group_id
   const { data, error } = await supabase
     .from("products")
-    .select(`
+    .select(
+      `
       *,
       groups(id, name)
-    `)
+    `
+    )
     .eq("group_id", groupId)
     .order("created_at", { ascending: false });
 
@@ -992,7 +996,9 @@ export async function addToCart(user_id, product_id, quantity = 1) {
 
 export const getCartItems = async (user_id) => {
   try {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/cart/${user_id}`);
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/cart/${user_id}`
+    );
     return { success: true, cartItems: res.data.cartItems };
   } catch (err) {
     console.error("Error fetching cart items:", err);
@@ -1002,7 +1008,10 @@ export const getCartItems = async (user_id) => {
 
 export const updateCartItem = async (cart_item_id, quantity) => {
   try {
-    const res = await axios.put(`https://ecommerce-8342.onrender.com/api/cart/update/${cart_item_id}`, { quantity });
+    const res = await axios.put(
+      `https://ecommerce-8342.onrender.com/api/cart/update/${cart_item_id}`,
+      { quantity }
+    );
     return { success: true, updated: res.data };
   } catch (err) {
     console.error("Error updating cart item:", err);
@@ -1012,7 +1021,9 @@ export const updateCartItem = async (cart_item_id, quantity) => {
 
 export const removeCartItem = async (cart_item_id) => {
   try {
-    const res = await axios.delete(`https://ecommerce-8342.onrender.com/api/cart/remove/${cart_item_id}`);
+    const res = await axios.delete(
+      `https://ecommerce-8342.onrender.com/api/cart/remove/${cart_item_id}`
+    );
     return { success: true, removed: res.data };
   } catch (err) {
     console.error("Error removing cart item:", err);
@@ -1022,7 +1033,9 @@ export const removeCartItem = async (cart_item_id) => {
 
 export const clearCart = async (user_id) => {
   try {
-    const res = await axios.delete(`https://ecommerce-8342.onrender.com/api/cart/clear/${user_id}`);
+    const res = await axios.delete(
+      `https://ecommerce-8342.onrender.com/api/cart/clear/${user_id}`
+    );
     return { success: true, cleared: res.data };
   } catch (err) {
     console.error("Error clearing cart:", err);
@@ -1090,11 +1103,13 @@ export async function removeFromWishlist(wishlist_item_id) {
 } */
 
 // --- ORDER MANAGEMENT ---
-const BASE_URL = 'https://ecommerce-8342.onrender.com/api/order';
+const BASE_URL = "https://ecommerce-8342.onrender.com/api/order";
 // ORDERS
 export async function getAllOrders() {
   try {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/order/all`);
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/order/all`
+    );
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1104,10 +1119,13 @@ export async function getAllOrders() {
 // 2. Update Order Status (Admin)
 export async function updateOrderStatus(id, status, adminNotes = "") {
   try {
-    const res = await axios.put(`https://ecommerce-8342.onrender.com/api/order/status/${id}`, {
-      status,
-      adminnotes: adminNotes,
-    });
+    const res = await axios.put(
+      `https://ecommerce-8342.onrender.com/api/order/status/${id}`,
+      {
+        status,
+        adminnotes: adminNotes,
+      }
+    );
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1125,15 +1143,18 @@ export async function placeOrder(
   payment_method
 ) {
   try {
-    const res = await axios.post(`https://ecommerce-8342.onrender.com/api/order/place`, {
-      user_id,
-      items,
-      subtotal,
-      shipping,
-      total,
-      address,
-      payment_method,
-    });
+    const res = await axios.post(
+      `https://ecommerce-8342.onrender.com/api/order/place`,
+      {
+        user_id,
+        items,
+        subtotal,
+        shipping,
+        total,
+        address,
+        payment_method,
+      }
+    );
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1180,24 +1201,43 @@ export async function placeOrderWithDetailedAddress(
 // 5. Get Orders for a User
 export async function getUserOrders(user_id) {
   try {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/order/user/${user_id}`);
-    return res.data;
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/order/user/${user_id}`
+    );
+
+    // Ensure we always return a consistent structure
+    if (res.data && res.data.success !== false) {
+      return {
+        success: true,
+        orders: res.data.orders || [],
+      };
+    } else {
+      return {
+        success: false,
+        error: res.data?.error || "Unknown error",
+        orders: [],
+      };
+    }
   } catch (err) {
-    console.error('API Error:', err.response?.data || err.message);
-    return { success: false, error: err.response?.data?.error || err.message };
+    console.error("API Error:", err.response?.data || err.message);
+    return {
+      success: false,
+      error: err.response?.data?.error || err.message,
+      orders: [],
+    };
   }
 }
 
 export async function getOrderItemsByOrderId(order_id) {
   try {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/orderItems/${order_id}`)
-    return res.data
-  }
-  catch (error) {
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/orderItems/${order_id}`
+    );
+    return res.data;
+  } catch (error) {
     return { success: false, error: error.message };
   }
 }
-
 
 // --- ENQUIRY MANAGEMENT ---
 export async function createEnquiry({
@@ -1369,67 +1409,64 @@ export async function markEnquiriesAsRead(userId) {
 // this is the fn to fetch the 'enquiry' boolean column from products table
 export async function getProductEnquiryStatus() {
   // Fetches the 'id' and the boolean 'enquiry' column from the 'products' table.
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, enquiry");
+  const { data, error } = await supabase.from("products").select("id, enquiry");
 
   if (error) {
     console.error("Error fetching product enquiry status:", error.message);
     return { success: false, error: error.message };
   }
-  
-  // The 'data' will be an array of objects like: 
+
+  // The 'data' will be an array of objects like:
   // [{ id: 'uuid-1', enquiry: true }, { id: 'uuid-2', enquiry: false }, ...]
   return { success: true, productEnquiryStatuses: data };
 }
 
-
 // This is the one <=====
 export async function createSingleProductEnquiry({
-  user_id,
-  name,
-  email,
-  phone,
-  message,
-  product, // Expects a single product object: { id, name, price, customization, quantity }
+  user_id,
+  name,
+  email,
+  phone,
+  message,
+  product, // Expects a single product object: { id, name, price, customization, quantity }
 }) {
-  // Ensure the essential product details are present before proceeding
-  if (!product || !product.id) {
-    return { success: false, error: 'Product details are required for a single-item enquiry.' };
-  }
+  // Ensure the essential product details are present before proceeding
+  if (!product || !product.id) {
+    return {
+      success: false,
+      error: "Product details are required for a single-item enquiry.",
+    };
+  } // 1. Insert the main enquiry record
 
-  // 1. Insert the main enquiry record
-  const { data: enquiry, error: enquiryError } = await supabase
-    .from("enquiries")
-    .insert([{ user_id, name, email, phone, message }])
-    .select()
-    .single();
+  const { data: enquiry, error: enquiryError } = await supabase
+    .from("enquiries")
+    .insert([{ user_id, name, email, phone, message }])
+    .select()
+    .single();
 
-  if (enquiryError) {
-    return { success: false, error: enquiryError.message };
-  }
+  if (enquiryError) {
+    return { success: false, error: enquiryError.message };
+  } // 2. Prepare and insert the single enquiry item
 
-  // 2. Prepare and insert the single enquiry item
-  const itemToInsert = {
-    enquiry_id: enquiry.id,
-    product_id: product.id,
-    product_name: product.name,
-    price: product.price,
-    quantity: product.quantity || 1, // Default to 1 if quantity is missing
-    customization: product.customization || null,
+  const itemToInsert = {
+    enquiry_id: enquiry.id,
+    product_id: product.id,
+    product_name: product.name,
+    price: product.price,
+    quantity: product.quantity || 1, // Default to 1 if quantity is missing
+    customization: product.customization || null,
     product_image: product.image || null,
-  };
+  };
 
-  const { error: itemsError } = await supabase
-    .from("enquiry_items")
-    .insert([itemToInsert]);
+  const { error: itemsError } = await supabase
+    .from("enquiry_items")
+    .insert([itemToInsert]);
 
-  if (itemsError) {
-    // Optional: Add logic here to delete the parent enquiry if item insertion fails
-    return { success: false, error: itemsError.message };
-  }
-  
-  return { success: true, enquiry };
+  if (itemsError) {
+    // Optional: Add logic here to delete the parent enquiry if item insertion fails
+    return { success: false, error: itemsError.message };
+  }
+  return { success: true, enquiry };
 }
 
 // WEBSITE SETTINGS
@@ -1521,7 +1558,7 @@ export async function updateMultiplePromotionalSettings(settings) {
   return { success: true };
 }
 
-// BBM Dost 
+// BBM Dost
 const API_BASE_URL = "https://ecommerce-8342.onrender.com/api/bbm-dost";
 
 // ✅ 1. Add (Create) a new BBM Dost
@@ -2062,7 +2099,7 @@ export async function migrateUserAddresses(userId) {
   }
 }
 
-const API_BASE = "https://ecommerce-8342.onrender.com/api"; 
+const API_BASE = "https://ecommerce-8342.onrender.com/api";
 
 export async function fetchStores() {
   const res = await fetch(`${API_BASE}/stores/fetch`);
@@ -2092,7 +2129,9 @@ export async function updateStore(id, formData) {
 }
 
 export async function deleteStore(id) {
-  const res = await fetch(`${API_BASE}/stores/delete/${id}`, { method: "DELETE" });
+  const res = await fetch(`${API_BASE}/stores/delete/${id}`, {
+    method: "DELETE",
+  });
   const data = await res.json();
   if (!data.success) throw new Error(data.error);
   return true;
@@ -2112,7 +2151,9 @@ export async function fetchQuickPicks() {
 // NEW: Fetches all groups for a specific Quick Pick ID
 export async function fetchGroupsForQuickPick(quickPickId) {
   // This assumes your API route is /api/quick-pick-groups/by-quick-pick/:quickPickId
-  const response = await fetch(`https://ecommerce-8342.onrender.com/api/quick-pick-group/by-quick-pick/${quickPickId}`);
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/quick-pick-group/by-quick-pick/${quickPickId}`
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch quick pick groups");
   }
@@ -2123,20 +2164,22 @@ export async function fetchGroupsForQuickPick(quickPickId) {
 // NEW: Fetches all products for a specific Quick Pick Group ID
 export async function fetchProductsForGroup(groupId) {
   // This assumes your API route is /api/quick-pick-group-products/products-for-group/:quick_pick_group_id
-  const response = await fetch(`https://ecommerce-8342.onrender.com/api/quick-pick-group-product/getProductsByGroup/${groupId}`);
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/quick-pick-group-product/getProductsByGroup/${groupId}`
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch products");
   }
   const data = await response.json();
   // The data is nested, so we extract the product details
-  return data.map(item => item.products);
+  return data.map((item) => item.products);
 }
 
 // Add new quick pick
 export async function addQuickPick(formData) {
   const response = await axios.post(`${API_URL}/add`, formData, {
     // This header is important for file uploads
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data.quickPick;
 }
@@ -2144,7 +2187,7 @@ export async function addQuickPick(formData) {
 // Edit an existing quick pick
 export async function editQuickPick(id, formData) {
   const response = await axios.put(`${API_URL}/update/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data.quickPick;
 }
@@ -2158,8 +2201,10 @@ export async function deleteQuickPick(id) {
 
 // The API endpoints are set for your Saving Zone services
 const API_SZ_URL = "https://ecommerce-8342.onrender.com/api/saving-zone";
-const SZ_GROUP_API_URL = "https://ecommerce-8342.onrender.com/api/saving-zone-group";
-const SZ_PRODUCT_API_URL = "https://ecommerce-8342.onrender.com/api/saving-zone-group-product";
+const SZ_GROUP_API_URL =
+  "https://ecommerce-8342.onrender.com/api/saving-zone-group";
+const SZ_PRODUCT_API_URL =
+  "https://ecommerce-8342.onrender.com/api/saving-zone-group-product";
 
 // Corresponds to: fetchQuickPicks
 // Fetches all Saving Zones
@@ -2171,7 +2216,9 @@ export async function getAllSavingZones() {
 // Corresponds to: fetchGroupsForQuickPick
 // Fetches all groups for a specific Saving Zone ID
 export async function getGroupsBySavingZoneId(savingZoneId) {
-  const response = await fetch(`https://ecommerce-8342.onrender.com/api/saving-zone-group/getGroupsBySavingZoneId/${savingZoneId}`);
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/saving-zone-group/getGroupsBySavingZoneId/${savingZoneId}`
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch saving zone groups");
   }
@@ -2182,20 +2229,22 @@ export async function getGroupsBySavingZoneId(savingZoneId) {
 // Corresponds to: fetchProductsForGroup
 // Fetches all products for a specific Saving Zone Group ID
 export async function getProductsForSavingZoneGroup(groupId) {
-  const response = await fetch(`${SZ_PRODUCT_API_URL}/getProductsByGroup/${groupId}`);
+  const response = await fetch(
+    `${SZ_PRODUCT_API_URL}/getProductsByGroup/${groupId}`
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch products");
   }
   const data = await response.json();
   // The data is nested, so we extract the product details
-  return data.map(item => item.products);
+  return data.map((item) => item.products);
 }
 
 // Corresponds to: addQuickPick
 // Add a new Saving Zone
 export async function addSavingZone(formData) {
   const response = await axios.post(`${API_SZ_URL}/add`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data.savingZone;
 }
@@ -2204,7 +2253,7 @@ export async function addSavingZone(formData) {
 // Edit an existing Saving Zone
 export async function updateSavingZone(id, formData) {
   const response = await axios.put(`${API_SZ_URL}/update/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data.savingZone;
 }
@@ -2217,7 +2266,8 @@ export async function deleteSavingZone(id) {
 }
 
 // The base URL for your recommended stores API
-const API_URL_New = "https://ecommerce-8342.onrender.com/api/recommended-stores";
+const API_URL_New =
+  "https://ecommerce-8342.onrender.com/api/recommended-stores";
 
 /**
  * Fetches all recommended stores.
@@ -2247,7 +2297,7 @@ export async function fetchSingleRecommendedStore(id) {
  */
 export async function addRecommendedStore(formData) {
   const response = await axios.post(`${API_URL_New}/add`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data.recommendedStore;
 }
@@ -2262,7 +2312,7 @@ export async function addRecommendedStore(formData) {
  */
 export async function editRecommendedStore(id, formData) {
   const response = await axios.put(`${API_URL_New}/update/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data.recommendedStore;
 }
@@ -2281,44 +2331,47 @@ export async function deleteRecommendedStore(id) {
 
 // 1. Fetches all main B&B items
 export async function fetchBandBs() {
-    const response = await fetch(`https://ecommerce-8342.onrender.com/api/bnb/list`);
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch B&B items');
-    }
-    const data = await response.json();
-    return data.bandbs; // Corresponds to the key in your b&bController.js
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/bnb/list`
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch B&B items");
+  }
+  const data = await response.json();
+  return data.bandbs; // Corresponds to the key in your b&bController.js
 }
 
 // 2. Fetches all groups for a specific B&B ID
 export async function fetchGroupsForBandB(bnbId) {
-    const response = await fetch(`https://ecommerce-8342.onrender.com/api/b&b-group/by-bnb/${bnbId}`);
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch B&B groups');
-    }
-    const data = await response.json();
-    return data.bandbGroups; // Corresponds to the key in your b&bGroupController.js
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/b&b-group/by-bnb/${bnbId}`
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch B&B groups");
+  }
+  const data = await response.json();
+  return data.bandbGroups; // Corresponds to the key in your b&bGroupController.js
 }
 
 // 3. Fetches all products for a specific B&B Group ID
 export async function fetchProductsForBandBGroup(groupId) {
-    const response = await fetch(`https://ecommerce-8342.onrender.com/api/b&b-group-product/getProductsByGroup/${groupId}`);
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch B&B products');
-    }
-    const data = await response.json();
-    // The data is nested, so we extract the product details
-    return data.map(item => item.products).filter(p => p);
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/b&b-group-product/getProductsByGroup/${groupId}`
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch B&B products");
+  }
+  const data = await response.json();
+  // The data is nested, so we extract the product details
+  return data.map((item) => item.products).filter((p) => p);
 }
-
 
 export const getYouMayLikeProducts = async () => {
   try {
-    const { data, error } = await supabase
-      .from("you_may_like")
-      .select(`
+    const { data, error } = await supabase.from("you_may_like").select(`
         product_id,
         products:product_id (id, name, price, old_price, rating, uom, discount, image, category)
       `);
@@ -2345,24 +2398,25 @@ export const getYouMayLikeProducts = async () => {
 export async function getProductsForRecommendedStore(storeId) {
   // Use the storeId to construct the URL for the API endpoint.
   // This assumes your API is hosted at a similar base URL.
-  const response = await fetch(`https://ecommerce-8342.onrender.com/api/product-recommended-stores/${storeId}`);
-  
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/product-recommended-stores/${storeId}`
+  );
+
   // Check if the network request was successful.
   if (!response.ok) {
     // If not, parse the error message from the server and throw a new error.
     const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch recommended products.');
+    throw new Error(error.message || "Failed to fetch recommended products.");
   }
 
   // If the request was successful, parse the JSON data.
   const data = await response.json();
-  
+
   // The API response from the server-side code contains a nested structure.
   // We need to map over the array to get the `products` object from each item.
   // The filter() part removes any potential null or undefined products.
-  return data.map(item => item.products).filter(p => p);
+  return data.map((item) => item.products).filter((p) => p);
 }
-
 
 export async function getProductsForBrand(brandId) {
   try {
@@ -2378,7 +2432,7 @@ export async function getProductsForBrand(brandId) {
     const data = await response.json();
 
     // The backend controller already returns just products[]
-    return data.map(item => item.products).filter(p => p);
+    return data.map((item) => item.products).filter((p) => p);
   } catch (err) {
     console.error("Error in getProductsForBrand:", err.message);
     throw err;
@@ -2390,53 +2444,65 @@ export async function getProductsForBrand(brandId) {
 // 1. Fetches all Banners filtered by a specific type (e.g., 'Deals', 'Offer')
 // This uses the /api/banner/type/:bannerType route we created earlier.
 export async function fetchBannersByType(bannerType) {
-    if (!bannerType) {
-        throw new Error('Banner type is required.');
-    }
-    const response = await fetch(`https://ecommerce-8342.onrender.com/api/banner/type/${bannerType}`);
+  if (!bannerType) {
+    throw new Error("Banner type is required.");
+  }
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/banner/type/${bannerType}`
+  );
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || `Failed to fetch banners for type: ${bannerType}`);
-    }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      error.error || `Failed to fetch banners for type: ${bannerType}`
+    );
+  }
 
-    const data = await response.json();
-    return data.banners; // Corresponds to the key in your addBannerController.js
+  const data = await response.json();
+  return data.banners; // Corresponds to the key in your addBannerController.js
 }
 
 // 2. Fetches all Banner Groups for a specific Banner ID
 // This uses the /api/banner-groups/by-banner/:bannerId route from your groups controller.
 export async function fetchGroupsForBanner(bannerId) {
-    if (!bannerId) {
-        throw new Error('Banner ID is required.');
-    }
-    const response = await fetch(`https://ecommerce-8342.onrender.com/api/banner-groups/by-banner/${bannerId}`);
+  if (!bannerId) {
+    throw new Error("Banner ID is required.");
+  }
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/banner-groups/by-banner/${bannerId}`
+  );
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || `Failed to fetch groups for Banner ID: ${bannerId}`);
-    }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      error.error || `Failed to fetch groups for Banner ID: ${bannerId}`
+    );
+  }
 
-    const data = await response.json();
-    return data.bannerGroups; // Corresponds to the key in your addBannerGroupController.js
+  const data = await response.json();
+  return data.bannerGroups; // Corresponds to the key in your addBannerGroupController.js
 }
 
 // 3. Fetches all products for a specific Banner Group ID
 // This uses the /api/banner-group-products/by-group/:add_banner_group_id route.
 export async function fetchProductsForBannerGroup(groupId) {
-    if (!groupId) {
-        throw new Error('Group ID is required.');
-    }
-    const response = await fetch(`https://ecommerce-8342.onrender.com/api/banner-group-products/by-group/${groupId}`);
+  if (!groupId) {
+    throw new Error("Group ID is required.");
+  }
+  const response = await fetch(
+    `https://ecommerce-8342.onrender.com/api/banner-group-products/by-group/${groupId}`
+  );
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || `Failed to fetch products for Banner Group ID: ${groupId}`);
-    }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      error.error || `Failed to fetch products for Banner Group ID: ${groupId}`
+    );
+  }
 
-    const data = await response.json();
-    // The data is an array of {product_id, products: {...}} objects. We extract the product data.
-    return data.map(item => item.products).filter(p => p);
+  const data = await response.json();
+  // The data is an array of {product_id, products: {...}} objects. We extract the product data.
+  return data.map((item) => item.products).filter((p) => p);
 }
 
 // --- Banner Section Functions ---
@@ -2522,16 +2588,22 @@ export async function fetchUniqueSectionsForProduct(productId) {
 
 // 5) Map a single product to a Unique Section
 // POST /api/unique-sections-products/map
-export async function mapProductToUniqueSectionApi({ product_id, unique_section_id }) {
+export async function mapProductToUniqueSectionApi({
+  product_id,
+  unique_section_id,
+}) {
   if (!product_id || !unique_section_id) {
     throw new Error("product_id and unique_section_id are required.");
   }
 
-  const response = await fetch(`${BASE_URL2}/api/unique-sections-products/map`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ product_id, unique_section_id }),
-  });
+  const response = await fetch(
+    `${BASE_URL2}/api/unique-sections-products/map`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product_id, unique_section_id }),
+    }
+  );
 
   if (!response.ok) {
     const error = await safeJson(response);
@@ -2543,16 +2615,22 @@ export async function mapProductToUniqueSectionApi({ product_id, unique_section_
 
 // 6) Remove a product from a Unique Section
 // DELETE /api/unique-sections-products/remove  (expects JSON body)
-export async function removeProductFromUniqueSectionApi({ product_id, unique_section_id }) {
+export async function removeProductFromUniqueSectionApi({
+  product_id,
+  unique_section_id,
+}) {
   if (!product_id || !unique_section_id) {
     throw new Error("product_id and unique_section_id are required.");
   }
 
-  const response = await fetch(`${BASE_URL2}/api/unique-sections-products/remove`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ product_id, unique_section_id }),
-  });
+  const response = await fetch(
+    `${BASE_URL2}/api/unique-sections-products/remove`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product_id, unique_section_id }),
+    }
+  );
 
   if (!response.ok) {
     const error = await safeJson(response);
@@ -2564,7 +2642,10 @@ export async function removeProductFromUniqueSectionApi({ product_id, unique_sec
 
 // 7) Bulk map products to a Unique Section by names
 // POST /api/unique-sections-products/bulk-map-by-names
-export async function bulkMapUniqueSectionByNamesApi({ section_name, product_names }) {
+export async function bulkMapUniqueSectionByNamesApi({
+  section_name,
+  product_names,
+}) {
   if (!section_name || !Array.isArray(product_names)) {
     throw new Error("section_name and product_names[] are required.");
   }
@@ -2589,17 +2670,20 @@ export async function bulkMapUniqueSectionByNamesApi({ section_name, product_nam
 // 8) Fetch Unique Sections by section_type (banner type)
 // GET /api/unique-sections/list  + client-side filter
 export async function fetchUniqueSectionsByType(sectionType) {
-  const response = await fetch(`${BASE_URL2}/api/unique-sections/type/${sectionType}`);
+  const response = await fetch(
+    `${BASE_URL2}/api/unique-sections/type/${sectionType}`
+  );
 
   if (!response.ok) {
     const error = await safeJson(response);
-    throw new Error(error?.error || `Failed to fetch sections of type ${sectionType}`);
+    throw new Error(
+      error?.error || `Failed to fetch sections of type ${sectionType}`
+    );
   }
 
   const data = await response.json();
   return data.uniqueSections || [];
 }
-
 
 // --- helpers ---
 async function safeJson(res) {
@@ -2610,63 +2694,60 @@ async function safeJson(res) {
   }
 }
 
-
 // ---SUB SECTIONS FUNCTIONS (SUBSTORES)----
 // The server.js route for SubStores is mounted at "/api/sub-stores"
 const SUBSTORE_API_PATH = "https://ecommerce-8342.onrender.com/api/sub-stores";
 
-
 export async function fetchSubStores() {
-  // Corresponds to router.get("/fetch", getAllSubStores);
-  const res = await fetch(`${SUBSTORE_API_PATH}/fetch`);
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error);
-  // Assuming the backend returns 'stores' key (as per your SubStoreAdmin component)
-  return data.stores; 
+  // Corresponds to router.get("/fetch", getAllSubStores);
+  const res = await fetch(`${SUBSTORE_API_PATH}/fetch`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error); // Assuming the backend returns 'stores' key (as per your SubStoreAdmin component)
+  return data.stores;
 }
 
 export async function addSubStore(formData) {
-  // Corresponds to router.post("/add", upload.single("image"), addSubStore);
-  const res = await fetch(`${SUBSTORE_API_PATH}/add`, {
-    method: "POST",
-    body: formData, // FormData handles the 'multipart/form-data' header automatically
-  });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error);
-  // Assuming the backend returns 'store' key
-  return data.store; 
+  // Corresponds to router.post("/add", upload.single("image"), addSubStore);
+  const res = await fetch(`${SUBSTORE_API_PATH}/add`, {
+    method: "POST",
+    body: formData, // FormData handles the 'multipart/form-data' header automatically
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error); // Assuming the backend returns 'store' key
+  return data.store;
 }
 
 export async function updateSubStore(id, formData) {
-  // Corresponds to router.put("/update/:id", upload.single("image"), updateSubStore);
-  const res = await fetch(`${SUBSTORE_API_PATH}/update/${id}`, {
-    method: "PUT",
-    body: formData,
-  });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error);
-  // Assuming the backend returns 'store' key
-  return data.store;
+  // Corresponds to router.put("/update/:id", upload.single("image"), updateSubStore);
+  const res = await fetch(`${SUBSTORE_API_PATH}/update/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error); // Assuming the backend returns 'store' key
+  return data.store;
 }
 
 export async function deleteSubStore(id) {
-  // Corresponds to router.delete("/delete/:id", deleteSubStore);
-  const res = await fetch(`${SUBSTORE_API_PATH}/delete/${id}`, { method: "DELETE" });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error);
-  return true;
+  // Corresponds to router.delete("/delete/:id", deleteSubStore);
+  const res = await fetch(`${SUBSTORE_API_PATH}/delete/${id}`, {
+    method: "DELETE",
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return true;
 }
 
 // Upload user avatar
 export const uploadUserAvatar = async (file) => {
   try {
     const formData = new FormData();
-    formData.append('avatar', file);
+    formData.append("avatar", file);
 
-    const response = await fetch('/api/business/upload-avatar', {
-      method: 'POST',
+    const response = await fetch("/api/business/upload-avatar", {
+      method: "POST",
       body: formData,
-      credentials: 'include'
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -2684,9 +2765,9 @@ export const uploadUserAvatar = async (file) => {
 // Remove user avatar
 export const removeUserAvatar = async () => {
   try {
-    const response = await fetch('/api/business/remove-avatar', {
-      method: 'DELETE',
-      credentials: 'include'
+    const response = await fetch("/api/business/remove-avatar", {
+      method: "DELETE",
+      credentials: "include",
     });
 
     if (!response.ok) {

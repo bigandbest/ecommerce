@@ -61,6 +61,8 @@ const AccountPage = () => {
       ],
       account: [
         { key: "orders", label: "My Orders", icon: <FaShoppingBag /> },
+        { key: "return-request", label: "Return Request", icon: <FaHistory /> },
+        { key: "return-tracking", label: "Return Tracking", icon: <FaEye /> },
         { key: "security", label: "Security", icon: <FaLock /> },
       ],
       repeat: [
@@ -117,7 +119,6 @@ const AccountPage = () => {
   const forceRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
-  setAllOrders;
 
   // Listen for order placement events
   useEffect(() => {
@@ -182,8 +183,10 @@ const AccountPage = () => {
 
   // Fetch all orders for repeat order tab
   useEffect(() => {
-    fetchAllOrders();
-  }, []);
+    if (currentUser?.id) {
+      fetchAllOrders();
+    }
+  }, [currentUser?.id]);
 
   const fetchUserOrders = async () => {
     if (!currentUser?.id) return;
@@ -220,25 +223,28 @@ const AccountPage = () => {
   };
 
   const fetchAllOrders = async () => {
+    if (!currentUser?.id) return;
+
     setAllOrdersLoading(true);
     try {
-      const response = await fetch(
-        "https://ecommerce-8342.onrender.com/api/order/all"
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch orders");
-      }
-      const data = await response.json();
-      console.log("All orders API response:", data);
-      if (Array.isArray(data)) {
-        setAllOrders(data);
-      } else if (data && Array.isArray(data.orders)) {
-        setAllOrders(data.orders);
+      const {
+        success,
+        orders: fetchedOrders,
+        error,
+      } = await getUserOrders(currentUser.id);
+      console.log("User orders API response:", {
+        success,
+        fetchedOrders,
+        error,
+      });
+      if (success && fetchedOrders) {
+        setAllOrders(fetchedOrders);
       } else {
+        console.error("Failed to fetch user orders:", error);
         setAllOrders([]);
       }
     } catch (error) {
-      console.error("Error fetching all orders:", error);
+      console.error("Error fetching user orders:", error);
       setAllOrders([]);
     } finally {
       setAllOrdersLoading(false);
@@ -464,7 +470,15 @@ const AccountPage = () => {
               {TAB_CONFIG.vertical[activeHorizontalTab]?.map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveVerticalTab(tab.key)}
+                  onClick={() => {
+                    if (tab.key === "return-request") {
+                      navigate("/return-request");
+                    } else if (tab.key === "return-tracking") {
+                      navigate("/return-tracking");
+                    } else {
+                      setActiveVerticalTab(tab.key);
+                    }
+                  }}
                   className={`w-full flex items-center px-3 py-3 rounded-lg text-left transition-colors ${
                     activeVerticalTab === tab.key
                       ? "bg-indigo-100 text-indigo-700 border-l-4 border-indigo-500"
@@ -624,51 +638,178 @@ const AccountPage = () => {
                     <div>
                       <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                         <FaShoppingBag className="text-indigo-600" />
-                        My Orders (Delivered Products)
+                        My Orders (Active Orders)
                       </h2>
                       {allOrdersLoading ? (
                         <div className="text-center py-8">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
                           <p className="mt-4 text-gray-600">
-                            Loading delivered orders...
+                            Loading your orders...
                           </p>
                         </div>
                       ) : (
                         <div>
+                          {/* Active Orders Section */}
+                          {allOrders.filter(
+                            (order) =>
+                              order.status !== "delivered" &&
+                              order.status !== "Delivered" &&
+                              order.status !== "cancelled" &&
+                              order.status !== "Cancelled"
+                          ).length === 0 ? (
+                            <div className="text-center py-12 mb-8">
+                              <div className="text-6xl mb-4">📦</div>
+                              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                No Active Orders
+                              </h3>
+                              <p className="text-gray-600 mb-6">
+                                You don&apos;t have any active orders to track
+                                right now.
+                              </p>
+                              <Link
+                                to="/"
+                                className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors mr-3"
+                              >
+                                Start Shopping
+                              </Link>
+                              <Link
+                                to="/MyOrders"
+                                className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                              >
+                                View Order History
+                              </Link>
+                            </div>
+                          ) : (
+                            <div className="space-y-4 mb-8">
+                              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                🚚 Active Orders (
+                                {
+                                  allOrders.filter(
+                                    (order) =>
+                                      order.status !== "delivered" &&
+                                      order.status !== "Delivered" &&
+                                      order.status !== "cancelled" &&
+                                      order.status !== "Cancelled"
+                                  ).length
+                                }
+                                )
+                              </h3>
+                              {allOrders
+                                .filter(
+                                  (order) =>
+                                    order.status !== "delivered" &&
+                                    order.status !== "Delivered" &&
+                                    order.status !== "cancelled" &&
+                                    order.status !== "Cancelled"
+                                )
+                                .slice(0, 3)
+                                .map((order) => (
+                                  <div
+                                    key={order.id}
+                                    className="bg-blue-50 rounded-lg p-4 border border-blue-200"
+                                  >
+                                    <div className="flex justify-between items-start mb-3">
+                                      <div>
+                                        <h4 className="font-semibold text-gray-900">
+                                          Order #{order.id.slice(0, 8)}
+                                        </h4>
+                                        <p className="text-sm text-gray-600">
+                                          {new Date(
+                                            order.created_at
+                                          ).toLocaleDateString()}
+                                        </p>
+                                      </div>
+                                      <span
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
+                                          order.status === "pending"
+                                            ? "bg-yellow-100 text-yellow-800"
+                                            : order.status === "processing"
+                                            ? "bg-blue-100 text-blue-800"
+                                            : order.status === "shipped"
+                                            ? "bg-purple-100 text-purple-800"
+                                            : "bg-gray-100 text-gray-800"
+                                        }`}
+                                      >
+                                        {order.status}
+                                      </span>
+                                    </div>
+                                    <div className="mb-3">
+                                      <p className="text-sm text-gray-600 mb-2">
+                                        Items: {order.order_items?.length || 0}
+                                      </p>
+                                      <div className="flex flex-wrap gap-2">
+                                        {order.order_items
+                                          ?.slice(0, 3)
+                                          .map((item, idx) => (
+                                            <span
+                                              key={idx}
+                                              className="text-xs bg-white px-2 py-1 rounded border"
+                                            >
+                                              {item.products?.name || "Product"}
+                                            </span>
+                                          ))}
+                                        {order.order_items?.length > 3 && (
+                                          <span className="text-xs text-gray-500">
+                                            +{order.order_items.length - 3} more
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-semibold text-gray-900">
+                                        ₹{order.total?.toLocaleString("en-IN")}
+                                      </span>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() =>
+                                            setSelectedOrder(order)
+                                          }
+                                          className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                        >
+                                          View Details
+                                        </button>
+                                        <Link
+                                          to="/MyOrders"
+                                          className="px-4 py-2 text-sm border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition-colors"
+                                        >
+                                          Track Order
+                                        </Link>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+
+                          {/* Delivered Orders Section */}
                           {allOrders.filter(
                             (order) =>
                               order.status === "delivered" ||
                               order.status === "Delivered"
-                          ).length === 0 ? (
-                            <div className="text-center py-12">
-                              <div className="text-6xl mb-4">📦</div>
-                              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                                No Delivered Orders
+                          ).length > 0 && (
+                            <div className="space-y-4 pt-6 border-t border-gray-200">
+                              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                ✅ Recently Delivered (
+                                {
+                                  allOrders.filter(
+                                    (order) =>
+                                      order.status === "delivered" ||
+                                      order.status === "Delivered"
+                                  ).length
+                                }
+                                )
                               </h3>
-                              <p className="text-gray-600 mb-6">
-                                Your delivered orders will appear here once
-                                completed.
-                              </p>
-                              <Link
-                                to="/MyOrders"
-                                className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                              >
-                                View Active Orders
-                              </Link>
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
                               {allOrders
                                 .filter(
                                   (order) =>
                                     order.status === "delivered" ||
                                     order.status === "Delivered"
                                 )
-                                .slice(0, 5)
+                                .slice(0, 2)
                                 .map((order) => (
                                   <div
                                     key={order.id}
-                                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                                    className="bg-green-50 rounded-lg p-4 border border-green-200"
                                   >
                                     <div className="flex justify-between items-start mb-3">
                                       <div>
@@ -720,23 +861,24 @@ const AccountPage = () => {
                                         >
                                           View Details
                                         </button>
-                                        <button className="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-50 transition-colors">
+                                        <button className="px-4 py-2 text-sm border border-green-600 text-green-600 rounded hover:bg-green-50 transition-colors">
                                           Reorder
                                         </button>
                                       </div>
                                     </div>
                                   </div>
                                 ))}
-                              <div className="text-center pt-4">
-                                <Link
-                                  to="/MyOrders"
-                                  className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                                >
-                                  View Active Orders
-                                </Link>
-                              </div>
                             </div>
                           )}
+
+                          <div className="text-center pt-6">
+                            <Link
+                              to="/MyOrders"
+                              className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                              View All Orders
+                            </Link>
+                          </div>
                         </div>
                       )}
                     </div>
