@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { AdminAuthProvider, useAdminAuth } from "./contexts/AdminAuthContext";
-import { createBrowserRouter, RouterProvider, Outlet, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  Navigate,
+} from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import '@mantine/spotlight/styles.css';
-import { Notifications } from '@mantine/notifications';
-import { ModalsProvider } from '@mantine/modals';
-import { Spotlight, spotlight } from '@mantine/spotlight';
-import { FaSearch, FaHome, FaUsers, FaBoxOpen, FaQuestionCircle } from 'react-icons/fa';  
-
+import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
+import "@mantine/spotlight/styles.css";
+import { Notifications } from "@mantine/notifications";
+import { ModalsProvider } from "@mantine/modals";
+import { Spotlight, spotlight } from "@mantine/spotlight";
+import {
+  FaSearch,
+  FaHome,
+  FaUsers,
+  FaBoxOpen,
+  FaQuestionCircle,
+} from "react-icons/fa";
 
 // Components
 import Sidebar from "./Components/Sidebar";
@@ -35,7 +45,7 @@ import StorageDetailsPage from "./Pages/Storage";
 import BusinessUsersList from "./Pages/BusinessWork/BusinessData.jsx";
 import EnhancedStoragePage from "./Pages/Storage/enhanced";
 import WarehouseList from "./Pages/WarehousePages/WarehouseList.jsx";
-import WarehouseProducts from './Pages/WarehousePages/WarehouseProducts.jsx'
+import WarehouseProducts from "./Pages/WarehousePages/WarehouseProducts.jsx";
 import VideoBannerManagement from "./Pages/VideoBanners/VideoBannerManagement.jsx";
 import AdminOrders from "./Pages/Orders/index.jsx";
 import ShippingBanner from "./Pages/ShippingBanner/ShippingBanner.jsx";
@@ -43,7 +53,7 @@ import Notification from "./Pages/Notifications/Notification.jsx";
 import Bnb from "./Pages/B&b/B&b.jsx";
 import BnbGroup from "./Pages/B&b/B&bGroup.jsx";
 import BnbGroupProducts from "./Pages/B&b/B&bGroupProducts.jsx";
-import Brand from './Pages/Brand/Brand.jsx'
+import Brand from "./Pages/Brand/Brand.jsx";
 import BrandProducts from "./Pages/Brand/BrandProducts.jsx";
 import QuickPicksPage from "./Pages/QuickPicks/QuickPicks.jsx";
 import QuickPickGroupPage from "./Pages/QuickPicks/QuickPickGroup.jsx";
@@ -62,6 +72,7 @@ import AddBannerGroupProducts from "./Pages/AddBanners/AddBannerGroupProducts.js
 import UniqueSection from "./Pages/UniqueSection/UniqueSection.jsx";
 import UniqueSectionProducts from "./Pages/UniqueSection/UniqueSectionProduct.jsx";
 import BbmDost from "./Pages/BbmDost/BbmDost.jsx";
+import ReturnOrdersAdmin from "./Pages/ReturnOrders/index.jsx";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -73,7 +84,11 @@ const MainLayout = () => {
   return (
     <div className="flex h-screen mantine-bg">
       <Sidebar isOpen={sidebarOpen} />
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'ml-[240px]' : 'ml-[70px]'}`}>
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          sidebarOpen ? "ml-[240px]" : "ml-[70px]"
+        }`}
+      >
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
         <main className="flex-1 overflow-y-auto mantine-bg rounded-tl-xl shadow-inner p-4">
           <AnimatePresence mode="wait">
@@ -96,32 +111,32 @@ const MainLayout = () => {
 // Actions for spotlight search
 const spotlightActions = [
   {
-    id: 'home',
-    label: 'Dashboard',
-    description: 'Go to dashboard',
+    id: "home",
+    label: "Dashboard",
+    description: "Go to dashboard",
     icon: <FaHome size={18} />,
-    onClick: () => window.location.href = '/',
+    onClick: () => (window.location.href = "/"),
   },
   {
-    id: 'products',
-    label: 'Products',
-    description: 'Manage your products',
+    id: "products",
+    label: "Products",
+    description: "Manage your products",
     icon: <FaBoxOpen size={18} />,
-    onClick: () => window.location.href = '/products',
+    onClick: () => (window.location.href = "/products"),
   },
   {
-    id: 'users',
-    label: 'Users',
-    description: 'Manage your users',
+    id: "users",
+    label: "Users",
+    description: "Manage your users",
     icon: <FaUsers size={18} />,
-    onClick: () => window.location.href = '/users',
+    onClick: () => (window.location.href = "/users"),
   },
   {
-    id: 'enquiry',
-    label: 'Enquiries',
-    description: 'View customer enquiries',
+    id: "enquiry",
+    label: "Enquiries",
+    description: "View customer enquiries",
     icon: <FaQuestionCircle size={18} />,
-    onClick: () => window.location.href = '/enquiry',
+    onClick: () => (window.location.href = "/enquiry"),
   },
 ];
 
@@ -134,7 +149,11 @@ function App() {
       element: <AuthenticationForm />,
     },
     {
-      element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
+      element: (
+        <ProtectedRoute>
+          <MainLayout />
+        </ProtectedRoute>
+      ),
       children: [
         {
           path: "/",
@@ -221,6 +240,10 @@ function App() {
           element: <AdminOrders />,
         },
         {
+          path: "/return-orders",
+          element: <ReturnOrdersAdmin />,
+        },
+        {
           path: "/warehouseproducts/:id/products",
           element: <WarehouseProducts />,
         },
@@ -246,17 +269,16 @@ function App() {
         },
         {
           path: "/b&b-groups-products/:id",
-          element: <BnbGroupProducts />
+          element: <BnbGroupProducts />,
         },
         {
           path: "/add-banner",
           element: <AddBanner />,
         },
-        {   path: "/add-banner-group",
-            element: <AddBannerGroup />,
-        },
-        {   path: "/add-banner-group-products/:id",
-            element: <AddBannerGroupProducts />,
+        { path: "/add-banner-group", element: <AddBannerGroup /> },
+        {
+          path: "/add-banner-group-products/:id",
+          element: <AddBannerGroupProducts />,
         },
         {
           path: "/brands",
@@ -267,9 +289,10 @@ function App() {
           element: <BrandProducts />,
         },
         {
-          path: "/quick-picks",
-          element: <QuickPicksPage />,
-        },{
+          path: "/quick-picks",
+          element: <QuickPicksPage />,
+        },
+        {
           path: "/quick-pick-groups",
           element: <QuickPickGroupPage />,
         },
@@ -277,7 +300,7 @@ function App() {
           path: "/quick-pick-group/products/:id",
           element: <QuickPickGroupProducts />,
         },
-         {
+        {
           path: "/recommended-stores",
           element: <RecommendedStore />,
         },
@@ -295,7 +318,7 @@ function App() {
         },
         {
           path: "/saving-zone-group/products/:id",
-          element: <SavingZoneGroupProducts />
+          element: <SavingZoneGroupProducts />,
         },
         {
           path: "/youMayLikeProducts/:id",
@@ -325,11 +348,10 @@ function App() {
           <Spotlight
             actions={spotlightActions}
             searchProps={{
-              placeholder: 'Search...',
+              placeholder: "Search...",
               leftSection: <FaSearch size={18} />,
             }}
             shortcut="mod + k"
-            
           />
           <RouterProvider router={router} />
         </ModalsProvider>
@@ -341,7 +363,7 @@ function App() {
 // Protected route component using the AdminAuthContext
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAdminAuth();
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen mantine-bg">
@@ -349,7 +371,7 @@ const ProtectedRoute = ({ children }) => {
       </div>
     );
   }
-  
+
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 

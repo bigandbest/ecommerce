@@ -1,4 +1,10 @@
-import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useState, useEffect } from "react";
 import "./App.css";
@@ -18,8 +24,8 @@ import MobileAccountPage from "./Pages/MobileAccountPage/MobileAccountPage.jsx";
 import BusinessPartnerSignup from "./Pages/BusinessPartner/BusinessPartnerSignup.jsx"; // Import MobileAccountPage
 import SubCategoryPage from "./Pages/SubCategoryPage/SubCategoryPage.jsx";
 import Search from "./components/Search/index.jsx";
-import MobileBannerCarousel from './components/MobileBannerCarousel/MobileBannerCarousel.jsx';
-import MobileIntegratedBanner from './components/MobileIntegratedBanner/MobileIntegratedBanner.jsx';
+import MobileBannerCarousel from "./components/MobileBannerCarousel/MobileBannerCarousel.jsx";
+import MobileIntegratedBanner from "./components/MobileIntegratedBanner/MobileIntegratedBanner.jsx";
 import MobileCategoriesBar from "./components/CategoriesBar/MobileCategoriesBar.jsx";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 import PaymentPage from "./Pages/Payment/PaymentPage.jsx";
@@ -32,10 +38,12 @@ import Wishlist from "./Pages/Wishlist";
 import ResetPassword from "./Pages/ResetPassword";
 import EnquiryHistory from "./Pages/EnquiryHistory"; // Add EnquiryHistory import
 import ComingSoon from "./Pages/ComingSoon"; // Add ComingSoon import
-import PrivacyPolicy from './Pages/PrivacyPolicy';
+import PrivacyPolicy from "./Pages/PrivacyPolicy";
 import TermsOfService from "./Pages/TermsOfService";
 import FAQ from "./Pages/FAQ";
 import ShippingReturns from "./Pages/ShippingReturns";
+import ReturnRequest from "./Pages/ReturnRequest/ReturnRequest";
+import ReturnRequestTracking from "./Pages/ReturnRequest/ReturnRequestTracking";
 import { AuthProvider } from "./contexts/AuthContext";
 import { useAuth } from "./contexts/AuthContext";
 import { SettingsProvider } from "./contexts/SettingsContext.jsx";
@@ -64,7 +72,6 @@ import AddressSelectionPage from "./components/AddressSelectionPage/AddressSelec
 import DetailPage from "./Pages/NewSectionGroupDetailPage/DetailPage.jsx";
 import ProductListingPage from "./Pages/NewProductListingPage/ProductListingPage.jsx";
 import BbmDost from "./Pages/BbmDost/BbmDost.jsx"; // Import BbmDost component
-
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -102,22 +109,23 @@ const ConditionalLayout = ({ children }) => {
   }, []);
 
   // Check if current route is any account/dashboard page
-  const isDashboardPage = location.pathname === '/MyOrders' || 
-                         location.pathname === '/account' || 
-                         location.pathname === '/MobileAccount' || 
-                         location.pathname === '/wishlist' || 
-                         location.pathname === '/enquiry-history' || 
-                         location.pathname === '/custom-printing' || 
-                         location.pathname === '/Notifications' || 
-                         location.pathname === '/contact-us' || 
-                         location.pathname === '/about-us' || 
-                         location.pathname === '/faq' || 
-                         location.pathname === '/shipping-returns' || 
-                         location.pathname === '/terms-of-service' || 
-                         location.pathname === '/privacy-policy' ||
-                         location.pathname === '/coming-soon' ||
-                         location.pathname.includes('/wallet') ||
-                         location.pathname.includes('/refund');
+  const isDashboardPage =
+    location.pathname === "/MyOrders" ||
+    location.pathname === "/account" ||
+    location.pathname === "/MobileAccount" ||
+    location.pathname === "/wishlist" ||
+    location.pathname === "/enquiry-history" ||
+    location.pathname === "/custom-printing" ||
+    location.pathname === "/Notifications" ||
+    location.pathname === "/contact-us" ||
+    location.pathname === "/about-us" ||
+    location.pathname === "/faq" ||
+    location.pathname === "/shipping-returns" ||
+    location.pathname === "/terms-of-service" ||
+    location.pathname === "/privacy-policy" ||
+    location.pathname === "/coming-soon" ||
+    location.pathname.includes("/wallet") ||
+    location.pathname.includes("/refund");
 
   const data = [
     { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "Office" },
@@ -127,18 +135,58 @@ const ConditionalLayout = ({ children }) => {
     { image: "https://i.postimg.cc/Tw85NQLJ/Candle2.jpg", label: "More" },
   ];
   const Seconddata = [
-    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Office" },
-    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Packaging" },
-    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Essentia" },
-    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg", label: "Plus" },
-    { image: "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpager-preview.jpg", label: "More" },
+    {
+      image:
+        "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg",
+      label: "Office",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg",
+      label: "Packaging",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg",
+      label: "Essentia",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpaper-preview.jpg",
+      label: "Plus",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfvZpS8G/digital-digital-art-artwork-futuristic-futuristic-city-hd-wallpager-preview.jpg",
+      label: "More",
+    },
   ];
   const Thirddata = [
-    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Office" },
-    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Packaging" },
-    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Essentia" },
-    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "Plus" },
-    { image: "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg", label: "More" },
+    {
+      image:
+        "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg",
+      label: "Office",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg",
+      label: "Packaging",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg",
+      label: "Essentia",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg",
+      label: "Plus",
+    },
+    {
+      image:
+        "https://i.postimg.cc/zfFgL0VR/Whats-App-Image-2025-07-24-at-13-27-17.jpg",
+      label: "More",
+    },
   ];
 
   return (
@@ -146,8 +194,12 @@ const ConditionalLayout = ({ children }) => {
       {!isDashboardPage && <AnnouncementBar />}
       {!isDashboardPage && (
         <>
-          {isMobile ? <MobileHeader toggleMobileMenu={toggleMobileMenu} /> : <Header />}
-          {location.pathname === '/' && (
+          {isMobile ? (
+            <MobileHeader toggleMobileMenu={toggleMobileMenu} />
+          ) : (
+            <Header />
+          )}
+          {location.pathname === "/" && (
             <>
               <MobileIntegratedBanner />
               {isMobile && <StoreNav />}
@@ -157,7 +209,7 @@ const ConditionalLayout = ({ children }) => {
               <MobileCategoriesBar />
             </>
           )}
-          {location.pathname !== '/' && (
+          {location.pathname !== "/" && (
             <>
               <div className="!sticky top-0">
                 <MainSearchBar />
@@ -171,8 +223,11 @@ const ConditionalLayout = ({ children }) => {
               <MobileCategoriesBar />
             </>
           )}
-          <CategoriesBar className="sm:hidden" mobileMenuOpen={mobileMenuOpen}
-            setMobileMenuOpen={setMobileMenuOpen} />
+          <CategoriesBar
+            className="sm:hidden"
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
+          />
         </>
       )}
       <LocationModal />
@@ -193,157 +248,199 @@ function App() {
                 <BrowserRouter>
                   <ConditionalLayout>
                     <Routes>
-                    <Route path={"/"} exact={true} element={<Home />} />
-                    <Route
-                      path={"/productListing"}
-                      exact={true}
-                      element={<ProductListing />}
-                    />
-                    <Route
-                      path={"/product/:id"}
-                      exact={true}
-                      element={<ProductDetails />}
-                    />
-                    <Route path={"/login"} exact={true} element={<Login />} />
-                    <Route path={"/signup"} exact={true} element={<Signup />} />
-                    <Route path={"/bbm-dost"} exact={true} element={<BbmDost />} />
-                    <Route
-                      path={"/reset-password"}
-                      exact={true}
-                      element={<ResetPassword />}
-                    />
-                    <Route
-                      path={"checkout/select-location"}
-                      exact={true}
-                      element={<MapLocationPage />}
-                    />
-                    <Route
-                      path={"/checkout/confirm-address"}
-                      exact={true}
-                      element={<AddressSelectionPage />}
-                    />
-                    <Route path="/checkout/payment" element={<PaymentPage />} />
-                    <Route
-                      path={"/about-us"}
-                      exact={true}
-                      element={<AboutUs />}
-                    />
-                    <Route
-                      path={"/all"}
-                      exact={true}
-                      element={<AllCategoriesPage />}
-                    />
-                    <Route
-                      path={"/contact-us"}
-                      exact={true}
-                      element={<ContactUs />}
-                    />
-                    <Route
-                      path={"/Notifications"}
-                      exact={true}
-                      element={<Notifications />}
-                    />
-                    <Route path={"/cart"} exact={true} element={<Cart />} />
-                    <Route
-                      path={"/custom-printing"}
-                      exact={true}
-                      element={<CustomPrinting />}
-                    />
-                    {<Route
-                      path="/privacy-policy"
-                      element={<PrivacyPolicy />}
-                    />}
-                    <Route
-                      path={"/terms-of-service"}
-                      exact={true}
-                      element={<TermsOfService />}
-                    />
-                    <Route path={"/faq"} exact={true} element={<FAQ />} />
-                    <Route
-                      path={"/MyOrders"}
-                      exact={true}
-                      element={<MyOrders />}
-                    />
-                    <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} />
-                    {/* <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} /> */}
-                    <Route path="/:section/:id" element={<DetailPage />} />
-                    <Route
-                      path={"/BusinessPartner"}
-                      exact={true}
-                      element={<BusinessPartnerLogin />}
-                    />
-                    <Route
-                      path={"/BusinessPartnerSignup"}
-                      exact={true}
-                      element={<BusinessPartnerSignup />}
-                    />
-                    <Route
-                      path="/subcategories/:categoryName"
-                      element={<SubCategoryPage />}
-                    />
-                    <Route
-                      path="/subcategories"
-                      element={<SubCategoryPage />}
-                    />
-                    <Route
-                      path={"/shipping-returns"}
-                      exact={true}
-                      element={<ShippingReturns />}
-                    />
-                    <Route
-                      path={"/account"}
-                      exact={true}
-                      element={
-                        <ProtectedRoute>
-                          <Account />
-                        </ProtectedRoute>
+                      <Route path={"/"} exact={true} element={<Home />} />
+                      <Route
+                        path={"/productListing"}
+                        exact={true}
+                        element={<ProductListing />}
+                      />
+                      <Route
+                        path={"/product/:id"}
+                        exact={true}
+                        element={<ProductDetails />}
+                      />
+                      <Route path={"/login"} exact={true} element={<Login />} />
+                      <Route
+                        path={"/signup"}
+                        exact={true}
+                        element={<Signup />}
+                      />
+                      <Route
+                        path={"/bbm-dost"}
+                        exact={true}
+                        element={<BbmDost />}
+                      />
+                      <Route
+                        path={"/reset-password"}
+                        exact={true}
+                        element={<ResetPassword />}
+                      />
+                      <Route
+                        path={"checkout/select-location"}
+                        exact={true}
+                        element={<MapLocationPage />}
+                      />
+                      <Route
+                        path={"/checkout/confirm-address"}
+                        exact={true}
+                        element={<AddressSelectionPage />}
+                      />
+                      <Route
+                        path="/checkout/payment"
+                        element={<PaymentPage />}
+                      />
+                      <Route
+                        path={"/about-us"}
+                        exact={true}
+                        element={<AboutUs />}
+                      />
+                      <Route
+                        path={"/all"}
+                        exact={true}
+                        element={<AllCategoriesPage />}
+                      />
+                      <Route
+                        path={"/contact-us"}
+                        exact={true}
+                        element={<ContactUs />}
+                      />
+                      <Route
+                        path={"/Notifications"}
+                        exact={true}
+                        element={<Notifications />}
+                      />
+                      <Route path={"/cart"} exact={true} element={<Cart />} />
+                      <Route
+                        path={"/custom-printing"}
+                        exact={true}
+                        element={<CustomPrinting />}
+                      />
+                      {
+                        <Route
+                          path="/privacy-policy"
+                          element={<PrivacyPolicy />}
+                        />
                       }
-                    />
-                    <Route
-                      path={"/MobileAccount"}
-                      exact={true}
-                      element={
-                        <ProtectedRoute>
-                          <MobileAccountPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/ProductLisingPage/:Name/:id" element={<ProductListingPage />} />
-                    <Route path="/ProductLisingPage/:Name" element={<ProductListingPage />} />
-                    <Route
-                      path={"/wishlist"}
-                      exact={true}
-                      element={
-                        <ProtectedRoute>
-                          <Wishlist />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path={"/enquiry-history"}
-                      exact={true}
-                      element={
-                        <ProtectedRoute>
-                          <EnquiryHistory />
-                        </ProtectedRoute>
-                      }
-                    />{" "}
-                    {/* Add protected route for EnquiryHistory */}
-                    <Route
-                      path={"/coming-soon"}
-                      exact={true}
-                      element={<ComingSoon />}
-                    />{" "}
-                    {/* Add route for ComingSoon */}
-                    {/* Fallback 404 route */}
-                    <Route
-                      path="*"
-                      element={
-                        <div style={{ padding: 40, textAlign: "center" }}>
-                          <h2>404 - Page Not Found</h2>
-                        </div>
-                      }
-                    />
+                      <Route
+                        path={"/terms-of-service"}
+                        exact={true}
+                        element={<TermsOfService />}
+                      />
+                      <Route path={"/faq"} exact={true} element={<FAQ />} />
+                      <Route
+                        path={"/MyOrders"}
+                        exact={true}
+                        element={<MyOrders />}
+                      />
+                      <Route
+                        path="/category/:id/:name"
+                        element={<NewCategoryDivisionPage />}
+                      />
+                      {/* <Route path="/category/:id/:name" element={<NewCategoryDivisionPage />} /> */}
+                      <Route path="/:section/:id" element={<DetailPage />} />
+                      <Route
+                        path={"/BusinessPartner"}
+                        exact={true}
+                        element={<BusinessPartnerLogin />}
+                      />
+                      <Route
+                        path={"/BusinessPartnerSignup"}
+                        exact={true}
+                        element={<BusinessPartnerSignup />}
+                      />
+                      <Route
+                        path="/subcategories/:categoryName"
+                        element={<SubCategoryPage />}
+                      />
+                      <Route
+                        path="/subcategories"
+                        element={<SubCategoryPage />}
+                      />
+                      <Route
+                        path={"/shipping-returns"}
+                        exact={true}
+                        element={<ShippingReturns />}
+                      />
+                      <Route
+                        path={"/account"}
+                        exact={true}
+                        element={
+                          <ProtectedRoute>
+                            <Account />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path={"/MobileAccount"}
+                        exact={true}
+                        element={
+                          <ProtectedRoute>
+                            <MobileAccountPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/ProductLisingPage/:Name/:id"
+                        element={<ProductListingPage />}
+                      />
+                      <Route
+                        path="/ProductLisingPage/:Name"
+                        element={<ProductListingPage />}
+                      />
+                      <Route
+                        path={"/wishlist"}
+                        exact={true}
+                        element={
+                          <ProtectedRoute>
+                            <Wishlist />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path={"/enquiry-history"}
+                        exact={true}
+                        element={
+                          <ProtectedRoute>
+                            <EnquiryHistory />
+                          </ProtectedRoute>
+                        }
+                      />{" "}
+                      {/* Add protected route for EnquiryHistory */}
+                      <Route
+                        path={"/return-request"}
+                        exact={true}
+                        element={
+                          <ProtectedRoute>
+                            <ReturnRequest />
+                          </ProtectedRoute>
+                        }
+                      />{" "}
+                      {/* Add protected route for ReturnRequest */}
+                      <Route
+                        path={"/return-tracking"}
+                        exact={true}
+                        element={
+                          <ProtectedRoute>
+                            <ReturnRequestTracking />
+                          </ProtectedRoute>
+                        }
+                      />{" "}
+                      {/* Add protected route for ReturnRequestTracking */}
+                      <Route
+                        path={"/coming-soon"}
+                        exact={true}
+                        element={<ComingSoon />}
+                      />{" "}
+                      {/* Add route for ComingSoon */}
+                      {/* Fallback 404 route */}
+                      <Route
+                        path="*"
+                        element={
+                          <div style={{ padding: 40, textAlign: "center" }}>
+                            <h2>404 - Page Not Found</h2>
+                          </div>
+                        }
+                      />
                     </Routes>
                   </ConditionalLayout>
                   <WhatsAppWidget />

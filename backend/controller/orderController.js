@@ -6,10 +6,11 @@ import crypto from "crypto";
 export const getAllOrders = async (req, res) => {
   const { data, error } = await supabase
     .from("orders")
-    .select("*, users(name, email, phone)")  // 👈 join users table
+    .select("*, users(name, email, phone)") // 👈 join users table
     .order("created_at", { ascending: false });
 
-  if (error) return res.status(500).json({ success: false, error: error.message });
+  if (error)
+    return res.status(500).json({ success: false, error: error.message });
   return res.json({ success: true, orders: data });
 };
 
@@ -23,33 +24,46 @@ export const updateOrderStatus = async (req, res) => {
     .update({ status, adminnotes, updated_at: new Date().toISOString() })
     .eq("id", id);
 
-  if (error) return res.status(500).json({ success: false, error: error.message });
+  if (error)
+    return res.status(500).json({ success: false, error: error.message });
   return res.json({ success: true });
 };
 
 /** Get orders for a specific user */
 export const getUserOrders = async (req, res) => {
   const { user_id } = req.params;
-  console.log('Getting orders for user_id:', user_id);
+  const { limit = 10, offset = 0 } = req.query; // Add pagination
+  console.log(
+    "Getting orders for user_id:",
+    user_id,
+    "limit:",
+    limit,
+    "offset:",
+    offset
+  );
 
   const { data, error } = await supabase
     .from("orders")
-    .select("*, order_items(*, products(*))")
+    .select(
+      "id, status, created_at, payment_method, address, subtotal, shipping, total, order_items(id, quantity, price, products(id, name, image))"
+    )
     .eq("user_id", user_id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1); // Add pagination
 
-  console.log('Database query result:', { data, error });
+  console.log("Database query result:", { data, error });
   if (error) {
-    console.error('Database error:', error);
+    console.error("Database error:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
-  console.log('Sending response with orders count:', data?.length || 0);
+  console.log("Sending response with orders count:", data?.length || 0);
   return res.json({ success: true, orders: data });
 };
 
 /** Place order with a flat address string */
 export const placeOrder = async (req, res) => {
-  const { user_id, items, subtotal, shipping, total, address, payment_method } = req.body;
+  const { user_id, items, subtotal, shipping, total, address, payment_method } =
+    req.body;
 
   const { data: order, error: orderError } = await supabase
     .from("orders")
@@ -57,7 +71,8 @@ export const placeOrder = async (req, res) => {
     .select()
     .single();
 
-  if (orderError) return res.status(500).json({ success: false, error: orderError.message });
+  if (orderError)
+    return res.status(500).json({ success: false, error: orderError.message });
 
   const orderItemsToInsert = items.map((item) => ({
     order_id: order.id,
@@ -70,7 +85,8 @@ export const placeOrder = async (req, res) => {
     .from("order_items")
     .insert(orderItemsToInsert);
 
-  if (itemsError) return res.status(500).json({ success: false, error: itemsError.message });
+  if (itemsError)
+    return res.status(500).json({ success: false, error: itemsError.message });
 
   // Optional: clear user's cart (no response check here)
   await supabase.from("cart_items").delete().eq("user_id", user_id);
@@ -85,14 +101,13 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     subtotal,
     shipping,
     total,
-    detailedAddress,    // The manually selected address
+    detailedAddress, // The manually selected address
     payment_method,
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
-    gpsLocation,        // 👈 The new GPS data from the map selection
+    gpsLocation, // 👈 The new GPS data from the map selection
   } = req.body;
-
 
   const generatedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -100,8 +115,8 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
     .digest("hex");
 
   if (generatedSignature !== razorpay_signature) {
-  return res.status(400).json({ success: false, error: "Invalid signature" });
-}
+    return res.status(400).json({ success: false, error: "Invalid signature" });
+  }
 
   // This part remains the same, creating a string from the manual address
   const addressString = [
@@ -205,6 +220,8 @@ export const deleteOrderById = async (req, res) => {
     return res.status(500).json({ success: false, error: orderError.message });
   }
 
-  return res.json({ success: true, message: "Order and its items deleted successfully." });
+  return res.json({
+    success: true,
+    message: "Order and its items deleted successfully.",
+  });
 };
-
