@@ -1103,11 +1103,15 @@ export async function removeFromWishlist(wishlist_item_id) {
 } */
 
 // --- ORDER MANAGEMENT ---
-const BASE_URL = "http://localhost:8000/api/order";
+const BASE_URL =
+  (import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com") +
+  "/api/order";
 // ORDERS
 export async function getAllOrders() {
   try {
-    const res = await axios.get(`http://localhost:8000/api/order/all`);
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/order/all`
+    );
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1200,7 +1204,7 @@ export async function placeOrderWithDetailedAddress(
 export async function getUserOrders(user_id) {
   try {
     const res = await axios.get(
-      `http://localhost:8000/api/order/user/${user_id}`
+      `https://ecommerce-8342.onrender.com/api/order/user/${user_id}`
     );
 
     // Ensure we always return a consistent structure

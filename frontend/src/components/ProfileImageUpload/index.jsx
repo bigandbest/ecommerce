@@ -14,7 +14,8 @@ const ProfileImageUpload = ({
   const [previewUrl, setPreviewUrl] = useState(currentImageUrl);
   const fileInputRef = useRef(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
 
   // Update preview when currentImageUrl changes
   useEffect(() => {

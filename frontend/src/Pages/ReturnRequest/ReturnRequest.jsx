@@ -46,7 +46,7 @@ const ReturnRequest = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/order/user/${currentUser.id}`
+          `https://ecommerce-8342.onrender.com/api/order/user/${currentUser.id}`
         );
         const data = await response.json();
 
@@ -65,7 +65,7 @@ const ReturnRequest = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/api/return-orders/eligibility/${orderId}`
+        `https://ecommerce-8342.onrender.com/api/return-orders/eligibility/${orderId}`
       );
       const data = await response.json();
 
@@ -132,7 +132,7 @@ const ReturnRequest = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:8000/api/return-orders/create",
+        "https://ecommerce-8342.onrender.com/api/return-orders/create",
         {
           method: "POST",
           headers: {

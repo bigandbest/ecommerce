@@ -20,7 +20,7 @@ function MyOrders() {
     try {
       // First check if order can be cancelled
       const eligibilityResponse = await fetch(
-        `http://localhost:8000/api/return-orders/eligibility/${orderId}`
+        `https://ecommerce-8342.onrender.com/api/return-orders/eligibility/${orderId}`
       );
       const eligibilityData = await eligibilityResponse.json();
 
@@ -44,7 +44,7 @@ function MyOrders() {
     try {
       // Check if order can be returned
       const eligibilityResponse = await fetch(
-        `http://localhost:8000/api/return-orders/eligibility/${orderId}`
+        `https://ecommerce-8342.onrender.com/api/return-orders/eligibility/${orderId}`
       );
       const eligibilityData = await eligibilityResponse.json();
 
