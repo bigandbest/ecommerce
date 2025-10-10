@@ -15,7 +15,7 @@ const ReturnOrdersAdmin = () => {
       if (statusFilter) params.status = statusFilter;
 
       const res = await axios.get(
-        "https://ecommerce-8342.onrender.com/api/return-orders/admin/all",
+        "http://localhost:8000/api/return-orders/admin/all",
         { params }
       );
       setReturnOrders(res.data.return_requests || []);
@@ -30,11 +30,11 @@ const ReturnOrdersAdmin = () => {
   const updateReturnStatus = async (returnId, status, adminNotes = "") => {
     try {
       await axios.put(
-        `https://ecommerce-8342.onrender.com/api/return-orders/admin/status/${returnId}`,
+        `http://localhost:8000/api/return-orders/admin/status/${returnId}`,
         {
           status,
           admin_notes: adminNotes,
-          admin_id: "admin-user-id", // Replace with actual admin user ID
+          // admin_id will be handled by the backend - omitting for now
         }
       );
 
@@ -52,7 +52,7 @@ const ReturnOrdersAdmin = () => {
 
     try {
       await axios.delete(
-        `https://ecommerce-8342.onrender.com/api/return-orders/admin/delete/${returnId}`
+        `http://localhost:8000/api/return-orders/admin/delete/${returnId}`
       );
       fetchReturnOrders(); // Refresh the list
       alert("Return request deleted successfully!");
@@ -104,6 +104,44 @@ const ReturnOrdersAdmin = () => {
         <p className="text-gray-600">
           Manage customer return and cancellation requests
         </p>
+
+        {/* Statistics Dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-4">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600">
+              {returnOrders.filter((r) => r.status === "pending").length}
+            </div>
+            <div className="text-sm text-gray-600">Pending Review</div>
+          </div>
+          <div className="bg-green-50 p-4 rounded-lg">
+            <div className="text-2xl font-bold text-green-600">
+              {returnOrders.filter((r) => r.status === "approved").length}
+            </div>
+            <div className="text-sm text-gray-600">Approved</div>
+          </div>
+          <div className="bg-red-50 p-4 rounded-lg">
+            <div className="text-2xl font-bold text-red-600">
+              {returnOrders.filter((r) => r.status === "rejected").length}
+            </div>
+            <div className="text-sm text-gray-600">Rejected</div>
+          </div>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <div className="text-2xl font-bold text-yellow-600">
+              {returnOrders.filter((r) => r.status === "processing").length}
+            </div>
+            <div className="text-sm text-gray-600">Processing</div>
+          </div>
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600">
+              ₹
+              {returnOrders
+                .filter((r) => r.status === "approved")
+                .reduce((sum, r) => sum + (r.refund_amount || 0), 0)
+                .toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-600">Total Refunds</div>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -302,11 +340,11 @@ const ReturnOrderDetails = ({ returnOrder, onUpdate, onDelete }) => {
   const handleStatusUpdate = async () => {
     try {
       await axios.put(
-        `https://ecommerce-8342.onrender.com/api/return-orders/admin/status/${returnOrder.id}`,
+        `http://localhost:8000/api/return-orders/admin/status/${returnOrder.id}`,
         {
           status: newStatus,
           admin_notes: adminNotes,
-          admin_id: "admin-user-id", // Replace with actual admin user ID
+          // admin_id will be handled by the backend - omitting for now
         }
       );
 

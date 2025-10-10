@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import * as XLSX from "xlsx";
 
 const BbmDost = () => {
   const [editingDost, setEditingDost] = useState(null);
@@ -23,7 +22,9 @@ const BbmDost = () => {
   // ✅ Fetch all Dosts
   const fetchDosts = async () => {
     try {
-      const res = await axios.get("https://ecommerce-8342.onrender.com/api/bbm-dost/all");
+      const res = await axios.get(
+        "https://ecommerce-8342.onrender.com/api/bbm-dost/all"
+      );
       setDosts(res.data.dosts || []);
     } catch (err) {
       console.error("Failed to fetch BBM Dosts:", err);
@@ -34,11 +35,15 @@ const BbmDost = () => {
 
   // ✅ Delete Dost
   const deleteDost = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this Dost?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this Dost?"
+    );
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`https://ecommerce-8342.onrender.com/api/bbm-dost/${id}`);
+      await axios.delete(
+        `https://ecommerce-8342.onrender.com/api/bbm-dost/${id}`
+      );
       await fetchDosts();
     } catch (err) {
       alert("Failed to delete BBM Dost");
@@ -48,36 +53,37 @@ const BbmDost = () => {
 
   // ✅ Download Excel
   const downloadExcel = () => {
-    if (dosts.length === 0) {
-      alert("No data to download");
-      return;
-    }
+    alert("Excel download feature is temporarily disabled");
+    // if (dosts.length === 0) {
+    //   alert("No data to download");
+    //   return;
+    // }
 
-    // Prepare data for Excel
-    const excelData = dosts.map((dost) => ({
-      ID: dost.id,
-      Name: dost.name,
-      Phone: dost.phone_no,
-      Email: dost.email,
-      Role: dost.role,
-      Pincode: dost.pincode || "-",
-      District: dost.district || "-",
-      State: dost.state || "-",
-      Organization: dost.organization_name || "-",
-      GST: dost.gst_no || "-",
-      "Created At": dost.created_at ? new Date(dost.created_at).toLocaleString() : "-",
-    }));
+    // // Prepare data for Excel
+    // const excelData = dosts.map((dost) => ({
+    //   ID: dost.id,
+    //   Name: dost.name,
+    //   Phone: dost.phone_no,
+    //   Email: dost.email,
+    //   Role: dost.role,
+    //   Pincode: dost.pincode || "-",
+    //   District: dost.district || "-",
+    //   State: dost.state || "-",
+    //   Organization: dost.organization_name || "-",
+    //   GST: dost.gst_no || "-",
+    //   "Created At": dost.created_at ? new Date(dost.created_at).toLocaleString() : "-",
+    // }));
 
-    // Create worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "BBM Dosts");
+    // // Create worksheet and workbook
+    // const worksheet = XLSX.utils.json_to_sheet(excelData);
+    // const workbook = XLSX.utils.book_new();
+    // XLSX.utils.book_append_sheet(workbook, worksheet, "BBM Dosts");
 
-    // Generate filename with current date
-    const fileName = `BBM_Dosts_${new Date().toISOString().split("T")[0]}.xlsx`;
+    // // Generate filename with current date
+    // const fileName = `BBM_Dosts_${new Date().toISOString().split("T")[0]}.xlsx`;
 
-    // Download file
-    XLSX.writeFile(workbook, fileName);
+    // // Download file
+    // XLSX.writeFile(workbook, fileName);
   };
 
   // ✅ Add / Update Dost
@@ -87,9 +93,15 @@ const BbmDost = () => {
 
     try {
       if (editingDost) {
-        await axios.put(`https://ecommerce-8342.onrender.com/api/bbm-dost/${editingDost.id}`, form);
+        await axios.put(
+          `https://ecommerce-8342.onrender.com/api/bbm-dost/${editingDost.id}`,
+          form
+        );
       } else {
-        await axios.post("https://ecommerce-8342.onrender.com/api/bbm-dost/add", form);
+        await axios.post(
+          "https://ecommerce-8342.onrender.com/api/bbm-dost/add",
+          form
+        );
       }
 
       await fetchDosts();

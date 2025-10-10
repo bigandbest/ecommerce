@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { getUserOrders } from "../../utils/supabaseApi";
+import ReturnOrders from "./ReturnOrders";
 import "./MyOrders.css";
 
 function MyOrders() {
@@ -11,6 +12,56 @@ function MyOrders() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [networkStatus, setNetworkStatus] = useState("checking");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Handle cancel order
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
+    try {
+      // First check if order can be cancelled
+      const eligibilityResponse = await fetch(
+        `http://localhost:8000/api/return-orders/eligibility/${orderId}`
+      );
+      const eligibilityData = await eligibilityResponse.json();
+
+      if (eligibilityData.success && eligibilityData.eligibility.can_cancel) {
+        // Redirect to return request page with cancellation type
+        window.location.href = `/return-request?orderId=${orderId}&type=cancellation`;
+      } else {
+        alert(
+          eligibilityData.eligibility?.reason ||
+            "This order cannot be cancelled."
+        );
+      }
+    } catch (error) {
+      console.error("Error checking cancellation eligibility:", error);
+      alert("Unable to process cancellation request. Please try again.");
+    }
+  };
+
+  // Handle return request
+  const handleReturnOrder = async (orderId) => {
+    try {
+      // Check if order can be returned
+      const eligibilityResponse = await fetch(
+        `http://localhost:8000/api/return-orders/eligibility/${orderId}`
+      );
+      const eligibilityData = await eligibilityResponse.json();
+
+      if (eligibilityData.success && eligibilityData.eligibility.can_return) {
+        // Redirect to return request page
+        window.location.href = `/return-request?orderId=${orderId}&type=return`;
+      } else {
+        alert(
+          eligibilityData.eligibility?.reason ||
+            "This order is not eligible for return."
+        );
+      }
+    } catch (error) {
+      console.error("Error checking return eligibility:", error);
+      alert("Unable to process return request. Please try again.");
+    }
+  };
 
   // Check network connectivity
   useEffect(() => {
@@ -100,7 +151,9 @@ function MyOrders() {
                 },
                 {
                   step: "Shipped",
-                  completed: ["shipped", "delivered"].includes(order.status.toLowerCase()),
+                  completed: ["shipped", "delivered"].includes(
+                    order.status.toLowerCase()
+                  ),
                   time: "",
                 },
                 {
@@ -194,7 +247,9 @@ function MyOrders() {
                 },
                 {
                   step: "Shipped",
-                  completed: ["shipped", "delivered"].includes(order.status.toLowerCase()),
+                  completed: ["shipped", "delivered"].includes(
+                    order.status.toLowerCase()
+                  ),
                   time: "",
                 },
                 {
@@ -278,11 +333,15 @@ function MyOrders() {
                 {order.order_items?.slice(0, 1).map((item, idx) => (
                   <div key={idx} className="order-item">
                     <div className="order-item-image">
-                      <img 
-                        src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
+                      <img
+                        src={
+                          item.products?.image ||
+                          "https://via.placeholder.com/40x40?text=📦"
+                        }
                         alt={item.products?.name || "Product"}
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/40x40?text=📦';
+                          e.target.src =
+                            "https://via.placeholder.com/40x40?text=📦";
                         }}
                       />
                     </div>
@@ -298,8 +357,8 @@ function MyOrders() {
                 )) || (
                   <div className="order-item">
                     <div className="order-item-image">
-                      <img 
-                        src="https://via.placeholder.com/40x40?text=📦" 
+                      <img
+                        src="https://via.placeholder.com/40x40?text=📦"
                         alt="Product"
                       />
                     </div>
@@ -364,6 +423,26 @@ function MyOrders() {
               >
                 Track Package
               </button>
+              {/* Cancel Order Button for Non-Shipped Orders */}
+              {["pending", "processing"].includes(
+                order.status.toLowerCase()
+              ) && (
+                <button
+                  onClick={() => handleCancelOrder(order.id)}
+                  className="cancel-order-btn"
+                  style={{
+                    marginLeft: "10px",
+                    backgroundColor: "#ff6b35",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel Order
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -470,11 +549,15 @@ function MyOrders() {
                 {order.order_items?.slice(0, 1).map((item, idx) => (
                   <div key={idx} className="order-item">
                     <div className="order-item-image">
-                      <img 
-                        src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
+                      <img
+                        src={
+                          item.products?.image ||
+                          "https://via.placeholder.com/40x40?text=📦"
+                        }
                         alt={item.products?.name || "Product"}
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/40x40?text=📦';
+                          e.target.src =
+                            "https://via.placeholder.com/40x40?text=📦";
                         }}
                       />
                     </div>
@@ -490,8 +573,8 @@ function MyOrders() {
                 )) || (
                   <div className="order-item">
                     <div className="order-item-image">
-                      <img 
-                        src="https://via.placeholder.com/40x40?text=📦" 
+                      <img
+                        src="https://via.placeholder.com/40x40?text=📦"
                         alt="Product"
                       />
                     </div>
@@ -514,9 +597,7 @@ function MyOrders() {
               {(order.status === "delivered" ||
                 order.status === "Delivered") && (
                 <button
-                  onClick={() =>
-                    (window.location.href = `/return-request?orderId=${order.id}`)
-                  }
+                  onClick={() => handleReturnOrder(order.id)}
                   className="return-request-btn"
                   style={{
                     marginLeft: "10px",
@@ -604,12 +685,7 @@ function MyOrders() {
         )}
         {activeTab === "returns" && (
           <div>
-            <h2>Returns</h2>
-            <div className="no-orders">
-              <div className="no-orders-icon">↩️</div>
-              <h3>No Returns</h3>
-              <p>You haven&apos;t returned any items yet.</p>
-            </div>
+            <ReturnOrders />
           </div>
         )}
         {activeTab === "notifications" && (
@@ -658,14 +734,21 @@ function MyOrders() {
               <div className="order-detail-section">
                 <h3>Items</h3>
                 {selectedOrder.order_items?.map((item, idx) => (
-                  <div key={idx} className="order-item-detail flex items-center gap-4">
+                  <div
+                    key={idx}
+                    className="order-item-detail flex items-center gap-4"
+                  >
                     <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                      <img 
-                        src={item.products?.image || 'https://via.placeholder.com/64x64?text=📦'} 
+                      <img
+                        src={
+                          item.products?.image ||
+                          "https://via.placeholder.com/64x64?text=📦"
+                        }
                         alt={item.products?.name || "Product"}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/64x64?text=📦';
+                          e.target.src =
+                            "https://via.placeholder.com/64x64?text=📦";
                         }}
                       />
                     </div>
