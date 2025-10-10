@@ -3,7 +3,9 @@ import { supabase } from "../config/supabaseClient.js";
 // ✅ Helper: Upload image to Supabase bucket
 async function uploadNotificationImage(imageFile) {
   const fileExt = imageFile.name.split(".").pop();
-  const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+  const fileName = `${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}.${fileExt}`;
 
   const { error: uploadError } = await supabase.storage
     .from("notifications")
@@ -25,7 +27,9 @@ export async function createNotification(req, res) {
     let image_url = req.body.image_url; // fallback if direct URL given
 
     if (!heading || !description || !expiry_date) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
     // If admin uploads file via frontend → req.file / req.files (if using multipart)
@@ -37,12 +41,92 @@ export async function createNotification(req, res) {
 
     const { data, error } = await supabase
       .from("notifications")
-      .insert([{ heading, description, expiry_date: expiryISO, image_url, created_at: new Date().toISOString() }])
+      .insert([
+        {
+          heading,
+          description,
+          expiry_date: expiryISO,
+          image_url,
+          created_at: new Date().toISOString(),
+        },
+      ])
       .select()
       .single();
 
     if (error) throw error;
     res.status(201).json({ success: true, notification: data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// ✅ Get User Notifications
+export async function getUserNotifications(req, res) {
+  try {
+    const { user_id } = req.params;
+    const { limit = 20, unread_only = false } = req.query;
+
+    let query = supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user_id)
+      .order("created_at", { ascending: false })
+      .limit(parseInt(limit));
+
+    if (unread_only === "true") {
+      query = query.eq("is_read", false);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      notifications: data || [],
+      unread_count: data ? data.filter((n) => !n.is_read).length : 0,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// ✅ Mark Notification as Read
+export async function markNotificationRead(req, res) {
+  try {
+    const { id } = req.params;
+    const { user_id } = req.body;
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", id)
+      .eq("user_id", user_id) // Ensure user can only mark their own notifications
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ success: true, notification: data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// ✅ Mark All Notifications as Read for User
+export async function markAllNotificationsRead(req, res) {
+  try {
+    const { user_id } = req.params;
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", user_id)
+      .eq("is_read", false);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: "All notifications marked as read" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -78,7 +162,8 @@ export async function updateNotification(req, res) {
     const updates = {};
     if (heading) updates.heading = heading;
     if (description) updates.description = description;
-    if (expiry_date) updates.expiry_date = new Date(`${expiry_date}T23:59:59Z`).toISOString();
+    if (expiry_date)
+      updates.expiry_date = new Date(`${expiry_date}T23:59:59Z`).toISOString();
     if (image_url) updates.image_url = image_url;
 
     const { data, error } = await supabase
@@ -100,7 +185,10 @@ export async function deleteNotification(req, res) {
   try {
     const { id } = req.params;
 
-    const { error } = await supabase.from("notifications").delete().eq("id", id);
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", id);
 
     if (error) throw error;
     res.status(200).json({ success: true, message: "Notification deleted" });

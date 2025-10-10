@@ -46,7 +46,7 @@ const ReturnRequest = () => {
 
       try {
         const response = await fetch(
-          `https://ecommerce-8342.onrender.com/api/order/user/${currentUser.id}`
+          `http://localhost:8000/api/order/user/${currentUser.id}`
         );
         const data = await response.json();
 
@@ -65,7 +65,7 @@ const ReturnRequest = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://ecommerce-8342.onrender.com/api/return-orders/eligibility/${orderId}`
+        `http://localhost:8000/api/return-orders/eligibility/${orderId}`
       );
       const data = await response.json();
 
@@ -132,7 +132,7 @@ const ReturnRequest = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://ecommerce-8342.onrender.com/api/return-orders/create",
+        "http://localhost:8000/api/return-orders/create",
         {
           method: "POST",
           headers: {
@@ -286,12 +286,16 @@ const ReturnRequest = () => {
                           className="flex items-center gap-3 text-sm"
                         >
                           <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden">
-                            <img 
-                              src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
+                            <img
+                              src={
+                                item.products?.image ||
+                                "https://via.placeholder.com/40x40?text=📦"
+                              }
                               alt={item.products?.name || "Product"}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/40x40?text=📦';
+                                e.target.src =
+                                  "https://via.placeholder.com/40x40?text=📦";
                               }}
                             />
                           </div>
