@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { getUserOrders } from "../../utils/supabaseApi";
+import { getUserOrders, cancelOrder } from "../../utils/supabaseApi";
 import "./MyOrders.css";
 
 function MyOrders() {
@@ -11,13 +11,15 @@ function MyOrders() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [networkStatus, setNetworkStatus] = useState("checking");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [cancellingOrder, setCancellingOrder] = useState(null);
 
   // Check network connectivity
   useEffect(() => {
     const checkNetwork = async () => {
       try {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
         const response = await fetch(
-          "https://ecommerce-8342.onrender.com/api/order/all"
+          `${API_BASE_URL}/api/order/all`
         );
         if (response.ok) {
           setNetworkStatus("connected");
@@ -34,6 +36,28 @@ function MyOrders() {
   // Force refresh function
   const forceRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
+  };
+
+  // Cancel order function
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) {
+      return;
+    }
+
+    setCancellingOrder(orderId);
+    try {
+      const result = await cancelOrder(orderId);
+      if (result.success) {
+        alert('Order cancelled successfully!');
+        forceRefresh();
+      } else {
+        alert('Failed to cancel order: ' + result.error);
+      }
+    } catch (error) {
+      alert('Error cancelling order: ' + error.message);
+    } finally {
+      setCancellingOrder(null);
+    }
   };
 
   // Listen for order placement events
@@ -66,10 +90,9 @@ function MyOrders() {
           const formattedOrders = fetchedOrders
             .filter(
               (order) =>
-                order.status !== "cancelled" &&
                 order.status !== "delivered" &&
                 order.status !== "Delivered"
-            ) // Hide delivered and cancelled orders from tracking
+            ) // Hide delivered orders from tracking
             .map((order) => ({
               id: order.id,
               status: order.status || "pending",
@@ -85,7 +108,19 @@ function MyOrders() {
               address: order.address || "No address provided",
               payment_method: order.payment_method || "Unknown",
               order_items: order.order_items || [],
-              trackingSteps: [
+              trackingSteps: order.status.toLowerCase() === "cancelled" ? [
+                {
+                  step: "Order Placed",
+                  completed: true,
+                  time: new Date(order.created_at).toLocaleString(),
+                },
+                {
+                  step: "Order Cancelled",
+                  completed: true,
+                  cancelled: true,
+                  time: order.updated_at ? new Date(order.updated_at).toLocaleString() : "",
+                },
+              ] : [
                 {
                   step: "Order Placed",
                   completed: true,
@@ -160,7 +195,6 @@ function MyOrders() {
           const formattedOrders = fetchedOrders
             .filter(
               (order) =>
-                order.status !== "cancelled" &&
                 order.status !== "delivered" &&
                 order.status !== "Delivered"
             )
@@ -179,7 +213,19 @@ function MyOrders() {
               address: order.address || "No address provided",
               payment_method: order.payment_method || "Unknown",
               order_items: order.order_items || [],
-              trackingSteps: [
+              trackingSteps: order.status.toLowerCase() === "cancelled" ? [
+                {
+                  step: "Order Placed",
+                  completed: true,
+                  time: new Date(order.created_at).toLocaleString(),
+                },
+                {
+                  step: "Order Cancelled",
+                  completed: true,
+                  cancelled: true,
+                  time: order.updated_at ? new Date(order.updated_at).toLocaleString() : "",
+                },
+              ] : [
                 {
                   step: "Order Placed",
                   completed: true,
@@ -337,17 +383,29 @@ function MyOrders() {
                     key={idx}
                     className={`tracking-step ${
                       step.completed ? "completed" : ""
-                    }`}
+                    } ${step.cancelled ? "cancelled" : ""}`}
                   >
-                    <div className="step-circle">
-                      {step.completed ? "✓" : ""}
+                    <div className={`step-circle ${step.cancelled ? "cancelled-circle" : ""}`}>
+                      {step.completed ? (step.cancelled ? "✕" : "✓") : ""}
                     </div>
                     <div className="step-content">
-                      <h4>{step.step}</h4>
+                      <h4 className={step.cancelled ? "cancelled-text" : ""}>{step.step}</h4>
                       {step.time && <p className="step-time">{step.time}</p>}
                     </div>
                   </div>
                 ))}
+                {order.status.toLowerCase() !== "cancelled" && 
+                 ["pending", "processing"].includes(order.status.toLowerCase()) && (
+                  <div className="cancel-order-section">
+                    <button
+                      onClick={() => handleCancelOrder(order.id)}
+                      disabled={cancellingOrder === order.id}
+                      className="cancel-order-btn"
+                    >
+                      {cancellingOrder === order.id ? "Cancelling..." : "Cancel Order"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

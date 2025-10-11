@@ -5,6 +5,7 @@ import {
   placeOrderWithDetailedAddress,
   getUserOrders,
   updateOrderStatus,
+  cancelOrder,
   deleteOrderById,
 } from "../controller/orderController.js";
 
@@ -15,6 +16,7 @@ router.post("/place", placeOrder);
 router.post("/place-detailed", placeOrderWithDetailedAddress);
 router.get("/user/:user_id", getUserOrders);
 router.put("/status/:id", updateOrderStatus);
+router.put("/cancel/:id", cancelOrder);
 router.delete("/delete/:id", deleteOrderById);
 
 export default router;

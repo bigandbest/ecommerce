@@ -165,7 +165,7 @@ const MobileIntegratedBanner = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="relative z-20 px-4">
+      <div className="relative z-20 px-4 pb-4">
         <form onSubmit={handleSearch} className="w-full">
           <div 
             className="relative flex items-center bg-white/95 rounded-2xl px-5 py-3 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 backdrop-blur-sm"
@@ -188,7 +188,7 @@ const MobileIntegratedBanner = () => {
       </div>
 
       {/* Banner Carousel */}
-      <div className="relative w-full h-56 z-10 flex items-end -mt-8">
+      <div className="relative w-full h-56 z-10 flex items-end mt-4">
         {banners.length > 0 ? (
           <Swiper
             navigation={false}

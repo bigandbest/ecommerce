@@ -141,8 +141,8 @@
 .search-container {
   position: relative;
   z-index: 20;
-  padding: 0 16px 25px 16px;
-  margin-bottom: 5px;
+  padding: 0 16px 16px 16px;
+  margin-bottom: 8px;
 }
 
 .search-form {

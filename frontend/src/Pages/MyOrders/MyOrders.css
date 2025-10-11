@@ -801,3 +801,50 @@
   background: #fee2e2;
   color: #dc2626;
 }
+/* Cancel Order Styles */
+.cancel-order-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.cancel-order-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.cancel-order-btn:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.cancel-order-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Cancelled Status Styles */
+.tracking-step.cancelled {
+  opacity: 0.8;
+}
+
+.cancelled-circle {
+  background: #dc3545 !important;
+  color: white !important;
+  border-color: #dc3545 !important;
+}
+
+.cancelled-text {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.tracking-step.cancelled:not(:last-child)::after {
+  background: #dc3545 !important;
+}
