@@ -997,7 +997,7 @@ export async function addToCart(user_id, product_id, quantity = 1) {
 export const getCartItems = async (user_id) => {
   try {
     const res = await axios.get(
-      `https://ecommerce-8342.onrender.com/api/cart/${user_id}`
+      `${API_BASE_URL}/api/cart/${user_id}`
     );
     return { success: true, cartItems: res.data.cartItems };
   } catch (err) {
@@ -1009,7 +1009,7 @@ export const getCartItems = async (user_id) => {
 export const updateCartItem = async (cart_item_id, quantity) => {
   try {
     const res = await axios.put(
-      `https://ecommerce-8342.onrender.com/api/cart/update/${cart_item_id}`,
+      `${API_BASE_URL}/api/cart/update/${cart_item_id}`,
       { quantity }
     );
     return { success: true, updated: res.data };
@@ -1022,7 +1022,7 @@ export const updateCartItem = async (cart_item_id, quantity) => {
 export const removeCartItem = async (cart_item_id) => {
   try {
     const res = await axios.delete(
-      `https://ecommerce-8342.onrender.com/api/cart/remove/${cart_item_id}`
+      `${API_BASE_URL}/api/cart/remove/${cart_item_id}`
     );
     return { success: true, removed: res.data };
   } catch (err) {
@@ -1034,7 +1034,7 @@ export const removeCartItem = async (cart_item_id) => {
 export const clearCart = async (user_id) => {
   try {
     const res = await axios.delete(
-      `https://ecommerce-8342.onrender.com/api/cart/clear/${user_id}`
+      `${API_BASE_URL}/api/cart/clear/${user_id}`
     );
     return { success: true, cleared: res.data };
   } catch (err) {
@@ -1103,15 +1103,15 @@ export async function removeFromWishlist(wishlist_item_id) {
 } */
 
 // --- ORDER MANAGEMENT ---
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
+const BASE_URL = `${API_BASE_URL}/api/order`;
 const BASE_URL =
   (import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com") +
   "/api/order";
 // ORDERS
 export async function getAllOrders() {
   try {
-    const res = await axios.get(
-      `https://ecommerce-8342.onrender.com/api/order/all`
-    );
+    const res = await axios.get(`${BASE_URL}/all`);
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1122,7 +1122,7 @@ export async function getAllOrders() {
 export async function updateOrderStatus(id, status, adminNotes = "") {
   try {
     const res = await axios.put(
-      `https://ecommerce-8342.onrender.com/api/order/status/${id}`,
+      `${BASE_URL}/status/${id}`,
       {
         status,
         adminnotes: adminNotes,
@@ -1146,7 +1146,7 @@ export async function placeOrder(
 ) {
   try {
     const res = await axios.post(
-      `https://ecommerce-8342.onrender.com/api/order/place`,
+      `${BASE_URL}/place`,
       {
         user_id,
         items,
@@ -1179,7 +1179,7 @@ export async function placeOrderWithDetailedAddress(
 ) {
   try {
     const res = await axios.post(
-      `https://ecommerce-8342.onrender.com/api/order/place-detailed`, // Ensure this URL is correct
+      `${BASE_URL}/place-detailed`,
       {
         user_id,
         items,
@@ -1203,9 +1203,7 @@ export async function placeOrderWithDetailedAddress(
 // 5. Get Orders for a User
 export async function getUserOrders(user_id) {
   try {
-    const res = await axios.get(
-      `https://ecommerce-8342.onrender.com/api/order/user/${user_id}`
-    );
+    const res = await axios.get(`${BASE_URL}/user/${user_id}`);
 
     // Ensure we always return a consistent structure
     if (res.data && res.data.success !== false) {
@@ -1230,10 +1228,19 @@ export async function getUserOrders(user_id) {
   }
 }
 
+export async function cancelOrder(orderId) {
+  try {
+    const res = await axios.put(`${BASE_URL}/cancel/${orderId}`);
+    return res.data;
+  } catch (err) {
+    return { success: false, error: err.response?.data?.error || err.message };
+  }
+}
+
 export async function getOrderItemsByOrderId(order_id) {
   try {
     const res = await axios.get(
-      `https://ecommerce-8342.onrender.com/api/orderItems/${order_id}`
+      `${API_BASE_URL}/api/orderItems/${order_id}`
     );
     return res.data;
   } catch (error) {
@@ -1561,12 +1568,12 @@ export async function updateMultiplePromotionalSettings(settings) {
 }
 
 // BBM Dost
-const API_BASE_URL = "https://ecommerce-8342.onrender.com/api/bbm-dost";
+const BBM_DOST_API_URL = `${API_BASE_URL}/api/bbm-dost`;
 
 // ✅ 1. Add (Create) a new BBM Dost
 export const addBbmDost = async (dostData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/add`, dostData);
+    const response = await axios.post(`${BBM_DOST_API_URL}/add`, dostData);
     return response.data;
   } catch (error) {
     console.error("Error adding BBM Dost:", error);
@@ -1577,7 +1584,7 @@ export const addBbmDost = async (dostData) => {
 // ✅ 2. Get all BBM Dost entries
 export const getAllBbmDosts = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/all`);
+    const response = await axios.get(`${BBM_DOST_API_URL}/all`);
     return response.data;
   } catch (error) {
     console.error("Error fetching all BBM Dosts:", error);
@@ -1588,7 +1595,7 @@ export const getAllBbmDosts = async () => {
 // ✅ 3. Get a single BBM Dost by ID
 export const getBbmDostById = async (id) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/${id}`);
+    const response = await axios.get(`${BBM_DOST_API_URL}/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching BBM Dost by ID:", error);
@@ -1599,7 +1606,7 @@ export const getBbmDostById = async (id) => {
 // ✅ 4. Update BBM Dost by ID
 export const updateBbmDost = async (id, updateData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/${id}`, updateData);
+    const response = await axios.put(`${BBM_DOST_API_URL}/${id}`, updateData);
     return response.data;
   } catch (error) {
     console.error("Error updating BBM Dost:", error);
@@ -1610,7 +1617,7 @@ export const updateBbmDost = async (id, updateData) => {
 // ✅ 5. Delete BBM Dost by ID
 export const deleteBbmDost = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/${id}`);
+    const response = await axios.delete(`${BBM_DOST_API_URL}/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting BBM Dost:", error);
@@ -1945,7 +1952,7 @@ import axios from "axios";
 export async function addUserAddress(userId, address) {
   try {
     const response = await axios.post(
-      "https://ecommerce-8342.onrender.com/api/geo-address/createAddress",
+      `${API_BASE_URL}/api/geo-address/createAddress`,
       {
         ...address,
         user_id: userId,
@@ -1974,7 +1981,7 @@ export async function addUserAddress(userId, address) {
 export async function updateUserAddress(addressId, address) {
   try {
     const res = await axios.put(
-      `https://ecommerce-8342.onrender.com/api/geo-address/update/${addressId}`,
+      `${API_BASE_URL}/api/geo-address/update/${addressId}`,
       address
     );
 
@@ -1999,7 +2006,7 @@ export async function updateUserAddress(addressId, address) {
 export async function deleteUserAddress(addressId) {
   try {
     await axios.delete(
-      `https://ecommerce-8342.onrender.com/api/geo-address/delete/${addressId}`
+      `${API_BASE_URL}/api/geo-address/delete/${addressId}`
     );
 
     return { success: true };
@@ -2101,7 +2108,7 @@ export async function migrateUserAddresses(userId) {
   }
 }
 
-const API_BASE = "https://ecommerce-8342.onrender.com/api";
+const API_BASE = `${API_BASE_URL}/api`;
 
 export async function fetchStores() {
   const res = await fetch(`${API_BASE}/stores/fetch`);

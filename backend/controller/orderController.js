@@ -197,6 +197,21 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
   return res.json({ success: true, order });
 };
 
+export const cancelOrder = async (req, res) => {
+  const { id } = req.params;
+
+  const { error } = await supabase
+    .from("orders")
+    .update({ 
+      status: "cancelled", 
+      updated_at: new Date().toISOString() 
+    })
+    .eq("id", id);
+    
+  if (error) return res.status(500).json({ success: false, error: error.message });
+  return res.json({ success: true, message: "Order cancelled successfully" });
+};
+
 export const deleteOrderById = async (req, res) => {
   const { id } = req.params;
 
