@@ -321,13 +321,13 @@ async function uploadShippingBannerImage(imageFile) {
   }
   const fileExt = imageFile.name.split(".").pop();
   const fileName = `shipping_${Date.now()}.${fileExt}`;
-  const { error: uploadError } = await supabaseAdmin.storage
+  const { error: uploadError } = await supabase.storage
     .from("shippingbanners")
     .upload(fileName, imageFile);
   if (uploadError) {
     return { url: null, error: uploadError.message };
   }
-  const { data: urlData } = supabaseAdmin.storage
+  const { data: urlData } = supabase.storage
     .from("shippingbanners")
     .getPublicUrl(fileName);
   return { url: urlData.publicUrl, error: null };
@@ -348,7 +348,7 @@ export async function addShippingBanner(banner, imageFile) {
   if (error) return { success: false, error };
 
   const bannerToInsert = { ...banner, image_url: url };
-  const { data, error: insertError } = await supabaseAdmin
+  const { data, error: insertError } = await supabase
     .from("shipping_banners")
     .insert([bannerToInsert])
     .select();
@@ -360,7 +360,7 @@ export async function addShippingBanner(banner, imageFile) {
 export async function updateShippingBanner(id, banner, imageFile) {
   // Deactivate all other banners if this one is being set to active
   if (banner.active) {
-    const { error: deactivateError } = await supabaseAdmin
+    const { error: deactivateError } = await supabase
       .from("shipping_banners")
       .update({ active: false })
       .neq("id", id);
@@ -375,7 +375,7 @@ export async function updateShippingBanner(id, banner, imageFile) {
     imageUrl = url;
   }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("shipping_banners")
     .update({ ...banner, image_url: imageUrl, updated_at: new Date() })
     .eq("id", id)
@@ -387,7 +387,7 @@ export async function updateShippingBanner(id, banner, imageFile) {
 
 // Delete a shipping banner (no change)
 export async function deleteShippingBanner(id) {
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from("shipping_banners")
     .delete()
     .eq("id", id);
@@ -399,7 +399,7 @@ export async function deleteShippingBanner(id) {
 export async function toggleShippingBannerStatus(id, active) {
   try {
     if (active) {
-      const { error: deactivateError } = await supabaseAdmin
+      const { error: deactivateError } = await supabase
         .from("shipping_banners")
         .update({ active: false })
         .neq("id", id);
@@ -410,7 +410,7 @@ export async function toggleShippingBannerStatus(id, active) {
         };
       }
     }
-    const { error } = await supabaseAdmin
+    const { error } = await supabase
       .from("shipping_banners")
       .update({ active })
       .eq("id", id);
@@ -1105,9 +1105,6 @@ export async function removeFromWishlist(wishlist_item_id) {
 // --- ORDER MANAGEMENT ---
 const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
 const BASE_URL = `${API_BASE_URL}/api/order`;
-const BASE_URL =
-  (import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com") +
-  "/api/order";
 // ORDERS
 export async function getAllOrders() {
   try {
@@ -1121,8 +1118,7 @@ export async function getAllOrders() {
 // 2. Update Order Status (Admin)
 export async function updateOrderStatus(id, status, adminNotes = "") {
   try {
-    const res = await axios.put(
-      `${BASE_URL}/status/${id}`,
+    const res = await axios.put(`${BASE_URL}/status/${id}`,
       {
         status,
         adminnotes: adminNotes,
@@ -1178,8 +1174,7 @@ export async function placeOrderWithDetailedAddress(
   gpsLocation // 👈 1. Add the new parameter here
 ) {
   try {
-    const res = await axios.post(
-      `${BASE_URL}/place-detailed`,
+    const res = await axios.post(`${BASE_URL}/place-detailed`,
       {
         user_id,
         items,
@@ -1341,6 +1336,19 @@ export async function getEnquiryWithReplies(enquiryId) {
   }
 
   return { success: true, enquiry: data };
+}
+
+// Cancel return request
+export async function cancelReturnRequest(returnRequestId, userId) {
+  try {
+    const res = await axios.put(
+      `${API_BASE_URL}/api/return-orders/cancel/${returnRequestId}`,
+      { user_id: userId }
+    );
+    return res.data;
+  } catch (err) {
+    return { success: false, error: err.response?.data?.error || err.message };
+  }
 }
 
 export async function addEnquiryReply(

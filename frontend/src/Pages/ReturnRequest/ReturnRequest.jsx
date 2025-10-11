@@ -7,6 +7,7 @@ const ReturnRequest = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [eligibility, setEligibility] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [checkingOrderId, setCheckingOrderId] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -62,7 +63,7 @@ const ReturnRequest = () => {
   }, [currentUser]);
 
   const checkEligibility = async (orderId) => {
-    setLoading(true);
+    setCheckingOrderId(orderId);
     try {
       const response = await fetch(
         `https://ecommerce-8342.onrender.com/api/return-orders/eligibility/${orderId}`
@@ -93,7 +94,7 @@ const ReturnRequest = () => {
       console.error("Error checking eligibility:", error);
       alert("Error checking eligibility. Please try again.");
     } finally {
-      setLoading(false);
+      setCheckingOrderId(null);
     }
   };
 
@@ -267,10 +268,10 @@ const ReturnRequest = () => {
                       <div>
                         <button
                           onClick={() => checkEligibility(order.id)}
-                          disabled={loading}
+                          disabled={checkingOrderId === order.id}
                           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
                         >
-                          {loading ? "Checking..." : "Request Return/Cancel"}
+                          {checkingOrderId === order.id ? "Checking..." : "Request Return/Cancel"}
                         </button>
                       </div>
                     </div>
