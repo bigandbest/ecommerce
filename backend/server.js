@@ -45,6 +45,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
   "https://ecommerce-umber-five-95.vercel.app",
   "https://admin-eight-flax.vercel.app",
   "https://ecommerce-six-brown-12.vercel.app",

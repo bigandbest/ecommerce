@@ -286,12 +286,16 @@ const ReturnRequest = () => {
                           className="flex items-center gap-3 text-sm"
                         >
                           <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden">
-                            <img 
-                              src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
+                            <img
+                              src={
+                                item.products?.image ||
+                                "https://via.placeholder.com/40x40?text=📦"
+                              }
                               alt={item.products?.name || "Product"}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/40x40?text=📦';
+                                e.target.src =
+                                  "https://via.placeholder.com/40x40?text=📦";
                               }}
                             />
                           </div>

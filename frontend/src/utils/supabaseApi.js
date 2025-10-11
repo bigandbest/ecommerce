@@ -1105,6 +1105,9 @@ export async function removeFromWishlist(wishlist_item_id) {
 // --- ORDER MANAGEMENT ---
 const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
 const BASE_URL = `${API_BASE_URL}/api/order`;
+const BASE_URL =
+  (import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com") +
+  "/api/order";
 // ORDERS
 export async function getAllOrders() {
   try {

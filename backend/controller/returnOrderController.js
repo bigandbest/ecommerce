@@ -3,12 +3,84 @@ import { supabase } from "../config/supabaseClient.js";
 
 // Helper function to calculate days since order delivery
 const calculateDaysSinceDelivery = (orderDate, orderStatus) => {
-  if (orderStatus !== "delivered") return -1;
+  if (orderStatus.toLowerCase() !== "delivered") return -1;
+  if (!orderDate) return -1; // Handle null/undefined dates
+
   const deliveryDate = new Date(orderDate);
   const currentDate = new Date();
+
+  // Check if date is valid
+  if (isNaN(deliveryDate.getTime())) return -1;
+
   const diffTime = Math.abs(currentDate - deliveryDate);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  console.log("Date calculation debug:", {
+    orderDate,
+    deliveryDate: deliveryDate.toISOString(),
+    currentDate: currentDate.toISOString(),
+    diffTime,
+    diffDays,
+  });
+
   return diffDays;
+};
+
+// Helper function to generate notification messages
+const getNotificationMessage = (status, return_type) => {
+  const actionType = return_type === "cancellation" ? "cancellation" : "return";
+
+  switch (status) {
+    case "approved":
+      return `Your ${actionType} request has been approved. Refund processing will begin shortly.`;
+    case "rejected":
+      return `Your ${actionType} request has been declined. Please contact support for more details.`;
+    case "processing":
+      return `Your ${actionType} request is being processed. Refund will be credited soon.`;
+    case "completed":
+      return `Your ${actionType} has been completed successfully. Refund amount has been credited to your account.`;
+    default:
+      return `Your ${actionType} request status has been updated to ${status}.`;
+  }
+};
+
+// Test database connection and tables
+export const testDatabase = async (req, res) => {
+  try {
+    // Test if return_orders table exists
+    const { data: returnOrders, error: returnOrdersError } = await supabase
+      .from("return_orders")
+      .select("count", { count: "exact" })
+      .limit(1);
+
+    // Test if notifications table exists
+    const { data: notifications, error: notificationsError } = await supabase
+      .from("notifications")
+      .select("count", { count: "exact" })
+      .limit(1);
+
+    return res.json({
+      success: true,
+      message: "Database connection test",
+      tables: {
+        return_orders: {
+          exists: !returnOrdersError,
+          error: returnOrdersError?.message,
+          count: returnOrders?.[0]?.count || 0,
+        },
+        notifications: {
+          exists: !notificationsError,
+          error: notificationsError?.message,
+          count: notifications?.[0]?.count || 0,
+        },
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
 };
 
 // Check if order is eligible for return/cancellation
@@ -51,27 +123,44 @@ export const checkReturnEligibility = async (req, res) => {
       days_since_delivery: 0,
     };
 
-    if (order.status === "delivered") {
+    if (order.status.toLowerCase() === "delivered") {
+      // Use updated_at if available, otherwise fall back to created_at
+      const deliveryDate = order.updated_at || order.created_at;
       const daysSinceDelivery = calculateDaysSinceDelivery(
-        order.created_at,
+        deliveryDate,
         order.status
       );
       eligibility.days_since_delivery = daysSinceDelivery;
 
-      if (daysSinceDelivery <= 7) {
+      console.log("Order eligibility check:", {
+        order_id: order.id,
+        status: order.status,
+        updated_at: order.updated_at,
+        created_at: order.created_at,
+        deliveryDate,
+        daysSinceDelivery,
+      });
+
+      if (daysSinceDelivery <= 7 && daysSinceDelivery >= 0) {
         eligibility.can_return = true;
         eligibility.reason = `Product can be returned within 7 days of delivery. ${
           7 - daysSinceDelivery
         } days remaining.`;
-      } else {
+      } else if (daysSinceDelivery > 7) {
         eligibility.reason =
           "Return period has expired. Products can only be returned within 7 days of delivery.";
+      } else {
+        eligibility.reason =
+          "Unable to calculate delivery date for this order.";
       }
-    } else if (["pending", "processing", "shipped"].includes(order.status)) {
+    } else if (
+      ["pending", "processing", "shipped"].includes(order.status.toLowerCase())
+    ) {
       eligibility.can_cancel = true;
       eligibility.reason =
         "Order can be cancelled as it hasn't been delivered yet.";
     } else {
+      console.log("Order status not eligible:", order.status);
       eligibility.reason =
         "This order is not eligible for return or cancellation.";
     }
@@ -148,20 +237,25 @@ export const createReturnRequest = async (req, res) => {
     // Re-fetch eligibility properly
     const { data: eligibilityCheck } = await supabase
       .from("orders")
-      .select("status, created_at")
+      .select("status, created_at, updated_at")
       .eq("id", order_id)
       .single();
 
     let isEligible = false;
-    if (return_type === "return" && eligibilityCheck.status === "delivered") {
+    if (
+      return_type === "return" &&
+      eligibilityCheck.status.toLowerCase() === "delivered"
+    ) {
       const daysSince = calculateDaysSinceDelivery(
-        eligibilityCheck.created_at,
+        eligibilityCheck.updated_at,
         eligibilityCheck.status
       );
       isEligible = daysSince <= 7;
     } else if (
       return_type === "cancellation" &&
-      ["pending", "processing", "shipped"].includes(eligibilityCheck.status)
+      ["pending", "processing", "shipped"].includes(
+        eligibilityCheck.status.toLowerCase()
+      )
     ) {
       isEligible = true;
     }
@@ -316,6 +410,28 @@ export const updateReturnRequestStatus = async (req, res) => {
   const { status, admin_notes, admin_id } = req.body;
 
   try {
+    console.log("Updating return request:", {
+      id,
+      status,
+      admin_notes,
+      admin_id,
+    });
+
+    // Validate required fields
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "Return request ID is required",
+      });
+    }
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        error: "Status is required",
+      });
+    }
+
     const validStatuses = [
       "pending",
       "approved",
@@ -326,7 +442,30 @@ export const updateReturnRequestStatus = async (req, res) => {
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid status",
+        error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    // Check if return order exists first
+    const { data: existingReturn, error: fetchError } = await supabase
+      .from("return_orders")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching return order:", fetchError);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to fetch return order",
+        details: fetchError.message,
+      });
+    }
+
+    if (!existingReturn) {
+      return res.status(404).json({
+        success: false,
+        error: "Return order not found",
       });
     }
 
@@ -336,7 +475,19 @@ export const updateReturnRequestStatus = async (req, res) => {
       updated_at: new Date().toISOString(),
     };
 
-    if (admin_id) updateData.admin_id = admin_id;
+    // Only add admin_id if it's a valid UUID format
+    if (admin_id && admin_id !== "admin-user-id") {
+      // Validate UUID format
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(admin_id)) {
+        updateData.admin_id = admin_id;
+      } else {
+        console.warn("Invalid admin_id UUID format:", admin_id);
+        // Don't include admin_id in update if it's not a valid UUID
+      }
+    }
+
     if (status === "completed")
       updateData.processed_at = new Date().toISOString();
 
@@ -348,10 +499,51 @@ export const updateReturnRequestStatus = async (req, res) => {
       .single();
 
     if (error) {
+      console.error("Error updating return order:", error);
       return res.status(500).json({
         success: false,
         error: error.message,
+        details: error,
       });
+    }
+
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        error: "Return order not found",
+      });
+    }
+
+    // Add notification when status changes
+    try {
+      const notificationMessage = getNotificationMessage(
+        status,
+        data.return_type
+      );
+
+      // Check if notifications table exists before inserting
+      const { error: notificationError } = await supabase
+        .from("notifications")
+        .insert([
+          {
+            user_id: data.user_id,
+            type: "return_status_update",
+            title: `Return Request ${
+              status.charAt(0).toUpperCase() + status.slice(1)
+            }`,
+            message: notificationMessage,
+            related_id: data.id,
+            related_type: "return_order",
+          },
+        ]);
+
+      if (notificationError) {
+        console.warn("Failed to create notification:", notificationError);
+        // Don't fail the main operation if notification fails
+      }
+    } catch (notificationError) {
+      console.error("Failed to create notification:", notificationError);
+      // Don't fail the main operation if notification fails
     }
 
     return res.json({

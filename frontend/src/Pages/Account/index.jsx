@@ -115,6 +115,10 @@ const AccountPage = () => {
   const [allOrders, setAllOrders] = useState([]);
   const [allOrdersLoading, setAllOrdersLoading] = useState(false);
 
+  // Return request notifications
+  const [returnNotifications, setReturnNotifications] = useState([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+
   // Force refresh function
   const forceRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
@@ -738,27 +742,45 @@ const AccountPage = () => {
                                         Items: {order.order_items?.length || 0}
                                       </p>
                                       <div className="flex items-center gap-3">
-                                        {order.order_items?.slice(0, 1).map((item, idx) => (
-                                          <div key={idx} className="flex items-center gap-2">
-                                            <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                                              <img 
-                                                src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
-                                                alt={item.products?.name || "Product"}
-                                                className="w-full h-full object-cover"
-                                                onError={(e) => {
-                                                  e.target.src = 'https://via.placeholder.com/40x40?text=📦';
-                                                }}
-                                              />
+                                        {order.order_items
+                                          ?.slice(0, 1)
+                                          .map((item, idx) => (
+                                            <div
+                                              key={idx}
+                                              className="flex items-center gap-2"
+                                            >
+                                              <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                                <img
+                                                  src={
+                                                    item.products?.image ||
+                                                    "https://via.placeholder.com/40x40?text=📦"
+                                                  }
+                                                  alt={
+                                                    item.products?.name ||
+                                                    "Product"
+                                                  }
+                                                  className="w-full h-full object-cover"
+                                                  onError={(e) => {
+                                                    e.target.src =
+                                                      "https://via.placeholder.com/40x40?text=📦";
+                                                  }}
+                                                />
+                                              </div>
+                                              <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                  {item.products?.name ||
+                                                    "Product"}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                  Qty: {item.quantity}
+                                                </p>
+                                              </div>
                                             </div>
-                                            <div>
-                                              <p className="text-sm font-medium text-gray-900">{item.products?.name || "Product"}</p>
-                                              <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                                            </div>
-                                          </div>
-                                        ))}
+                                          ))}
                                         {order.order_items?.length > 1 && (
                                           <span className="text-xs text-gray-500 ml-2">
-                                            +{order.order_items.length - 1} more items
+                                            +{order.order_items.length - 1} more
+                                            items
                                           </span>
                                         )}
                                       </div>
@@ -839,27 +861,45 @@ const AccountPage = () => {
                                         Items: {order.order_items?.length || 0}
                                       </p>
                                       <div className="flex items-center gap-3">
-                                        {order.order_items?.slice(0, 1).map((item, idx) => (
-                                          <div key={idx} className="flex items-center gap-2">
-                                            <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                                              <img 
-                                                src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
-                                                alt={item.products?.name || "Product"}
-                                                className="w-full h-full object-cover"
-                                                onError={(e) => {
-                                                  e.target.src = 'https://via.placeholder.com/40x40?text=📦';
-                                                }}
-                                              />
+                                        {order.order_items
+                                          ?.slice(0, 1)
+                                          .map((item, idx) => (
+                                            <div
+                                              key={idx}
+                                              className="flex items-center gap-2"
+                                            >
+                                              <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                                <img
+                                                  src={
+                                                    item.products?.image ||
+                                                    "https://via.placeholder.com/40x40?text=📦"
+                                                  }
+                                                  alt={
+                                                    item.products?.name ||
+                                                    "Product"
+                                                  }
+                                                  className="w-full h-full object-cover"
+                                                  onError={(e) => {
+                                                    e.target.src =
+                                                      "https://via.placeholder.com/40x40?text=📦";
+                                                  }}
+                                                />
+                                              </div>
+                                              <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                  {item.products?.name ||
+                                                    "Product"}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                  Qty: {item.quantity}
+                                                </p>
+                                              </div>
                                             </div>
-                                            <div>
-                                              <p className="text-sm font-medium text-gray-900">{item.products?.name || "Product"}</p>
-                                              <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                                            </div>
-                                          </div>
-                                        ))}
+                                          ))}
                                         {order.order_items?.length > 1 && (
                                           <span className="text-xs text-gray-500 ml-2">
-                                            +{order.order_items.length - 1} more items
+                                            +{order.order_items.length - 1} more
+                                            items
                                           </span>
                                         )}
                                       </div>
@@ -1120,27 +1160,43 @@ const AccountPage = () => {
                                     Items: {order.order_items?.length || 0}
                                   </p>
                                   <div className="flex items-center gap-3">
-                                    {order.order_items?.slice(0, 1).map((item, idx) => (
-                                      <div key={idx} className="flex items-center gap-2">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                                          <img 
-                                            src={item.products?.image || 'https://via.placeholder.com/40x40?text=📦'} 
-                                            alt={item.products?.name || "Product"}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                              e.target.src = 'https://via.placeholder.com/40x40?text=📦';
-                                            }}
-                                          />
+                                    {order.order_items
+                                      ?.slice(0, 1)
+                                      .map((item, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                            <img
+                                              src={
+                                                item.products?.image ||
+                                                "https://via.placeholder.com/40x40?text=📦"
+                                              }
+                                              alt={
+                                                item.products?.name || "Product"
+                                              }
+                                              className="w-full h-full object-cover"
+                                              onError={(e) => {
+                                                e.target.src =
+                                                  "https://via.placeholder.com/40x40?text=📦";
+                                              }}
+                                            />
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">
+                                              {item.products?.name || "Product"}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                              Qty: {item.quantity}
+                                            </p>
+                                          </div>
                                         </div>
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-900">{item.products?.name || "Product"}</p>
-                                          <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                                        </div>
-                                      </div>
-                                    ))}
+                                      ))}
                                     {order.order_items?.length > 1 && (
                                       <span className="text-xs text-gray-500 ml-2">
-                                        +{order.order_items.length - 1} more items
+                                        +{order.order_items.length - 1} more
+                                        items
                                       </span>
                                     )}
                                   </div>

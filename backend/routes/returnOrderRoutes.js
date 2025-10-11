@@ -1,6 +1,7 @@
 // routes/returnOrderRoutes.js
 import express from "express";
 import {
+  testDatabase,
   checkReturnEligibility,
   createReturnRequest,
   getUserReturnRequests,
@@ -11,6 +12,9 @@ import {
 } from "../controller/returnOrderController.js";
 
 const router = express.Router();
+
+// Test route
+router.get("/test", testDatabase);
 
 // User routes
 router.get("/eligibility/:order_id", checkReturnEligibility);
