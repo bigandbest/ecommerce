@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { getUserOrders, cancelOrder } from "../../utils/supabaseApi";
-import { getUserOrders } from "../../utils/supabaseApi";
 import ReturnOrders from "./ReturnOrders";
 import "./MyOrders.css";
 
@@ -19,25 +18,21 @@ function MyOrders() {
   const handleCancelOrder = async (orderId) => {
     if (!window.confirm("Are you sure you want to cancel this order?")) return;
 
+    setCancellingOrder(orderId);
     try {
-      // First check if order can be cancelled
-      const eligibilityResponse = await fetch(
-        `https://ecommerce-8342.onrender.com/api/return-orders/eligibility/${orderId}`
-      );
-      const eligibilityData = await eligibilityResponse.json();
-
-      if (eligibilityData.success && eligibilityData.eligibility.can_cancel) {
-        // Redirect to return request page with cancellation type
-        window.location.href = `/return-request?orderId=${orderId}&type=cancellation`;
+      const result = await cancelOrder(orderId);
+      if (result.success) {
+        alert("Order cancelled successfully!");
+        // Force refresh to show updated status
+        forceRefresh();
       } else {
-        alert(
-          eligibilityData.eligibility?.reason ||
-            "This order cannot be cancelled."
-        );
+        alert("Failed to cancel order: " + result.error);
       }
     } catch (error) {
-      console.error("Error checking cancellation eligibility:", error);
-      alert("Unable to process cancellation request. Please try again.");
+      console.error("Error cancelling order:", error);
+      alert("Unable to cancel order. Please try again.");
+    } finally {
+      setCancellingOrder(null);
     }
   };
 
@@ -90,27 +85,7 @@ function MyOrders() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  // Cancel order function
-  const handleCancelOrder = async (orderId) => {
-    if (!window.confirm('Are you sure you want to cancel this order?')) {
-      return;
-    }
 
-    setCancellingOrder(orderId);
-    try {
-      const result = await cancelOrder(orderId);
-      if (result.success) {
-        alert('Order cancelled successfully!');
-        forceRefresh();
-      } else {
-        alert('Failed to cancel order: ' + result.error);
-      }
-    } catch (error) {
-      alert('Error cancelling order: ' + error.message);
-    } finally {
-      setCancellingOrder(null);
-    }
-  };
 
   // Listen for order placement events
   useEffect(() => {
@@ -482,26 +457,6 @@ function MyOrders() {
               >
                 Track Package
               </button>
-              {/* Cancel Order Button for Non-Shipped Orders */}
-              {["pending", "processing"].includes(
-                order.status.toLowerCase()
-              ) && (
-                <button
-                  onClick={() => handleCancelOrder(order.id)}
-                  className="cancel-order-btn"
-                  style={{
-                    marginLeft: "10px",
-                    backgroundColor: "#ff6b35",
-                    color: "white",
-                    border: "none",
-                    padding: "8px 16px",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Cancel Order
-                </button>
-              )}
             </div>
           </div>
         ))}

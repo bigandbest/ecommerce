@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { cancelReturnRequest } from "../../utils/supabaseApi";
 
 const ReturnOrders = () => {
   const { currentUser } = useAuth();
@@ -7,6 +8,7 @@ const ReturnOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [cancellingId, setCancellingId] = useState(null);
 
   // Fetch user's return orders
   const fetchReturnOrders = useCallback(async () => {
@@ -82,6 +84,8 @@ const ReturnOrders = () => {
         return "bg-green-100 text-green-800";
       case "rejected":
         return "bg-red-100 text-red-800";
+      case "cancelled":
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -116,6 +120,7 @@ const ReturnOrders = () => {
       processing: 0,
       completed: 0,
       rejected: 0,
+      cancelled: 0,
     };
 
     returnOrders.forEach((order) => {
@@ -129,6 +134,34 @@ const ReturnOrders = () => {
   };
 
   const statusCounts = getStatusCounts();
+
+  // Handle cancel return request
+  const handleCancelRequest = async (returnRequestId) => {
+    if (!currentUser?.id) return;
+    
+    if (!confirm("Are you sure you want to cancel this return request?")) {
+      return;
+    }
+
+    setCancellingId(returnRequestId);
+    
+    try {
+      const result = await cancelReturnRequest(returnRequestId, currentUser.id);
+      
+      if (result.success) {
+        // Refresh the return orders list
+        await fetchReturnOrders();
+        alert("Return request cancelled successfully!");
+      } else {
+        alert(result.error || "Failed to cancel return request");
+      }
+    } catch (error) {
+      console.error("Error cancelling return request:", error);
+      alert("Failed to cancel return request");
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -195,6 +228,7 @@ const ReturnOrders = () => {
             count: statusCounts.completed,
           },
           { key: "rejected", label: "Rejected", count: statusCounts.rejected },
+          { key: "cancelled", label: "Cancelled", count: statusCounts.cancelled },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -338,8 +372,12 @@ const ReturnOrders = () => {
               {/* Return Order Actions */}
               <div className="return-order-actions">
                 {returnOrder.status === "pending" && (
-                  <button className="action-btn cancel-btn">
-                    Cancel Request
+                  <button 
+                    className="action-btn cancel-btn"
+                    onClick={() => handleCancelRequest(returnOrder.id)}
+                    disabled={cancellingId === returnOrder.id}
+                  >
+                    {cancellingId === returnOrder.id ? "Cancelling..." : "Cancel Request"}
                   </button>
                 )}
 

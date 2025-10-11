@@ -137,7 +137,7 @@ function MobileAccountPage() {
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="divide-y divide-gray-200">
             <AccountLink to="/enquiry-history" icon={ClipboardList}> Enquiries</AccountLink>
-            <AccountLink to="/coming-soon?feature=orders" icon={List}> Refund</AccountLink>
+            <AccountLink to="/return-request" icon={List}> Return & Refund</AccountLink>
             <AccountLink to="/contact-us" icon={Phone}> Contact Us</AccountLink>
           </div>
         </div>
