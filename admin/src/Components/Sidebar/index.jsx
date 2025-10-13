@@ -19,6 +19,7 @@ import {
   FaTag,
   FaTrademark,
   FaDatabase,
+  FaWallet,
 } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { HiArchive } from "react-icons/hi";
@@ -169,6 +170,12 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/users",
       badge: userCount,
       description: "Manage users, roles, add, delete, change role",
+    },
+    {
+      title: "Wallet Management",
+      icon: <FaWallet />,
+      path: "/wallet-management",
+      description: "Manage user wallets, transactions, and recharges",
     },
     {
       title: "Business Partners",

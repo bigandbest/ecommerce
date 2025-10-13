@@ -1,0 +1,374 @@
+/* WalletPaymentOption.css */
+.wallet-payment-option {
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  background: white;
+  overflow: hidden;
+}
+
+.wallet-payment-option:hover:not(.disabled) {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.wallet-payment-option.selected {
+  border-color: #667eea;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+}
+
+.wallet-payment-option.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
+.payment-option-header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  cursor: pointer;
+  gap: 16px;
+}
+
+.wallet-payment-option.disabled .payment-option-header {
+  cursor: not-allowed;
+}
+
+.option-radio {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.option-radio input[type="radio"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-radio input[type="radio"]:checked {
+  border-color: #667eea;
+  background: #667eea;
+}
+
+.option-radio input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.radio-checkmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.option-radio input[type="radio"]:checked + .radio-checkmark {
+  opacity: 1;
+}
+
+.option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.wallet-icon {
+  font-size: 20px;
+  color: white;
+}
+
+.option-details {
+  flex: 1;
+}
+
+.option-details h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.option-details p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.wallet-balance-info {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.balance-label {
+  display: block;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+.balance-amount {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.balance-amount.sufficient {
+  color: #10b981;
+}
+
+.balance-amount.insufficient {
+  color: #ef4444;
+}
+
+.payment-option-details {
+  border-top: 1px solid #e5e7eb;
+  padding: 20px;
+  background: #f8faff;
+}
+
+.payment-breakdown {
+  background: white;
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.breakdown-row:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.breakdown-row.shortfall {
+  font-weight: 600;
+  background: #fef2f2;
+  margin: 8px -16px -16px -16px;
+  padding: 12px 16px;
+  border-bottom: none;
+}
+
+.text-success {
+  color: #10b981;
+}
+
+.text-error {
+  color: #ef4444;
+}
+
+.insufficient-balance-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.warning-icon {
+  color: #ef4444;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warning-content p {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.warning-content span {
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.sufficient-balance-info {
+  padding: 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.success-content p {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.success-content span {
+  font-size: 13px;
+  color: #047857;
+}
+
+.payment-action {
+  text-align: center;
+}
+
+.wallet-pay-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+  min-width: 200px;
+}
+
+.wallet-pay-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.wallet-pay-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .payment-option-header {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .option-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .wallet-icon {
+    font-size: 16px;
+  }
+
+  .option-details h3 {
+    font-size: 16px;
+  }
+
+  .option-details p {
+    font-size: 13px;
+  }
+
+  .balance-amount {
+    font-size: 14px;
+  }
+
+  .payment-option-details {
+    padding: 16px;
+  }
+
+  .payment-breakdown {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .breakdown-row {
+    padding: 6px 0;
+    font-size: 14px;
+  }
+
+  .insufficient-balance-warning,
+  .sufficient-balance-info {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .wallet-pay-button {
+    padding: 12px 24px;
+    font-size: 15px;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-option-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .wallet-balance-info {
+    width: 100%;
+    text-align: left;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+  }
+
+  .balance-label {
+    display: inline;
+    margin-right: 8px;
+  }
+
+  .balance-amount {
+    display: inline;
+  }
+
+  .breakdown-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .insufficient-balance-warning,
+  .sufficient-balance-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .warning-icon {
+    align-self: center;
+    margin-top: 0;
+  }
+}

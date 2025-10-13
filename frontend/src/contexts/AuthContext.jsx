@@ -1,8 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import supabase from '../utils/supabase.ts';
-import { createUserProfileWithAddress } from '../utils/supabaseApi.js';
-import { useLocationContext } from './LocationContext.jsx';
-
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
+import supabase from "../utils/supabase.ts";
+import { createUserProfileWithAddress } from "../utils/supabaseApi.js";
+import { useLocationContext } from "./LocationContext.jsx";
 
 // Create the auth context
 const AuthContext = createContext();
@@ -29,11 +34,13 @@ export const AuthProvider = ({ children }) => {
         const name = user?.user_metadata?.name;
         /* console.log('Initial session user data:', user);
         console.log('User email from session:', user.email); */
-        setCurrentUser({ 
-          ...user, 
+        setCurrentUser({
+          ...user,
           name,
           email: user.email, // Explicitly ensure email is available
-          avatar: user.user_metadata?.avatar || null
+          avatar: user.user_metadata?.avatar || null,
+          access_token: data.session.access_token, // Add access token
+          refresh_token: data.session.refresh_token, // Add refresh token
         });
         setLoading(false);
       } else {
@@ -42,22 +49,26 @@ export const AuthProvider = ({ children }) => {
       }
     };
     getSession();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const user = session.user;
-        const name = user?.user_metadata?.name;
-        /* console.log('Auth state change user data:', user);
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          const user = session.user;
+          const name = user?.user_metadata?.name;
+          /* console.log('Auth state change user data:', user);
         console.log('User email from auth state change:', user.email); */
-        setCurrentUser({ 
-          ...user, 
-          name,
-          email: user.email, // Explicitly ensure email is available
-          avatar: user.user_metadata?.avatar || null
-        });
-      } else {
-        setCurrentUser(null);
+          setCurrentUser({
+            ...user,
+            name,
+            email: user.email, // Explicitly ensure email is available
+            avatar: user.user_metadata?.avatar || null,
+            access_token: session.access_token, // Add access token
+            refresh_token: session.refresh_token, // Add refresh token
+          });
+        } else {
+          setCurrentUser(null);
+        }
       }
-    });
+    );
     return () => {
       listener?.subscription.unsubscribe();
     };
@@ -67,18 +78,24 @@ export const AuthProvider = ({ children }) => {
   const loginUser = async (email, password) => {
     try {
       setError(null);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) throw error;
       // Merge user_metadata for name and ensure email is available
       const user = data.user;
       const name = user?.user_metadata?.name;
-      setCurrentUser({ 
-        ...user, 
+      const userWithToken = {
+        ...user,
         name,
         email: user.email, // Explicitly ensure email is available
-        avatar: user.user_metadata?.avatar || null
-      });
-      return { success: true, user: { ...user, name, email: user.email, avatar: user.user_metadata?.avatar || null } };
+        avatar: user.user_metadata?.avatar || null,
+        access_token: data.session?.access_token, // Add access token
+        refresh_token: data.session?.refresh_token, // Add refresh token
+      };
+      setCurrentUser(userWithToken);
+      return { success: true, user: userWithToken };
     } catch (err) {
       setError(err.message);
       return { success: false, error: err.message };
@@ -86,19 +103,37 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Supabase register
-  const registerUser = async (name, email, password, phone = '', accountType = 'individual', companyName = '', gstin = '', detailedAddress = {}) => {
+  const registerUser = async (
+    name,
+    email,
+    password,
+    phone = "",
+    accountType = "individual",
+    companyName = "",
+    gstin = "",
+    detailedAddress = {}
+  ) => {
     try {
       setError(null);
       // 1. Register with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name, phone, companyName, accountType, gstin, role: 'customer' } }
+        options: {
+          data: {
+            name,
+            phone,
+            companyName,
+            accountType,
+            gstin,
+            role: "customer",
+          },
+        },
       });
       if (error) throw error;
       const authUser = data.user;
-      if (!authUser) throw new Error('No user returned from Auth');
-      
+      if (!authUser) throw new Error("No user returned from Auth");
+
       // 2. Insert into users table using createUserProfileWithAddress, passing Auth id
       const userProfile = {
         id: authUser.id,
@@ -107,30 +142,30 @@ export const AuthProvider = ({ children }) => {
         phone,
         account_type: accountType,
         // Add detailed address fields using frontend naming
-        houseNumber: detailedAddress.houseNumber || '',
-        streetAddress: detailedAddress.streetAddress || '',
-        suiteUnitFloor: detailedAddress.suiteUnitFloor || '',
-        locality: detailedAddress.locality || '',
-        area: detailedAddress.area || '',
-        city: detailedAddress.city || '',
-        state: detailedAddress.state || '',
-        postalCode: detailedAddress.postalCode || '',
-        country: detailedAddress.country || 'India',
-        landmark: detailedAddress.landmark || '',
-        company_name: accountType === 'company' ? companyName : null,
-        gstin: accountType === 'company' ? gstin : null,
-        role: 'customer',
+        houseNumber: detailedAddress.houseNumber || "",
+        streetAddress: detailedAddress.streetAddress || "",
+        suiteUnitFloor: detailedAddress.suiteUnitFloor || "",
+        locality: detailedAddress.locality || "",
+        area: detailedAddress.area || "",
+        city: detailedAddress.city || "",
+        state: detailedAddress.state || "",
+        postalCode: detailedAddress.postalCode || "",
+        country: detailedAddress.country || "India",
+        landmark: detailedAddress.landmark || "",
+        company_name: accountType === "company" ? companyName : null,
+        gstin: accountType === "company" ? gstin : null,
+        role: "customer",
         is_active: true,
         avatar: null,
-        photo_url: null
+        photo_url: null,
       };
-      
+
       const addResult = await createUserProfileWithAddress(userProfile);
       if (!addResult.success) {
         setError(addResult.error);
         return { success: false, error: addResult.error };
       }
-      
+
       // Set currentUser directly from authUser after successful signup and DB insert
       const userName = authUser.user_metadata?.name || name;
       setCurrentUser({ ...authUser, name: userName });
@@ -157,34 +192,37 @@ export const AuthProvider = ({ children }) => {
   // Supabase reset password
   const resetPassword = async (email) => {
     try {
-      console.log('Reset password called with email:', email);
-      if (!email || email.trim() === '') {
-        throw new Error('Email is required for password reset');
+      console.log("Reset password called with email:", email);
+      if (!email || email.trim() === "") {
+        throw new Error("Email is required for password reset");
       }
-      
+
       // Determine the correct redirect URL based on environment
       let redirectUrl;
-      if (window.location.hostname === 'shop.psetu.com') {
-        redirectUrl = 'https://shop.psetu.com/reset-password';
-      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      if (window.location.hostname === "shop.psetu.com") {
+        redirectUrl = "https://shop.psetu.com/reset-password";
+      } else if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+      ) {
         redirectUrl = `${window.location.origin}/reset-password`;
       } else {
         // For any other domain, use the current origin
         redirectUrl = `${window.location.origin}/reset-password`;
       }
-      
-      console.log('Redirect URL:', redirectUrl);
-      console.log('Current hostname:', window.location.hostname);
-      console.log('Current origin:', window.location.origin);
-      
+
+      console.log("Redirect URL:", redirectUrl);
+      console.log("Current hostname:", window.location.hostname);
+      console.log("Current origin:", window.location.origin);
+
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl
+        redirectTo: redirectUrl,
       });
-      console.log('Supabase reset response:', { data, error });
+      console.log("Supabase reset response:", { data, error });
       if (error) throw error;
       return { success: true };
     } catch (err) {
-      console.error('Reset password error:', err);
+      console.error("Reset password error:", err);
       setError(err.message);
       return { success: false, error: err.message };
     }
@@ -194,7 +232,9 @@ export const AuthProvider = ({ children }) => {
   const updatePassword = async (newPassword) => {
     try {
       setError(null);
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
       if (error) throw error;
       return { success: true };
     } catch (err) {
@@ -206,30 +246,30 @@ export const AuthProvider = ({ children }) => {
   // Refresh user profile from database
   const refreshUserProfile = async () => {
     if (!currentUser?.id) return;
-    
+
     try {
       const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', currentUser.id)
+        .from("users")
+        .select("*")
+        .eq("id", currentUser.id)
         .single();
-      
+
       if (data && !error) {
-        setCurrentUser(prev => ({
+        setCurrentUser((prev) => ({
           ...prev,
           ...data,
-          photo_url: data.photo_url
+          photo_url: data.photo_url,
         }));
       }
     } catch (error) {
-      console.error('Error refreshing user profile:', error);
+      console.error("Error refreshing user profile:", error);
     }
   };
 
   const value = {
     currentUser,
     userRole,
-    isAdmin: userRole === 'admin',
+    isAdmin: userRole === "admin",
     isAuthenticated: !!currentUser,
     loading,
     error,
@@ -239,7 +279,7 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     updatePassword,
     setCurrentUser,
-    refreshUserProfile
+    refreshUserProfile,
   };
 
   return (

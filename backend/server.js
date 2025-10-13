@@ -40,6 +40,7 @@ import uniqueSectionRoutes from "./routes/uniqueSectionRoutes.js";
 import uniqueSectionProductRoutes from "./routes/uniqueSectionProductRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import returnOrderRoutes from "./routes/returnOrderRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -63,6 +64,8 @@ const corsOptions = {
     }
   },
   credentials: true,
+  exposedHeaders: ["Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 /* app.use(cors({
    origin: function (origin, callback) {
@@ -118,5 +121,37 @@ app.use("/api/unique-sections", uniqueSectionRoutes);
 app.use("/api/unique-sections-products", uniqueSectionProductRoutes);
 app.use("/api/user", profileRoutes);
 app.use("/api/return-orders", returnOrderRoutes);
+app.use("/api/wallet", walletRoutes);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Validate critical environment variables
+const requiredEnvVars = [
+  "JWT_SECRET",
+  "SUPABASE_URL",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "RAZORPAY_KEY_ID",
+  "RAZORPAY_KEY_SECRET",
+];
+
+const missingEnvVars = requiredEnvVars.filter(
+  (varName) => !process.env[varName]
+);
+
+if (missingEnvVars.length > 0) {
+  console.error(
+    "❌ Missing required environment variables:",
+    missingEnvVars.join(", ")
+  );
+  console.error("⚠️  Server may not function correctly!");
+} else {
+  console.log("✅ All required environment variables are set");
+}
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(
+    `💳 Razorpay Mode: ${
+      process.env.RAZORPAY_KEY_ID?.startsWith("rzp_test_") ? "TEST" : "LIVE"
+    }`
+  );
+});
