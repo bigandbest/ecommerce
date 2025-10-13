@@ -207,7 +207,7 @@ const ReturnRequest = () => {
           Return & Refund Request
         </h1>
         <p className="text-gray-600">
-          Request a return for delivered products (within 7 days) or cancel
+          Request a return for delivered products (within 7 days) or cancel or
           undelivered orders
         </p>
       </div>
@@ -215,7 +215,7 @@ const ReturnRequest = () => {
       {!showForm ? (
         <div>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Select Order for Return/Cancellation
+            Select Order for Return/Refund
           </h2>
 
           {orders.length === 0 ? (
