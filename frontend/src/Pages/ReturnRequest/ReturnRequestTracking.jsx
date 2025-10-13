@@ -169,20 +169,20 @@ const ReturnRequestTracking = () => {
                   <p className="text-sm text-gray-600">
                     {getStatusDescription(request.status)}
                   </p>
+                  
+                  <button
+                    onClick={() =>
+                      setSelectedRequest(
+                        selectedRequest === request.id ? null : request.id
+                      )
+                    }
+                    className="mt-3 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    {selectedRequest === request.id ? "Hide Details" : "View Details"}
+                  </button>
                 </div>
 
-                <button
-                  onClick={() =>
-                    setSelectedRequest(
-                      selectedRequest === request.id ? null : request.id
-                    )
-                  }
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm"
-                >
-                  {selectedRequest === request.id
-                    ? "Hide Details"
-                    : "View Details"}
-                </button>
+              
               </div>
 
               {/* Expanded Details */}

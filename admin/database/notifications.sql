@@ -2,9 +2,10 @@
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    type VARCHAR(50) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    message TEXT NOT NULL,
+    heading VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    expiry_date TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '30 days'),
+    image_url TEXT,
     related_id UUID, -- Can reference order_id, return_order_id, etc.
     related_type VARCHAR(50), -- 'order', 'return_order', 'payment', etc.
     is_read BOOLEAN DEFAULT FALSE,

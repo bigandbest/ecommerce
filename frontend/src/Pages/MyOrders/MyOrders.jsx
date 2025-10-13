@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { getUserOrders, cancelOrder } from "../../utils/supabaseApi";
+import { useNotifications } from "../../contexts/NotificationContext";
 import ReturnOrders from "./ReturnOrders";
 import "./MyOrders.css";
 
 function MyOrders() {
   const { currentUser } = useAuth();
+  const { notifications, fetchNotifications } = useNotifications();
   const [activeTab, setActiveTab] = useState("tracking");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -198,6 +200,9 @@ function MyOrders() {
     };
 
     fetchOrders();
+    if (currentUser?.id) {
+      fetchNotifications(currentUser.id);
+    }
   }, [currentUser, refreshTrigger]);
 
   // Generate notifications from orders for future use
@@ -687,11 +692,27 @@ function MyOrders() {
         {activeTab === "notifications" && (
           <div>
             <h2>Notifications</h2>
-            <div className="no-orders">
-              <div className="no-orders-icon">🔔</div>
-              <h3>No Notifications</h3>
-              <p>Your order notifications will appear here.</p>
-            </div>
+            {notifications.length === 0 ? (
+              <div className="no-orders">
+                <div className="no-orders-icon">🔔</div>
+                <h3>No Notifications</h3>
+                <p>Your order notifications will appear here.</p>
+              </div>
+            ) : (
+              <div className="notifications-list">
+                {notifications.map((notification) => (
+                  <div key={notification.id} className="notification-card">
+                    <div className="notification-header">
+                      <h4>{notification.heading}</h4>
+                      <span className="notification-time">
+                        {new Date(notification.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="notification-description">{notification.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

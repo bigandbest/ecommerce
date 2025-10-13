@@ -367,6 +367,13 @@ const ReturnOrders = () => {
                     </span>
                   </div>
                 )}
+
+                {/* Status Message */}
+                {returnOrder.status === "pending" && (
+                  <div className="status-message">
+                    <p>Your request is being reviewed by our team</p>
+                  </div>
+                )}
               </div>
 
               {/* Return Order Actions */}

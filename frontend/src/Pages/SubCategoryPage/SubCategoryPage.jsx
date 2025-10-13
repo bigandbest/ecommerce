@@ -125,7 +125,7 @@ const SubCategoryPage = () => {
 
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden pb-0">
       {/* Fixed Sidebar */}
       <aside
         ref={sidebarRef}
@@ -198,11 +198,11 @@ const SubCategoryPage = () => {
         {/* Scrollable Group Section */}
         <div
           ref={groupSectionRef}
-          className="flex-1 px-2 pb-6 pt-3 scrollable-container overflow-y-auto"
+          className="flex-1 px-2 pb-0 pt-3 scrollable-container overflow-y-auto"
           onScroll={handleScroll}
         >
           {subcategories.map((sub, index) => (
-            <div key={sub.id} ref={(el) => (sectionRefs.current[sub.id] = el)} className="mb-6 scroll-mt-16">
+            <div key={sub.id} ref={(el) => (sectionRefs.current[sub.id] = el)} className="mb-1 scroll-mt-16">
               {/* Subcategory Title */}
               <h3 className="text-sm font-semibold text-gray-700 mb-3">
                 {sub.name}
@@ -233,7 +233,7 @@ const SubCategoryPage = () => {
 
               {/* Divider between subcategories (not after last) */}
               {index < subcategories.length - 1 && (
-                <hr className="my-4 border-t border-gray-300" />
+                <hr className="my-2 border-t border-gray-300" />
               )}
             </div>
           ))}

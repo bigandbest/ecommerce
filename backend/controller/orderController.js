@@ -1,6 +1,7 @@
 // controllers/orderController.js
 import { supabase } from "../config/supabaseClient.js";
 import crypto from "crypto";
+import { createOrderNotification } from "./NotificationController.js";
 
 /** Get all orders (admin usage) */
 export const getAllOrders = async (req, res) => {
@@ -19,6 +20,16 @@ export const updateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status, adminnotes = "" } = req.body;
 
+  // Get order details first to get user_id
+  const { data: order, error: fetchError } = await supabase
+    .from("orders")
+    .select("user_id")
+    .eq("id", id)
+    .single();
+
+  if (fetchError)
+    return res.status(500).json({ success: false, error: fetchError.message });
+
   const { error } = await supabase
     .from("orders")
     .update({ status, adminnotes, updated_at: new Date().toISOString() })
@@ -26,6 +37,10 @@ export const updateOrderStatus = async (req, res) => {
 
   if (error)
     return res.status(500).json({ success: false, error: error.message });
+
+  // Create notification for status update
+  await createOrderNotification(order.user_id, id, status);
+
   return res.json({ success: true });
 };
 
@@ -193,6 +208,9 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
 
   // Clear the user's cart after successful order placement
   await supabase.from("cart_items").delete().eq("user_id", user_id);
+
+  // Create notification for new order
+  await createOrderNotification(user_id, order.id, 'pending');
 
   return res.json({ success: true, order });
 };
