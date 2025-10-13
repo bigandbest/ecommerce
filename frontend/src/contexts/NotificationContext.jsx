@@ -20,12 +20,15 @@ export function NotificationProvider({ children }) {
         }
     }, []);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = async (userId = null) => {
         try {
-            const res = await axios.get(
-                "https://ecommerce-8342.onrender.com/api/notifications/collect"
-            );
-            const fetched = res.data.notifications;
+            let url = "https://ecommerce-8342.onrender.com/api/notifications/collect";
+            if (userId) {
+                url = `https://ecommerce-8342.onrender.com/api/notifications/user/${userId}`;
+            }
+            
+            const res = await axios.get(url);
+            const fetched = res.data.notifications || [];
 
             // Load old localStorage BEFORE overwriting
             const oldStoredNotifs = JSON.parse(localStorage.getItem("notifications")) || [];

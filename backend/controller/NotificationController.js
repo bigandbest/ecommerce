@@ -142,9 +142,43 @@ export async function getNotifications(req, res) {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    res.status(200).json({ success: true, notifications: data });
+    res.status(200).json({ success: true, notifications: data || [] });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// ✅ Create Order Notification
+export async function createOrderNotification(userId, orderId, status) {
+  try {
+    const statusMessages = {
+      'pending': 'Your order has been placed successfully!',
+      'processing': 'Your order is being processed.',
+      'shipped': 'Your order has been shipped!',
+      'delivered': 'Your order has been delivered successfully!',
+      'cancelled': 'Your order has been cancelled.'
+    };
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .insert([
+        {
+          user_id: userId,
+          heading: `Order Update - ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+          description: statusMessages[status] || 'Your order status has been updated.',
+          related_id: orderId,
+          related_type: 'order',
+          expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+        },
+      ])
+      .select()
+      .single();
+
+    return { success: !error, data, error };
+  } catch (err) {
+    console.error('Error creating order notification:', err);
+    return { success: false, error: err.message };
   }
 }
 

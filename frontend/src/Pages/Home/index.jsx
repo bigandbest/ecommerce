@@ -520,7 +520,7 @@ export const Home = () => {
   return (
     <div className="home-page-container">
       {/* Banner Carousel - Mobile/Desktop */}
-      <SubStoreNav />
+      
       {isMobile ? <MobileBannerCarousel /> : <HomeSlider />}
       
       {/* Wholesale/Bazar/Eato sections */}
