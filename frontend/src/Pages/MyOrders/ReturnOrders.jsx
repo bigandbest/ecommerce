@@ -203,8 +203,8 @@ const ReturnOrders = () => {
       {/* Header */}
       <div className="return-orders-header">
         <div className="header-info">
-          <h2>Return & Refund Requests</h2>
-          <p>Track the status of your return and refund requests</p>
+          <h2>Return</h2>
+          <p>Track the status of your return requests</p>
         </div>
         <button onClick={fetchReturnOrders} className="refresh-btn">
           🔄 Refresh

@@ -608,24 +608,6 @@ function MyOrders() {
               >
                 View Details
               </button>
-              {(order.status === "delivered" ||
-                order.status === "Delivered") && (
-                <button
-                  onClick={() => handleReturnOrder(order.id)}
-                  className="return-request-btn"
-                  style={{
-                    marginLeft: "10px",
-                    backgroundColor: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    padding: "8px 16px",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Request Return
-                </button>
-              )}
             </div>
           </div>
         ))}
@@ -671,7 +653,7 @@ function MyOrders() {
             className={`tab-button ${activeTab === "returns" ? "active" : ""}`}
             onClick={() => setActiveTab("returns")}
           >
-            Returns
+            Return
           </button>
           <button
             className={`tab-button ${
