@@ -320,6 +320,11 @@ export const processWalletPayment = async (req, res) => {
   }
 };
 
+import {
+  createRefundNotification,
+  createAdminRefundNotification,
+} from "./NotificationHelpers.js";
+
 // Process wallet refund
 export const processWalletRefund = async (req, res) => {
   try {
@@ -368,6 +373,16 @@ export const processWalletRefund = async (req, res) => {
           result?.error || updateError?.message || "Refund processing failed",
       });
     }
+
+    // Get user details for notifications
+    const { data: userData } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", userId)
+      .single();
+
+    // Create notifications
+    await createRefundNotification(userId, orderId, "completed", amount);
 
     res.json({
       success: true,
