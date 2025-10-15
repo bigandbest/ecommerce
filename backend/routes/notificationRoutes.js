@@ -1,5 +1,6 @@
 import { Router } from "express";
 const router = Router();
+import { supabase } from "../config/supabaseClient.js";
 import {
   createNotification,
   getNotifications,

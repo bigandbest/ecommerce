@@ -19,17 +19,18 @@ export const createNotificationHelper = async (
   notification_type = "user"
 ) => {
   try {
+    // Add user ID to description for user-specific notifications
+    const finalDescription = notification_type === "user" 
+      ? `[USER:${user_id}] ${description}`
+      : description;
+
     const { data, error } = await supabase
       .from("notifications")
       .insert([
         {
-          user_id: notification_type === "admin" ? null : user_id,
           heading,
-          description,
-          related_type,
-          related_id,
-          notification_type,
-          is_read: false,
+          description: finalDescription,
+          expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           created_at: new Date().toISOString(),
         },
       ])
@@ -40,6 +41,7 @@ export const createNotificationHelper = async (
       return null;
     }
 
+    console.log("Notification created successfully:", data[0]);
     return data[0];
   } catch (error) {
     console.error("Unexpected error creating notification:", error);
