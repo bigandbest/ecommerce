@@ -1,5 +1,9 @@
 // controllers/returnOrderController.js
 import { supabase } from "../config/supabaseClient.js";
+import {
+  createReturnNotification,
+  createAdminReturnNotification,
+} from "./NotificationHelpers.js";
 
 // Helper function to calculate days since order delivery
 const calculateDaysSinceDelivery = (orderDate, orderStatus) => {
@@ -324,6 +328,17 @@ export const createReturnRequest = async (req, res) => {
       }
     }
 
+    // Get user details for admin notification
+    const { data: userData } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", user_id)
+      .single();
+
+    // Create notifications for return request
+    await createReturnNotification(user_id, order_id, "requested", return_type);
+    await createAdminReturnNotification(order_id, userData?.name, return_type);
+
     return res.json({
       success: true,
       return_order: returnOrder,
@@ -514,37 +529,13 @@ export const updateReturnRequestStatus = async (req, res) => {
       });
     }
 
-    // Add notification when status changes
-    try {
-      const notificationMessage = getNotificationMessage(
-        status,
-        data.return_type
-      );
-
-      // Check if notifications table exists before inserting
-      const { error: notificationError } = await supabase
-        .from("notifications")
-        .insert([
-          {
-            user_id: data.user_id,
-            type: "return_status_update",
-            title: `Return Request ${
-              status.charAt(0).toUpperCase() + status.slice(1)
-            }`,
-            message: notificationMessage,
-            related_id: data.id,
-            related_type: "return_order",
-          },
-        ]);
-
-      if (notificationError) {
-        console.warn("Failed to create notification:", notificationError);
-        // Don't fail the main operation if notification fails
-      }
-    } catch (notificationError) {
-      console.error("Failed to create notification:", notificationError);
-      // Don't fail the main operation if notification fails
-    }
+    // Create notification for status update
+    await createReturnNotification(
+      data.user_id,
+      data.order_id,
+      status,
+      data.return_type
+    );
 
     return res.json({
       success: true,

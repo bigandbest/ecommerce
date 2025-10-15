@@ -158,8 +158,7 @@ export async function addShippingBanner(banner, imageFile) {
     .from("shipping_banners")
     .insert([bannerToInsert])
     .select();
-  if (insertError)
-    return { success: false, error: insertError.message };
+  if (insertError) return { success: false, error: insertError.message };
   return { success: true, banner: data };
 }
 
@@ -855,6 +854,15 @@ export async function updateProduct(
   imageFiles = [],
   videoFile = null
 ) {
+  // First, get the current product data to compare changes
+  const { data: currentProduct, error: fetchError } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) return { success: false, error: fetchError.message };
+
   let imageUrl = product.image;
   let imageUrls = product.images || [];
   let videoUrl = product.video || null;
@@ -930,7 +938,60 @@ export async function updateProduct(
     .select();
 
   if (error) return { success: false, error: error.message };
-  return { success: true, product: data[0] };
+
+  // Check for changes that should trigger notifications
+  const updatedProduct = data[0];
+  const changes = [];
+
+  if (currentProduct.price !== updatedProduct.price) {
+    changes.push({
+      type: "price",
+      oldValue: currentProduct.price,
+      newValue: updatedProduct.price,
+    });
+  }
+
+  if (currentProduct.stock !== updatedProduct.stock) {
+    changes.push({
+      type: "stock",
+      oldValue: currentProduct.stock,
+      newValue: updatedProduct.stock,
+    });
+  }
+
+  if (currentProduct.in_stock !== updatedProduct.in_stock) {
+    changes.push({
+      type: "availability",
+      oldValue: currentProduct.in_stock,
+      newValue: updatedProduct.in_stock,
+    });
+  }
+
+  // Send notifications for each change
+  for (const change of changes) {
+    try {
+      await fetch(
+        "https://ecommerce-8342.onrender.com/api/notifications/product-update",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: id,
+            updateType: change.type,
+            oldValue: change.oldValue,
+            newValue: change.newValue,
+          }),
+        }
+      );
+    } catch (notifError) {
+      console.error("Failed to send product update notification:", notifError);
+      // Don't fail the update if notification fails
+    }
+  }
+
+  return { success: true, product: updatedProduct };
 }
 
 export async function deleteProduct(id) {
@@ -1251,8 +1312,9 @@ export async function deleteUser(id) {
   if (authError) {
     return {
       success: false,
-      error: `User deleted from DB but failed to delete from Auth: ${authError.message || authError
-        }`,
+      error: `User deleted from DB but failed to delete from Auth: ${
+        authError.message || authError
+      }`,
     };
   }
   return { success: true };
@@ -1304,8 +1366,9 @@ export async function toggleUserStatus(id, isActive) {
   if (authError) {
     return {
       success: false,
-      error: `User status updated in DB but failed to update in Auth: ${authError.message || authError
-        }`,
+      error: `User status updated in DB but failed to update in Auth: ${
+        authError.message || authError
+      }`,
     };
   }
   return { success: true };

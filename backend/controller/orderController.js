@@ -1,7 +1,11 @@
 // controllers/orderController.js
 import { supabase } from "../config/supabaseClient.js";
 import crypto from "crypto";
-import { createOrderNotification } from "./NotificationController.js";
+import {
+  createOrderNotification,
+  createAdminOrderNotification,
+  createAdminCancelNotification,
+} from "./NotificationHelpers.js";
 
 /** Get all orders (admin usage) */
 export const getAllOrders = async (req, res) => {
@@ -39,7 +43,7 @@ export const updateOrderStatus = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
 
   // Create notification for status update
-  await createOrderNotification(order.user_id, id, status);
+  await createOrderNotification(order.user_id, id, status, adminnotes);
 
   return res.json({ success: true });
 };
@@ -209,24 +213,50 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
   // Clear the user's cart after successful order placement
   await supabase.from("cart_items").delete().eq("user_id", user_id);
 
-  // Create notification for new order
-  await createOrderNotification(user_id, order.id, 'pending');
+  // Get user details for admin notification
+  const { data: userData } = await supabase
+    .from("users")
+    .select("name")
+    .eq("id", user_id)
+    .single();
+
+  // Create notifications for new order
+  await createOrderNotification(user_id, order.id, "pending");
+  await createAdminOrderNotification(order.id, userData?.name, total);
 
   return res.json({ success: true, order });
 };
 
 export const cancelOrder = async (req, res) => {
   const { id } = req.params;
+  const { reason } = req.body;
+
+  // Get order and user details first
+  const { data: order, error: fetchError } = await supabase
+    .from("orders")
+    .select("user_id, users(name)")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) {
+    return res.status(500).json({ success: false, error: fetchError.message });
+  }
 
   const { error } = await supabase
     .from("orders")
-    .update({ 
-      status: "cancelled", 
-      updated_at: new Date().toISOString() 
+    .update({
+      status: "cancelled",
+      updated_at: new Date().toISOString(),
     })
     .eq("id", id);
-    
-  if (error) return res.status(500).json({ success: false, error: error.message });
+
+  if (error)
+    return res.status(500).json({ success: false, error: error.message });
+
+  // Create notifications for cancellation
+  await createOrderNotification(order.user_id, id, "cancelled", reason);
+  await createAdminCancelNotification(id, order.users?.name, reason);
+
   return res.json({ success: true, message: "Order cancelled successfully" });
 };
 
