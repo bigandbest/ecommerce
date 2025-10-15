@@ -801,7 +801,7 @@ const NotificationsSection = ({ currentUser }) => {
       console.log('Fetching notifications for user:', currentUser.id);
       const servers = [
         'http://localhost:8000',
-        'https://ecommerce-backend-umber.vercel.app'
+        'https://ecommerce-8342.onrender.com'
       ];
 
       let response = null;
