@@ -29,6 +29,17 @@ export function NotificationProvider({ children }) {
     }
   }, [currentUser]);
 
+  // Real-time polling for notifications when user is logged in
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    const interval = setInterval(() => {
+      fetchNotifications(currentUser.id);
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [currentUser?.id]);
+
   const fetchNotifications = async (userId = null) => {
     try {
       // Try local server first, then fallback to deployed server

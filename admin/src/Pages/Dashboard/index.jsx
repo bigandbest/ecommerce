@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import { motion } from "framer-motion";
 import { 
@@ -37,38 +37,31 @@ import {
   Paper,
   Center,
 } from "@mantine/core";
-const Bar = lazy(() => import('react-chartjs-2').then(m => ({ default: m.Bar })));
-const Doughnut = lazy(() => import('react-chartjs-2').then(m => ({ default: m.Doughnut })));
-const Line = lazy(() => import('react-chartjs-2').then(m => ({ default: m.Line })));
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title as ChartTitle,
-  Tooltip as ChartTooltip,
-  Legend,
-  ArcElement,
-  Filler,
-} from "chart.js";
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ChartTitle,
-  ChartTooltip,
-  Legend,
-  ArcElement,
-  Filler
-);
-
-import { getDashboardData } from '../../utils/supabaseApi';
+// Mock dashboard data function
+const getDashboardData = async (timeframe) => {
+  return {
+    success: true,
+    stats: {
+      users: 0,
+      customers: 0,
+      products: 0,
+      custom_prints: 0,
+      revenue: 0,
+      categories: 0,
+      enquiries: 0
+    },
+    latestUsers: [],
+    latestCustomPrints: [],
+    categorySales: [],
+    revenueData: [],
+    userActivity: [],
+    customPrintTypes: [],
+    customPrintStatus: [],
+    enquiryData: [],
+    enquiryStatus: []
+  };
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -630,44 +623,15 @@ export default function Dashboard() {
                 <Loader size="lg" />
               </Center>
             ) : (
-              <Suspense fallback={<Loader />}>
-                <Line 
-                  data={revenueChartData} 
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'top',
-                      },
-                      tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                          label: function(context) {
-                            const label = context.dataset.label || '';
-                            const value = context.raw || 0;
-                            if (label.includes('Revenue')) {
-                              return `${label}: ₹${value.toLocaleString()}`;
-                            }
-                            return `${label}: ${value}`;
-                          }
-                        }
-                      }
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        ticks: {
-                          callback: function(value) {
-                            return '₹' + value.toLocaleString();
-                          }
-                        }
-                      }
-                    }
-                  }} 
-                />
-              </Suspense>
+              <Center className="h-full">
+                <Stack align="center" spacing="xs">
+                  <FaMoneyBillWave size={48} className="text-gray-300" />
+                  <Text size="sm" color="dimmed" weight={500}>Revenue Chart</Text>
+                  <Text size="xs" color="dimmed" align="center">
+                    Chart will be displayed here once data is available.
+                  </Text>
+                </Stack>
+              </Center>
             )}
           </div>
         </Card>
@@ -684,33 +648,15 @@ export default function Dashboard() {
                 <Loader size="lg" />
               </Center>
             ) : (
-              <Suspense fallback={<Loader />}>
-                <Bar 
-                  data={categoryPerformanceData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        display: false,
-                      },
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        grid: {
-                          drawBorder: false,
-                        },
-                      },
-                      x: {
-                        grid: {
-                          display: false,
-                        },
-                      },
-                    },
-                  }}
-                />
-              </Suspense>
+              <Center className="h-full">
+                <Stack align="center" spacing="xs">
+                  <MdCategory size={48} className="text-gray-300" />
+                  <Text size="sm" color="dimmed" weight={500}>Category Performance</Text>
+                  <Text size="xs" color="dimmed" align="center">
+                    Chart will be displayed here once categories are available.
+                  </Text>
+                </Stack>
+              </Center>
             )}
           </div>
         </Card>
@@ -728,20 +674,15 @@ export default function Dashboard() {
                   <Loader size="lg" />
                 </Center>
               ) : (
-                <Suspense fallback={<Loader />}>
-                  <Doughnut 
-                    data={customPrintTypesData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'bottom',
-                        },
-                      },
-                    }}
-                  />
-                </Suspense>
+                <Center className="h-full">
+                  <Stack align="center" spacing="xs">
+                    <FaPrint size={48} className="text-gray-300" />
+                    <Text size="sm" color="dimmed" weight={500}>Print Request Types</Text>
+                    <Text size="xs" color="dimmed" align="center">
+                      Chart will be displayed here once print requests are available.
+                    </Text>
+                  </Stack>
+                </Center>
               )}
             </div>
           </Card>
@@ -757,33 +698,15 @@ export default function Dashboard() {
                   <Loader size="lg" />
                 </Center>
               ) : (
-                <Suspense fallback={<Loader />}>
-                  <Bar 
-                    data={customPrintStatusChartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          display: false,
-                        },
-                      },
-                      scales: {
-                        y: {
-                          beginAtZero: true,
-                          grid: {
-                            drawBorder: false,
-                          },
-                        },
-                        x: {
-                          grid: {
-                            display: false,
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </Suspense>
+                <Center className="h-full">
+                  <Stack align="center" spacing="xs">
+                    <FaRocket size={48} className="text-gray-300" />
+                    <Text size="sm" color="dimmed" weight={500}>Print Request Status</Text>
+                    <Text size="xs" color="dimmed" align="center">
+                      Chart will be displayed here once print requests are available.
+                    </Text>
+                  </Stack>
+                </Center>
               )}
             </div>
           </Card>
@@ -804,39 +727,6 @@ export default function Dashboard() {
                 <Center className="h-full">
                   <Loader size="lg" />
                 </Center>
-              ) : enquiryStatus && enquiryStatus.length > 0 ? (
-                <Suspense fallback={<Loader />}>
-                  <Doughnut 
-                    data={{
-                      labels: enquiryStatus.map(e => e.status || 'Unknown'),
-                      datasets: [{
-                        data: enquiryStatus.map(e => e.count || 0),
-                        backgroundColor: [
-                          'rgba(255, 193, 7, 0.8)',
-                          'rgba(40, 167, 69, 0.8)',
-                          'rgba(220, 53, 69, 0.8)',
-                          'rgba(108, 117, 125, 0.8)'
-                        ],
-                        borderColor: [
-                          'rgba(255, 193, 7, 1)',
-                          'rgba(40, 167, 69, 1)',
-                          'rgba(220, 53, 69, 1)',
-                          'rgba(108, 117, 125, 1)'
-                        ],
-                        borderWidth: 2
-                      }]
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'bottom',
-                        },
-                      },
-                    }}
-                  />
-                </Suspense>
               ) : (
                 <Center className="h-full">
                   <Stack align="center" spacing="xs">

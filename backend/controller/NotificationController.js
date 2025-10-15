@@ -60,56 +60,47 @@ export async function createNotification(req, res) {
   }
 }
 
-// ✅ Get User Notifications (backward compatible - returns all notifications for now)
+// ✅ Get User Notifications
 export async function getUserNotifications(req, res) {
   try {
     const { user_id } = req.params;
     const { limit = 20, unread_only = false } = req.query;
 
-    // Fetch all notifications first
-    let query = supabase
+    console.log('Getting notifications for user:', user_id);
+
+    // Fetch all notifications and filter by user pattern in description
+    const { data, error } = await supabase
       .from("notifications")
       .select("*")
       .gte("expiry_date", new Date().toISOString())
       .order("created_at", { ascending: false });
-
-    const { data, error } = await query;
 
     if (error) {
       console.error("Database error:", error);
       throw error;
     }
 
-    // Filter notifications for specific user only
+    // Filter notifications for specific user using [USER:id] pattern
     const userNotifications = (data || []).filter((notification) => {
-      // Check if this is a user-specific notification by looking for [USER:id] pattern
-      const userPattern = /\[USER:(\d+)\]/;
-      const match = notification.description?.match(userPattern);
-
-      if (match) {
-        // This is a user-specific notification, check if it's for this user
-        const notificationUserId = match[1];
-        return notificationUserId === user_id.toString();
-      }
-
-      // Skip general notifications - only show user-specific ones
-      return false;
+      const userPattern = new RegExp(`\\[USER:${user_id}\\]`);
+      return userPattern.test(notification.description);
     });
 
-    // Clean up the description by removing the user ID pattern
+    // Clean up descriptions by removing user pattern
     const cleanedNotifications = userNotifications
       .map((notification) => ({
         ...notification,
-        description: notification.description.replace(/\[USER:\d+\]\s*/, ""),
+        description: notification.description.replace(/\[USER:[^\]]+\]\s*/, ""),
       }))
       .filter((notification) => {
-        // Apply unread filter if requested
         if (unread_only === "true") {
           return !notification.is_read;
         }
         return true;
       })
       .slice(0, parseInt(limit));
+
+    console.log('Found user notifications:', cleanedNotifications.length);
 
     res.json({
       success: true,

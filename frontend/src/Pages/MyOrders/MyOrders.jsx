@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getUserOrders, cancelOrder } from "../../utils/supabaseApi";
 import { useNotifications } from "../../contexts/NotificationContext";
 import ReturnOrders from "./ReturnOrders";
+import ReturnNotificationBell from "../../components/ReturnNotificationBell";
 import "./MyOrders.css";
 
 function MyOrders() {
@@ -629,12 +630,15 @@ function MyOrders() {
             <span className="order-count-badge">{orders.length}</span>
           )}
         </h1>
-        <div className="network-status">
-          <span className={`status-indicator ${networkStatus}`}></span>
-          {networkStatus === "connected" && "Connected"}
-          {networkStatus === "offline" && "Offline"}
-          {networkStatus === "error" && "Connection Error"}
-          {networkStatus === "checking" && "Checking..."}
+        <div className="header-actions">
+          <ReturnNotificationBell />
+          <div className="network-status">
+            <span className={`status-indicator ${networkStatus}`}></span>
+            {networkStatus === "connected" && "Connected"}
+            {networkStatus === "offline" && "Offline"}
+            {networkStatus === "error" && "Connection Error"}
+            {networkStatus === "checking" && "Checking..."}
+          </div>
         </div>
       </div>
 
@@ -690,30 +694,7 @@ function MyOrders() {
           </div>
         )}
         {activeTab === "notifications" && (
-          <div>
-            <h2>Notifications</h2>
-            {notifications.length === 0 ? (
-              <div className="no-orders">
-                <div className="no-orders-icon">🔔</div>
-                <h3>No Notifications</h3>
-                <p>Your order notifications will appear here.</p>
-              </div>
-            ) : (
-              <div className="notifications-list">
-                {notifications.map((notification) => (
-                  <div key={notification.id} className="notification-card">
-                    <div className="notification-header">
-                      <h4>{notification.heading}</h4>
-                      <span className="notification-time">
-                        {new Date(notification.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="notification-description">{notification.description}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <NotificationsSection currentUser={currentUser} />
         )}
       </div>
 
@@ -807,5 +788,122 @@ function MyOrders() {
     </div>
   );
 }
+
+// Enhanced Notifications Section Component
+const NotificationsSection = ({ currentUser }) => {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchNotifications = async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      console.log('Fetching notifications for user:', currentUser.id);
+      const servers = [
+        'http://localhost:8000',
+        'https://ecommerce-backend-umber.vercel.app'
+      ];
+
+      let response = null;
+      for (const server of servers) {
+        try {
+          const url = `${server}/api/notifications/user/${currentUser.id}`;
+          console.log('Trying URL:', url);
+          response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            console.log('API Response:', data);
+            if (data.success) {
+              console.log('Setting notifications:', data.notifications);
+              setNotifications(data.notifications || []);
+            }
+            break;
+          }
+        } catch (err) {
+          console.log('Server failed:', server, err.message);
+          continue;
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 15000); // Refresh every 15 seconds
+    return () => clearInterval(interval);
+  }, [currentUser?.id]);
+
+  const getNotificationIcon = (notification) => {
+    if (notification.related_type === 'return') {
+      if (notification.heading?.toLowerCase().includes('approved')) return '✅';
+      if (notification.heading?.toLowerCase().includes('rejected')) return '❌';
+      return '🔄';
+    }
+    if (notification.related_type === 'order') return '📦';
+    return '🔔';
+  };
+
+  if (loading) {
+    return (
+      <div>
+        <h2>Notifications</h2>
+        <div className="loading-container">
+          <div className="modern-loader">
+            <div className="loader-circle"></div>
+            <div className="loader-circle"></div>
+            <div className="loader-circle"></div>
+          </div>
+          <p>Loading notifications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2>Notifications</h2>
+      {notifications.length === 0 ? (
+        <div className="no-orders">
+          <div className="no-orders-icon">🔔</div>
+          <h3>No Notifications</h3>
+          <p>Your order and return notifications will appear here.</p>
+        </div>
+      ) : (
+        <div className="notifications-list">
+          {notifications.map((notification) => (
+            <div 
+              key={notification.id} 
+              className={`notification-card ${!notification.is_read ? 'unread' : ''}`}
+            >
+              <div className="notification-header">
+                <div className="notification-icon">
+                  {getNotificationIcon(notification)}
+                </div>
+                <div className="notification-content">
+                  <h4>{notification.heading}</h4>
+                  <span className="notification-time">
+                    {new Date(notification.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                {!notification.is_read && <div className="unread-dot"></div>}
+              </div>
+              <p className="notification-description">{notification.description}</p>
+              {notification.related_id && (
+                <div className="notification-footer">
+                  <span className="related-id">#{notification.related_id.slice(0, 8)}</span>
+                  <span className="notification-type">{notification.related_type}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default MyOrders;

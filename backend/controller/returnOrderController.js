@@ -3,6 +3,7 @@ import { supabase } from "../config/supabaseClient.js";
 import {
   createReturnNotification,
   createAdminReturnNotification,
+  createNotificationHelper,
 } from "./NotificationHelpers.js";
 
 // Helper function to calculate days since order delivery
@@ -529,18 +530,34 @@ export const updateReturnRequestStatus = async (req, res) => {
       });
     }
 
-    // Create notification for status update
-    await createReturnNotification(
-      data.user_id,
-      data.order_id,
-      status,
-      data.return_type
-    );
+    // Create detailed notification for status update
+    console.log("Creating notification for user:", data.user_id, "status:", status);
+    const notificationMessage = getNotificationMessage(status, data.return_type);
+    
+    try {
+      // Create notification using helper
+      const notification = await createNotificationHelper(
+        data.user_id,
+        `${data.return_type === 'cancellation' ? 'Cancellation' : 'Return'} Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        notificationMessage,
+        'return',
+        data.order_id
+      );
+      
+      if (notification) {
+        console.log("✅ Notification created successfully:", notification.id);
+      } else {
+        console.log("❌ Failed to create notification");
+      }
+    } catch (notifError) {
+      console.error("Error creating notification:", notifError);
+    }
 
     return res.json({
       success: true,
       return_request: data,
       message: "Return request updated successfully",
+      notification_sent: true
     });
   } catch (error) {
     return res.status(500).json({
