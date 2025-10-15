@@ -45,7 +45,7 @@ export function NotificationProvider({ children }) {
       // Try local server first, then fallback to deployed server
       const baseUrls = [
         "http://localhost:8000/api/notifications",
-        "https://ecommerce-backend-umber.vercel.app/api/notifications",
+        "https://ecommerce-8342.onrender.com/api/notifications",
       ];
 
       let url = "";

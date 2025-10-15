@@ -17,7 +17,7 @@ const ReturnNotificationBell = () => {
       console.log('🔔 Fetching return notifications for user:', currentUser.id);
       const servers = [
         'http://localhost:8000',
-        'https://ecommerce-backend-umber.vercel.app'
+        'https://ecommerce-8342.onrender.com'
       ];
 
       let response = null;
@@ -57,7 +57,7 @@ const ReturnNotificationBell = () => {
     try {
       const servers = [
         'http://localhost:8000',
-        'https://ecommerce-backend-umber.vercel.app'
+        'https://ecommerce-8342.onrender.com'
       ];
 
       for (const server of servers) {
