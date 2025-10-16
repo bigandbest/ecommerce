@@ -996,9 +996,7 @@ export async function addToCart(user_id, product_id, quantity = 1) {
 
 export const getCartItems = async (user_id) => {
   try {
-    const res = await axios.get(
-      `${API_BASE_URL}/api/cart/${user_id}`
-    );
+    const res = await axios.get(`${API_BASE_URL}/api/cart/${user_id}`);
     return { success: true, cartItems: res.data.cartItems };
   } catch (err) {
     console.error("Error fetching cart items:", err);
@@ -1033,9 +1031,7 @@ export const removeCartItem = async (cart_item_id) => {
 
 export const clearCart = async (user_id) => {
   try {
-    const res = await axios.delete(
-      `${API_BASE_URL}/api/cart/clear/${user_id}`
-    );
+    const res = await axios.delete(`${API_BASE_URL}/api/cart/clear/${user_id}`);
     return { success: true, cleared: res.data };
   } catch (err) {
     console.error("Error clearing cart:", err);
@@ -1103,7 +1099,8 @@ export async function removeFromWishlist(wishlist_item_id) {
 } */
 
 // --- ORDER MANAGEMENT ---
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
 const BASE_URL = `${API_BASE_URL}/api/order`;
 // ORDERS
 export async function getAllOrders() {
@@ -1118,12 +1115,10 @@ export async function getAllOrders() {
 // 2. Update Order Status (Admin)
 export async function updateOrderStatus(id, status, adminNotes = "") {
   try {
-    const res = await axios.put(`${BASE_URL}/status/${id}`,
-      {
-        status,
-        adminnotes: adminNotes,
-      }
-    );
+    const res = await axios.put(`${BASE_URL}/status/${id}`, {
+      status,
+      adminnotes: adminNotes,
+    });
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1141,18 +1136,15 @@ export async function placeOrder(
   payment_method
 ) {
   try {
-    const res = await axios.post(
-      `${BASE_URL}/place`,
-      {
-        user_id,
-        items,
-        subtotal,
-        shipping,
-        total,
-        address,
-        payment_method,
-      }
-    );
+    const res = await axios.post(`${BASE_URL}/place`, {
+      user_id,
+      items,
+      subtotal,
+      shipping,
+      total,
+      address,
+      payment_method,
+    });
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1174,21 +1166,19 @@ export async function placeOrderWithDetailedAddress(
   gpsLocation // 👈 1. Add the new parameter here
 ) {
   try {
-    const res = await axios.post(`${BASE_URL}/place-detailed`,
-      {
-        user_id,
-        items,
-        subtotal,
-        shipping,
-        total,
-        detailedAddress,
-        payment_method,
-        razorpay_order_id,
-        razorpay_payment_id,
-        razorpay_signature,
-        gpsLocation, // 👈 2. Add the data to the request body
-      }
-    );
+    const res = await axios.post(`${BASE_URL}/place-detailed`, {
+      user_id,
+      items,
+      subtotal,
+      shipping,
+      total,
+      detailedAddress,
+      payment_method,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      gpsLocation, // 👈 2. Add the data to the request body
+    });
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1223,9 +1213,14 @@ export async function getUserOrders(user_id) {
   }
 }
 
-export async function cancelOrder(orderId) {
+export async function cancelOrder(
+  orderId,
+  reason = "User requested cancellation"
+) {
   try {
-    const res = await axios.put(`${BASE_URL}/cancel/${orderId}`);
+    const res = await axios.put(`${BASE_URL}/cancel/${orderId}`, {
+      reason: reason,
+    });
     return res.data;
   } catch (err) {
     return { success: false, error: err.response?.data?.error || err.message };
@@ -1234,9 +1229,7 @@ export async function cancelOrder(orderId) {
 
 export async function getOrderItemsByOrderId(order_id) {
   try {
-    const res = await axios.get(
-      `${API_BASE_URL}/api/orderItems/${order_id}`
-    );
+    const res = await axios.get(`${API_BASE_URL}/api/orderItems/${order_id}`);
     return res.data;
   } catch (error) {
     return { success: false, error: error.message };
@@ -2013,9 +2006,7 @@ export async function updateUserAddress(addressId, address) {
 
 export async function deleteUserAddress(addressId) {
   try {
-    await axios.delete(
-      `${API_BASE_URL}/api/geo-address/delete/${addressId}`
-    );
+    await axios.delete(`${API_BASE_URL}/api/geo-address/delete/${addressId}`);
 
     return { success: true };
   } catch (err) {

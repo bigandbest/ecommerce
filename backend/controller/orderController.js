@@ -228,36 +228,137 @@ export const placeOrderWithDetailedAddress = async (req, res) => {
 };
 
 export const cancelOrder = async (req, res) => {
-  const { id } = req.params;
-  const { reason } = req.body;
+  try {
+    const { id } = req.params;
+    const { reason } = req.body || {}; // Handle case where req.body is undefined
 
-  // Get order and user details first
-  const { data: order, error: fetchError } = await supabase
-    .from("orders")
-    .select("user_id, users(name)")
-    .eq("id", id)
-    .single();
+    console.log(
+      "Cancelling order:",
+      id,
+      "Reason:",
+      reason || "No reason provided"
+    );
 
-  if (fetchError) {
-    return res.status(500).json({ success: false, error: fetchError.message });
+    // Get order details first
+    const { data: order, error: fetchError } = await supabase
+      .from("orders")
+      .select("user_id, status, payment_method, total, payment_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching order:", fetchError);
+      return res
+        .status(500)
+        .json({ success: false, error: fetchError.message });
+    }
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    // Check if order can be cancelled
+    if (order.status === "cancelled") {
+      return res
+        .status(400)
+        .json({ success: false, error: "Order is already cancelled" });
+    }
+
+    if (order.status === "delivered") {
+      return res.status(400).json({
+        success: false,
+        error: "Delivered orders cannot be cancelled",
+      });
+    }
+
+    // Update order status
+    const { error } = await supabase
+      .from("orders")
+      .update({
+        status: "cancelled",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating order status:", error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+
+    // Get user details for notifications
+    const { data: userData } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", order.user_id)
+      .single();
+
+    // Create notifications for cancellation
+    try {
+      await createOrderNotification(order.user_id, id, "cancelled", reason);
+      await createAdminCancelNotification(
+        id,
+        userData?.name || "Unknown User",
+        reason
+      );
+    } catch (notificationError) {
+      console.error("Error creating notifications:", notificationError);
+      // Don't fail the entire operation if notifications fail
+    }
+
+    // Auto-create refund request for prepaid orders
+    if (order.payment_method === "prepaid") {
+      try {
+        const refundData = {
+          order_id: id,
+          user_id: order.user_id,
+          refund_amount: parseFloat(order.total),
+          refund_type: "order_cancellation",
+          payment_method: order.payment_method,
+          original_payment_id: order.payment_id,
+          refund_mode: "wallet", // Default to wallet refund for auto-created requests
+          status: "pending",
+        };
+
+        const { data: refundRequest, error: refundError } = await supabase
+          .from("refund_requests")
+          .insert(refundData)
+          .select()
+          .single();
+
+        if (!refundError) {
+          console.log("Auto-created refund request:", refundRequest.id);
+
+          // Create admin notification for refund request
+          await supabase.from("notifications").insert({
+            type: "admin",
+            title: "New Refund Request",
+            message: `Auto-generated refund request for cancelled order #${id}. Amount: ₹${order.total}`,
+            related_type: "refund",
+            related_id: refundRequest.id,
+            read: false,
+          });
+        } else {
+          console.error("Error creating refund request:", refundError);
+        }
+      } catch (refundError) {
+        console.error("Error auto-creating refund request:", refundError);
+        // Don't fail the entire operation if refund creation fails
+      }
+    }
+
+    console.log("Order cancelled successfully:", id);
+    return res.json({
+      success: true,
+      message: "Order cancelled successfully",
+      refundCreated: order.payment_method === "prepaid",
+    });
+  } catch (error) {
+    console.error("Unexpected error in cancelOrder:", error);
+    return res.status(500).json({
+      success: false,
+      error: "An unexpected error occurred while cancelling the order",
+    });
   }
-
-  const { error } = await supabase
-    .from("orders")
-    .update({
-      status: "cancelled",
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id);
-
-  if (error)
-    return res.status(500).json({ success: false, error: error.message });
-
-  // Create notifications for cancellation
-  await createOrderNotification(order.user_id, id, "cancelled", reason);
-  await createAdminCancelNotification(id, order.users?.name, reason);
-
-  return res.json({ success: true, message: "Order cancelled successfully" });
 };
 
 export const deleteOrderById = async (req, res) => {

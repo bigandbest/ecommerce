@@ -67,10 +67,9 @@ function MyOrders() {
   useEffect(() => {
     const checkNetwork = async () => {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
-        const response = await fetch(
-          `${API_BASE_URL}/api/order/all`
-        );
+        const API_BASE_URL =
+          import.meta.env.VITE_API_URL || "https://ecommerce-8342.onrender.com";
+        const response = await fetch(`${API_BASE_URL}/api/order/all`);
         if (response.ok) {
           setNetworkStatus("connected");
         } else {
@@ -87,8 +86,6 @@ function MyOrders() {
   const forceRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
-
-
 
   // Listen for order placement events
   useEffect(() => {
@@ -120,8 +117,7 @@ function MyOrders() {
           const formattedOrders = fetchedOrders
             .filter(
               (order) =>
-                order.status !== "delivered" &&
-                order.status !== "Delivered"
+                order.status !== "delivered" && order.status !== "Delivered"
             ) // Hide delivered orders from tracking
             .map((order) => ({
               id: order.id,
@@ -138,54 +134,61 @@ function MyOrders() {
               address: order.address || "No address provided",
               payment_method: order.payment_method || "Unknown",
               order_items: order.order_items || [],
-              trackingSteps: order.status.toLowerCase() === "cancelled" ? [
-                {
-                  step: "Order Placed",
-                  completed: true,
-                  time: new Date(order.created_at).toLocaleString(),
-                },
-                {
-                  step: "Order Cancelled",
-                  completed: true,
-                  cancelled: true,
-                  time: order.updated_at ? new Date(order.updated_at).toLocaleString() : "",
-                },
-              ] : [
-                {
-                  step: "Order Placed",
-                  completed: true,
-                  time: new Date(order.created_at).toLocaleString(),
-                },
-                {
-                  step: "Processing",
-                  completed: ["processing", "shipped", "delivered"].includes(
-                    order.status.toLowerCase()
-                  ),
-                  time: "",
-                },
-                {
-                  step: "Shipped",
-                  completed: ["shipped", "delivered"].includes(
-                    order.status.toLowerCase()
-                  ),
-                  time: "",
-                },
-                {
-                  step: "Out for Delivery",
-                  completed: order.status.toLowerCase() === "delivered",
-                  time: "",
-                },
-                {
-                  step: "Delivered",
-                  completed: order.status.toLowerCase() === "delivered",
-                  time:
-                    order.status.toLowerCase() === "delivered"
-                      ? new Date(
-                          order.updated_at || order.created_at
-                        ).toLocaleString()
-                      : "",
-                },
-              ],
+              trackingSteps:
+                order.status.toLowerCase() === "cancelled"
+                  ? [
+                      {
+                        step: "Order Placed",
+                        completed: true,
+                        time: new Date(order.created_at).toLocaleString(),
+                      },
+                      {
+                        step: "Order Cancelled",
+                        completed: true,
+                        cancelled: true,
+                        time: order.updated_at
+                          ? new Date(order.updated_at).toLocaleString()
+                          : "",
+                      },
+                    ]
+                  : [
+                      {
+                        step: "Order Placed",
+                        completed: true,
+                        time: new Date(order.created_at).toLocaleString(),
+                      },
+                      {
+                        step: "Processing",
+                        completed: [
+                          "processing",
+                          "shipped",
+                          "delivered",
+                        ].includes(order.status.toLowerCase()),
+                        time: "",
+                      },
+                      {
+                        step: "Shipped",
+                        completed: ["shipped", "delivered"].includes(
+                          order.status.toLowerCase()
+                        ),
+                        time: "",
+                      },
+                      {
+                        step: "Out for Delivery",
+                        completed: order.status.toLowerCase() === "delivered",
+                        time: "",
+                      },
+                      {
+                        step: "Delivered",
+                        completed: order.status.toLowerCase() === "delivered",
+                        time:
+                          order.status.toLowerCase() === "delivered"
+                            ? new Date(
+                                order.updated_at || order.created_at
+                              ).toLocaleString()
+                            : "",
+                      },
+                    ],
             }));
           setOrders(formattedOrders);
         } else {
@@ -230,8 +233,7 @@ function MyOrders() {
           const formattedOrders = fetchedOrders
             .filter(
               (order) =>
-                order.status !== "delivered" &&
-                order.status !== "Delivered"
+                order.status !== "delivered" && order.status !== "Delivered"
             )
             .map((order) => ({
               id: order.id,
@@ -248,54 +250,61 @@ function MyOrders() {
               address: order.address || "No address provided",
               payment_method: order.payment_method || "Unknown",
               order_items: order.order_items || [],
-              trackingSteps: order.status.toLowerCase() === "cancelled" ? [
-                {
-                  step: "Order Placed",
-                  completed: true,
-                  time: new Date(order.created_at).toLocaleString(),
-                },
-                {
-                  step: "Order Cancelled",
-                  completed: true,
-                  cancelled: true,
-                  time: order.updated_at ? new Date(order.updated_at).toLocaleString() : "",
-                },
-              ] : [
-                {
-                  step: "Order Placed",
-                  completed: true,
-                  time: new Date(order.created_at).toLocaleString(),
-                },
-                {
-                  step: "Processing",
-                  completed: ["processing", "shipped", "delivered"].includes(
-                    order.status.toLowerCase()
-                  ),
-                  time: "",
-                },
-                {
-                  step: "Shipped",
-                  completed: ["shipped", "delivered"].includes(
-                    order.status.toLowerCase()
-                  ),
-                  time: "",
-                },
-                {
-                  step: "Out for Delivery",
-                  completed: order.status.toLowerCase() === "delivered",
-                  time: "",
-                },
-                {
-                  step: "Delivered",
-                  completed: order.status.toLowerCase() === "delivered",
-                  time:
-                    order.status.toLowerCase() === "delivered"
-                      ? new Date(
-                          order.updated_at || order.created_at
-                        ).toLocaleString()
-                      : "",
-                },
-              ],
+              trackingSteps:
+                order.status.toLowerCase() === "cancelled"
+                  ? [
+                      {
+                        step: "Order Placed",
+                        completed: true,
+                        time: new Date(order.created_at).toLocaleString(),
+                      },
+                      {
+                        step: "Order Cancelled",
+                        completed: true,
+                        cancelled: true,
+                        time: order.updated_at
+                          ? new Date(order.updated_at).toLocaleString()
+                          : "",
+                      },
+                    ]
+                  : [
+                      {
+                        step: "Order Placed",
+                        completed: true,
+                        time: new Date(order.created_at).toLocaleString(),
+                      },
+                      {
+                        step: "Processing",
+                        completed: [
+                          "processing",
+                          "shipped",
+                          "delivered",
+                        ].includes(order.status.toLowerCase()),
+                        time: "",
+                      },
+                      {
+                        step: "Shipped",
+                        completed: ["shipped", "delivered"].includes(
+                          order.status.toLowerCase()
+                        ),
+                        time: "",
+                      },
+                      {
+                        step: "Out for Delivery",
+                        completed: order.status.toLowerCase() === "delivered",
+                        time: "",
+                      },
+                      {
+                        step: "Delivered",
+                        completed: order.status.toLowerCase() === "delivered",
+                        time:
+                          order.status.toLowerCase() === "delivered"
+                            ? new Date(
+                                order.updated_at || order.created_at
+                              ).toLocaleString()
+                            : "",
+                      },
+                    ],
             }));
           setOrders(formattedOrders);
         }
@@ -426,27 +435,37 @@ function MyOrders() {
                       step.completed ? "completed" : ""
                     } ${step.cancelled ? "cancelled" : ""}`}
                   >
-                    <div className={`step-circle ${step.cancelled ? "cancelled-circle" : ""}`}>
+                    <div
+                      className={`step-circle ${
+                        step.cancelled ? "cancelled-circle" : ""
+                      }`}
+                    >
                       {step.completed ? (step.cancelled ? "✕" : "✓") : ""}
                     </div>
                     <div className="step-content">
-                      <h4 className={step.cancelled ? "cancelled-text" : ""}>{step.step}</h4>
+                      <h4 className={step.cancelled ? "cancelled-text" : ""}>
+                        {step.step}
+                      </h4>
                       {step.time && <p className="step-time">{step.time}</p>}
                     </div>
                   </div>
                 ))}
-                {order.status.toLowerCase() !== "cancelled" && 
-                 ["pending", "processing"].includes(order.status.toLowerCase()) && (
-                  <div className="cancel-order-section">
-                    <button
-                      onClick={() => handleCancelOrder(order.id)}
-                      disabled={cancellingOrder === order.id}
-                      className="cancel-order-btn"
-                    >
-                      {cancellingOrder === order.id ? "Cancelling..." : "Cancel Order"}
-                    </button>
-                  </div>
-                )}
+                {order.status.toLowerCase() !== "cancelled" &&
+                  ["pending", "processing"].includes(
+                    order.status.toLowerCase()
+                  ) && (
+                    <div className="cancel-order-section">
+                      <button
+                        onClick={() => handleCancelOrder(order.id)}
+                        disabled={cancellingOrder === order.id}
+                        className="cancel-order-btn"
+                      >
+                        {cancellingOrder === order.id
+                          ? "Cancelling..."
+                          : "Cancel Order"}
+                      </button>
+                    </div>
+                  )}
               </div>
             </div>
 
@@ -795,37 +814,72 @@ const NotificationsSection = ({ currentUser }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchNotifications = async () => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id) {
+      console.log("No user ID available, skipping notification fetch");
+      setLoading(false);
+      return;
+    }
 
     try {
-      console.log('Fetching notifications for user:', currentUser.id);
+      console.log("🔔 Fetching notifications for user:", currentUser.id);
       const servers = [
-        'http://localhost:8000',
-        'https://ecommerce-8342.onrender.com'
+        "http://localhost:8000",
+        "https://ecommerce-8342.onrender.com",
       ];
 
       let response = null;
+      let responseData = null;
+
       for (const server of servers) {
         try {
           const url = `${server}/api/notifications/user/${currentUser.id}`;
-          console.log('Trying URL:', url);
-          response = await fetch(url);
+          console.log("🔔 Trying URL:", url);
+
+          response = await fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            timeout: 10000,
+          });
+
+          console.log("🔔 Response status:", response.status);
+
           if (response.ok) {
-            const data = await response.json();
-            console.log('API Response:', data);
-            if (data.success) {
-              console.log('Setting notifications:', data.notifications);
-              setNotifications(data.notifications || []);
+            responseData = await response.json();
+            console.log("🔔 API Response:", responseData);
+
+            if (responseData.success) {
+              console.log(
+                "🔔 Setting notifications:",
+                responseData.notifications?.length || 0,
+                "notifications"
+              );
+              setNotifications(responseData.notifications || []);
+              break;
+            } else {
+              console.warn("🔔 API returned success: false", responseData);
             }
-            break;
+          } else {
+            console.warn(
+              "🔔 Response not OK:",
+              response.status,
+              response.statusText
+            );
           }
         } catch (err) {
-          console.log('Server failed:', server, err.message);
+          console.log("🔔 Server failed:", server, err.message);
           continue;
         }
       }
+
+      if (!responseData?.success) {
+        console.warn(
+          "🔔 All servers failed or returned unsuccessful responses"
+        );
+      }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("🔔 Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -838,13 +892,13 @@ const NotificationsSection = ({ currentUser }) => {
   }, [currentUser?.id]);
 
   const getNotificationIcon = (notification) => {
-    if (notification.related_type === 'return') {
-      if (notification.heading?.toLowerCase().includes('approved')) return '✅';
-      if (notification.heading?.toLowerCase().includes('rejected')) return '❌';
-      return '🔄';
+    if (notification.related_type === "return") {
+      if (notification.heading?.toLowerCase().includes("approved")) return "✅";
+      if (notification.heading?.toLowerCase().includes("rejected")) return "❌";
+      return "🔄";
     }
-    if (notification.related_type === 'order') return '📦';
-    return '🔔';
+    if (notification.related_type === "order") return "📦";
+    return "🔔";
   };
 
   if (loading) {
@@ -863,21 +917,81 @@ const NotificationsSection = ({ currentUser }) => {
     );
   }
 
+  const createTestNotifications = async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/notifications/create-sample-notifications",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        console.log("✅ Created sample notifications");
+        await fetchNotifications(); // Refresh notifications
+      } else {
+        console.error(
+          "❌ Failed to create sample notifications:",
+          data.message
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error creating sample notifications:", error);
+    }
+  };
+
   return (
     <div>
-      <h2>Notifications</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <h2>Notifications</h2>
+        <button
+          onClick={createTestNotifications}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          Create Test Notifications
+        </button>
+      </div>
       {notifications.length === 0 ? (
         <div className="no-orders">
           <div className="no-orders-icon">🔔</div>
           <h3>No Notifications</h3>
           <p>Your order and return notifications will appear here.</p>
+          <p style={{ fontSize: "14px", color: "#666", marginTop: "10px" }}>
+            Try clicking "Create Test Notifications" to see sample data.
+          </p>
         </div>
       ) : (
         <div className="notifications-list">
           {notifications.map((notification) => (
-            <div 
-              key={notification.id} 
-              className={`notification-card ${!notification.is_read ? 'unread' : ''}`}
+            <div
+              key={notification.id}
+              className={`notification-card ${
+                !notification.is_read ? "unread" : ""
+              }`}
             >
               <div className="notification-header">
                 <div className="notification-icon">
@@ -891,11 +1005,17 @@ const NotificationsSection = ({ currentUser }) => {
                 </div>
                 {!notification.is_read && <div className="unread-dot"></div>}
               </div>
-              <p className="notification-description">{notification.description}</p>
+              <p className="notification-description">
+                {notification.description}
+              </p>
               {notification.related_id && (
                 <div className="notification-footer">
-                  <span className="related-id">#{notification.related_id.slice(0, 8)}</span>
-                  <span className="notification-type">{notification.related_type}</span>
+                  <span className="related-id">
+                    #{notification.related_id.slice(0, 8)}
+                  </span>
+                  <span className="notification-type">
+                    {notification.related_type}
+                  </span>
                 </div>
               )}
             </div>

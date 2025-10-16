@@ -10,12 +10,23 @@ import {
   getWalletStatistics,
   getRechargeRequests,
   getUsersWithWallets,
+  freezeWallet,
+  unfreezeWallet,
+  getWalletTransactionHistory,
+  getAdminWalletDetails,
+  createAdminWalletRechargeRequest,
+  transferMoneyToUser,
 } from "../controller/walletController.js";
 import {
   createWalletRechargeOrder,
   verifyWalletRechargePayment,
   handleWalletRechargeWebhook,
 } from "../controller/walletRechargeController.js";
+import {
+  createAdminWalletRechargeOrder,
+  verifyAdminWalletRechargePayment,
+  handleAdminWalletRechargeWebhook,
+} from "../controller/adminWalletRechargeController.js";
 
 const router = express.Router();
 
@@ -47,8 +58,35 @@ router.post("/admin/add-money", authenticateToken, addMoneyToWallet);
 router.get("/admin/statistics", authenticateToken, getWalletStatistics);
 router.get("/admin/recharge-requests", authenticateToken, getRechargeRequests);
 router.get("/admin/users-with-wallets", authenticateToken, getUsersWithWallets);
+router.post("/admin/freeze/:userId", authenticateToken, freezeWallet);
+router.post("/admin/unfreeze/:userId", authenticateToken, unfreezeWallet);
+router.get(
+  "/admin/transactions/:userId",
+  authenticateToken,
+  getWalletTransactionHistory
+);
 
-// Webhook route (no authentication required)
+// Admin wallet management routes
+router.get("/admin/wallet-details", authenticateToken, getAdminWalletDetails);
+router.post(
+  "/admin/wallet-recharge/request",
+  authenticateToken,
+  createAdminWalletRechargeRequest
+);
+router.post(
+  "/admin/wallet-recharge/create-order",
+  authenticateToken,
+  createAdminWalletRechargeOrder
+);
+router.post(
+  "/admin/wallet-recharge/verify-payment",
+  authenticateToken,
+  verifyAdminWalletRechargePayment
+);
+router.post("/admin/transfer-to-user", authenticateToken, transferMoneyToUser);
+
+// Webhook routes (no authentication required)
 router.post("/webhook/recharge", handleWalletRechargeWebhook);
+router.post("/webhook/admin-recharge", handleAdminWalletRechargeWebhook);
 
 export default router;

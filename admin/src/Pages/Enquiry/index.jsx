@@ -370,7 +370,7 @@ const EnquiryPage = () => {
                               color="blue"
                               onClick={() => openViewModal(enquiry)}
                               size="xs"
-                              leftIcon={<FaEye size={16} />}
+                              leftSection={<FaEye size={16} />}
                             >
                               View
                             </Button>
@@ -381,7 +381,7 @@ const EnquiryPage = () => {
                               color="green"
                               onClick={() => openChatModal(enquiry)}
                               size="xs"
-                              leftIcon={<FaComments size={16} />}
+                              leftSection={<FaComments size={16} />}
                             >
                               Chat
                             </Button>
@@ -392,7 +392,7 @@ const EnquiryPage = () => {
                               color="red"
                               onClick={() => handleDeleteEnquiry(enquiry.id)}
                               size="xs"
-                              leftIcon={<FaTrash size={16} />}
+                              leftSection={<FaTrash size={16} />}
                             >
                               Delete
                             </Button>
@@ -629,7 +629,7 @@ const EnquiryPage = () => {
                     onClick={handleSendReply}
                     disabled={!replyMessage.trim() || sendingReply}
                     loading={sendingReply}
-                    leftIcon={<FaPaperPlane />}
+                    leftSection={<FaPaperPlane />}
                   >
                     Send Reply
                   </Button>

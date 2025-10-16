@@ -226,7 +226,7 @@ const EnhancedStoragePage = () => {
           <Title order={2} className="mb-6">Enhanced Storage Analytics</Title>
           <Alert color="red" title="Error loading storage data">
             {error}
-            <Button onClick={handleRefresh} leftIcon={<FaSync />} mt="md">
+            <Button onClick={handleRefresh} leftSection={<FaSync />} mt="md">
               Retry
             </Button>
           </Alert>
@@ -478,7 +478,7 @@ const EnhancedStoragePage = () => {
                         key={bucketName}
                         variant={selectedBucket === bucketName ? "filled" : "light"}
                         fullWidth
-                        leftIcon={<span style={{ fontSize: '16px' }}>{getBucketIcon(bucketName)}</span>}
+                        leftSection={<span style={{ fontSize: '16px' }}>{getBucketIcon(bucketName)}</span>}
                         onClick={() => setSelectedBucket(bucketName)}
                         size="sm"
                       >
