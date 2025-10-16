@@ -132,7 +132,7 @@ const StorageDetailsPage = () => {
           <Title order={2} className="mb-6">Storage Analytics</Title>
           <Alert color="red" title="Error loading storage data">
             {error}
-            <Button onClick={handleRefresh} leftIcon={<FaSync />} mt="md">
+            <Button onClick={handleRefresh} leftSection={<FaSync />} mt="md">
               Retry
             </Button>
           </Alert>

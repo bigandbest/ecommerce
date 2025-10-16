@@ -460,7 +460,7 @@ export default function PrintRequests() {
                         color="red"
                         variant="light"
                         onClick={() => handleDeleteRequest(request)}
-                        leftIcon={<FaTrash size={12} />}
+                        leftSection={<FaTrash size={12} />}
                       >
                         Delete
                       </Button>
@@ -847,7 +847,7 @@ export default function PrintRequests() {
                   onClick={handleSendReply}
                   disabled={!replyMessage.trim() || sendingReply}
                   loading={sendingReply}
-                  leftIcon={<FaPaperPlane />}
+                  leftSection={<FaPaperPlane />}
                 >
                   Send Reply
                 </Button>
@@ -884,7 +884,7 @@ export default function PrintRequests() {
             color="red"
             onClick={confirmDeleteRequest}
             loading={deleteLoading}
-            leftIcon={<FaTrash />}
+            leftSection={<FaTrash />}
           >
             Delete
           </Button>

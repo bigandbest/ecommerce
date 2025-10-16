@@ -935,7 +935,7 @@ const UsersPage = () => {
             color="red"
             onClick={confirmDeleteUser}
             loading={deleteLoading}
-            leftIcon={<FaTrash />}
+            leftSection={<FaTrash />}
           >
             Delete User
           </Button>

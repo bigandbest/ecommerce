@@ -66,28 +66,58 @@ export async function getUserNotifications(req, res) {
     const { user_id } = req.params;
     const { limit = 20, unread_only = false } = req.query;
 
-    console.log('Getting notifications for user:', user_id);
+    console.log("Getting notifications for user:", user_id);
 
-    // Fetch all notifications and filter by user pattern in description
-    const { data, error } = await supabase
+    // Primary query: Get general notifications (user_id column doesn't exist in current schema)
+    let query = supabase
       .from("notifications")
       .select("*")
       .gte("expiry_date", new Date().toISOString())
       .order("created_at", { ascending: false });
+
+    if (unread_only === "true") {
+      query = query.eq("is_read", false);
+    }
+
+    const { data: primaryResults, error } = await query.limit(parseInt(limit));
 
     if (error) {
       console.error("Database error:", error);
       throw error;
     }
 
-    // Filter notifications for specific user using [USER:id] pattern
-    const userNotifications = (data || []).filter((notification) => {
-      const userPattern = new RegExp(`\\[USER:${user_id}\\]`);
-      return userPattern.test(notification.description);
-    });
+    // Fallback query: Also fetch notifications with pattern for backward compatibility
+    const { data: fallbackResults, error: fallbackError } = await supabase
+      .from("notifications")
+      .select("*")
+      .is("user_id", null)
+      .gte("expiry_date", new Date().toISOString())
+      .order("created_at", { ascending: false });
 
-    // Clean up descriptions by removing user pattern
-    const cleanedNotifications = userNotifications
+    if (fallbackError) {
+      console.error("Fallback query error:", fallbackError);
+    }
+
+    // Filter fallback results by user pattern
+    const patternNotifications = (fallbackResults || []).filter(
+      (notification) => {
+        const userPattern = new RegExp(`\\[USER:${user_id}\\]`);
+        return userPattern.test(notification.description);
+      }
+    );
+
+    // Combine results and remove duplicates
+    const allNotifications = [
+      ...(primaryResults || []),
+      ...patternNotifications,
+    ];
+    const uniqueNotifications = allNotifications.filter(
+      (notification, index, self) =>
+        index === self.findIndex((n) => n.id === notification.id)
+    );
+
+    // Clean up descriptions by removing user pattern and apply filters
+    const cleanedNotifications = uniqueNotifications
       .map((notification) => ({
         ...notification,
         description: notification.description.replace(/\[USER:[^\]]+\]\s*/, ""),
@@ -100,7 +130,7 @@ export async function getUserNotifications(req, res) {
       })
       .slice(0, parseInt(limit));
 
-    console.log('Found user notifications:', cleanedNotifications.length);
+    console.log("Found user notifications:", cleanedNotifications.length);
 
     res.json({
       success: true,

@@ -569,8 +569,12 @@ export const getUsersWithWallets = async (req, res) => {
                 email,
                 phone,
                 created_at,
-                user_wallets (
+                user_wallets!user_wallets_user_id_fkey (
                     balance,
+                    is_frozen,
+                    frozen_reason,
+                    frozen_by,
+                    frozen_at,
                     created_at,
                     updated_at
                 )
@@ -591,12 +595,29 @@ export const getUsersWithWallets = async (req, res) => {
     if (error) throw error;
 
     // Format the response
-    const formattedUsers = users.map((user) => ({
+    let formattedUsers = users.map((user) => ({
       ...user,
       wallet_balance: user.user_wallets?.[0]?.balance || 0,
+      is_frozen: user.user_wallets?.[0]?.is_frozen || false,
+      frozen_reason: user.user_wallets?.[0]?.frozen_reason,
+      frozen_by: user.user_wallets?.[0]?.frozen_by,
+      frozen_at: user.user_wallets?.[0]?.frozen_at,
       wallet_created_at: user.user_wallets?.[0]?.created_at,
       wallet_updated_at: user.user_wallets?.[0]?.updated_at,
     }));
+
+    // Apply status filter
+    if (status) {
+      if (status === "frozen") {
+        formattedUsers = formattedUsers.filter(
+          (user) => user.is_frozen === true
+        );
+      } else if (status === "active") {
+        formattedUsers = formattedUsers.filter(
+          (user) => user.is_frozen === false
+        );
+      }
+    }
 
     res.json({
       success: true,
@@ -611,6 +632,606 @@ export const getUsersWithWallets = async (req, res) => {
     res.status(500).json({
       error: "Failed to fetch users with wallets",
       details: error.message,
+    });
+  }
+};
+
+// Freeze user wallet (admin function)
+export const freezeWallet = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { reason } = req.body;
+    const adminId = req.user?.id;
+
+    if (!userId || !reason) {
+      return res.status(400).json({
+        success: false,
+        error: "User ID and reason are required",
+      });
+    }
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        error: "Admin authentication required",
+      });
+    }
+
+    // Get user wallet (create if doesn't exist)
+    let { data: wallet, error: fetchError } = await supabase
+      .from("user_wallets")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError && fetchError.code === "PGRST116") {
+      // Create user wallet if it doesn't exist
+      const { data: newWallet, error: createError } = await supabase
+        .from("user_wallets")
+        .insert({
+          user_id: userId,
+          balance: 0.0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        return res.status(500).json({
+          success: false,
+          error: createError.message,
+        });
+      }
+      wallet = newWallet;
+    } else if (fetchError) {
+      return res.status(500).json({
+        success: false,
+        error: fetchError.message,
+      });
+    }
+
+    if (wallet.is_frozen) {
+      return res.status(400).json({
+        success: false,
+        error: "Wallet is already frozen",
+      });
+    }
+
+    // Freeze the wallet
+    const { error: updateError } = await supabase
+      .from("user_wallets")
+      .update({
+        is_frozen: true,
+        frozen_reason: reason,
+        frozen_by: adminId,
+        frozen_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      return res.status(500).json({
+        success: false,
+        error: updateError.message,
+      });
+    }
+
+    // Record transaction for audit trail
+    await supabase.from("wallet_transactions").insert({
+      user_id: userId,
+      transaction_type: "freeze",
+      amount: 0,
+      balance_before: wallet.balance,
+      balance_after: wallet.balance,
+      description: `Wallet frozen by admin. Reason: ${reason}`,
+      reference_type: "admin_action",
+      admin_id: adminId,
+      status: "completed",
+    });
+
+    // Get user details for notification
+    const { data: userData } = await supabase
+      .from("users")
+      .select("name, email")
+      .eq("id", userId)
+      .single();
+
+    // Create notification for user
+    await supabase.from("notifications").insert({
+      user_id: userId,
+      type: "wallet",
+      title: "Wallet Frozen",
+      message: `Your wallet has been frozen by admin. Reason: ${reason}`,
+      read: false,
+    });
+
+    res.json({
+      success: true,
+      message: "Wallet frozen successfully",
+      user: userData?.name || "Unknown User",
+    });
+  } catch (error) {
+    console.error("Freeze wallet error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+// Unfreeze user wallet (admin function)
+export const unfreezeWallet = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { reason } = req.body;
+    const adminId = req.user?.id;
+
+    if (!userId || !reason) {
+      return res.status(400).json({
+        success: false,
+        error: "User ID and reason are required",
+      });
+    }
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        error: "Admin authentication required",
+      });
+    }
+
+    // Check if wallet exists and is frozen
+    const { data: wallet, error: fetchError } = await supabase
+      .from("user_wallets")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === "PGRST116") {
+        return res.status(404).json({
+          success: false,
+          error:
+            "Cannot unfreeze wallet - user has no wallet. Please create a wallet first or transfer money to the user.",
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        error: fetchError.message,
+      });
+    }
+
+    if (!wallet.is_frozen) {
+      return res.status(400).json({
+        success: false,
+        error: "Wallet is not frozen",
+      });
+    }
+
+    // Unfreeze the wallet
+    const { error: updateError } = await supabase
+      .from("user_wallets")
+      .update({
+        is_frozen: false,
+        frozen_reason: null,
+        frozen_by: null,
+        frozen_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      return res.status(500).json({
+        success: false,
+        error: updateError.message,
+      });
+    }
+
+    // Record transaction for audit trail
+    await supabase.from("wallet_transactions").insert({
+      user_id: userId,
+      transaction_type: "unfreeze",
+      amount: 0,
+      balance_before: wallet.balance,
+      balance_after: wallet.balance,
+      description: `Wallet unfrozen by admin. Reason: ${reason}`,
+      reference_type: "admin_action",
+      admin_id: adminId,
+      status: "completed",
+    });
+
+    // Get user details for notification
+    const { data: userData } = await supabase
+      .from("users")
+      .select("name, email")
+      .eq("id", userId)
+      .single();
+
+    // Create notification for user
+    await supabase.from("notifications").insert({
+      user_id: userId,
+      type: "wallet",
+      title: "Wallet Unfrozen",
+      message: `Your wallet has been unfrozen by admin. Reason: ${reason}`,
+      read: false,
+    });
+
+    res.json({
+      success: true,
+      message: "Wallet unfrozen successfully",
+      user: userData?.name || "Unknown User",
+    });
+  } catch (error) {
+    console.error("Unfreeze wallet error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+// Get wallet transaction history for admin
+export const getWalletTransactionHistory = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 50 } = req.query;
+    const offset = (page - 1) * limit;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: "User ID is required",
+      });
+    }
+
+    const {
+      data: transactions,
+      error,
+      count,
+    } = await supabase
+      .from("wallet_transactions")
+      .select(
+        `
+        *,
+        admin:admin_id(name, email)
+      `,
+        { count: "exact" }
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + parseInt(limit) - 1);
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      transactions,
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / limit),
+    });
+  } catch (error) {
+    console.error("Get wallet transaction history error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+// Get admin wallet details
+export const getAdminWalletDetails = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        error: "Admin authentication required",
+      });
+    }
+
+    // Check if admin wallet exists, create if not
+    const { data: adminWallet, error } = await supabase
+      .from("admin_wallets")
+      .select("*")
+      .eq("admin_id", adminId)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        // Create admin wallet if it doesn't exist
+        const { data: newWallet, error: createError } = await supabase
+          .from("admin_wallets")
+          .insert({
+            admin_id: adminId,
+            balance: 0.0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          return res.status(500).json({
+            success: false,
+            error: createError.message,
+          });
+        }
+
+        return res.json({
+          success: true,
+          wallet: newWallet,
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      wallet: adminWallet,
+    });
+  } catch (error) {
+    console.error("Get admin wallet details error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+// Create admin wallet recharge request
+export const createAdminWalletRechargeRequest = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    const { amount } = req.body;
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        error: "Admin authentication required",
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Valid amount is required",
+      });
+    }
+
+    // Create recharge request
+    const { data: rechargeRequest, error } = await supabase
+      .from("admin_wallet_recharge_requests")
+      .insert({
+        admin_id: adminId,
+        amount: parseFloat(amount),
+        status: "pending",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      rechargeRequest,
+    });
+  } catch (error) {
+    console.error("Create admin wallet recharge request error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+// Transfer money from admin wallet to user wallet
+export const transferMoneyToUser = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    const { userId, amount, reason } = req.body;
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        error: "Admin authentication required",
+      });
+    }
+
+    if (!userId || !amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "User ID and valid amount are required",
+      });
+    }
+
+    // Get admin wallet
+    const { data: adminWallet, error: adminError } = await supabase
+      .from("admin_wallets")
+      .select("*")
+      .eq("admin_id", adminId)
+      .single();
+
+    if (adminError || !adminWallet) {
+      return res.status(404).json({
+        success: false,
+        error: "Admin wallet not found",
+      });
+    }
+
+    // Check if admin has sufficient balance
+    if (parseFloat(adminWallet.balance) < parseFloat(amount)) {
+      return res.status(400).json({
+        success: false,
+        error: "Insufficient balance in admin wallet",
+      });
+    }
+
+    // Get user wallet (create if doesn't exist)
+    let { data: userWallet, error: userError } = await supabase
+      .from("user_wallets")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (userError && userError.code === "PGRST116") {
+      // Create user wallet if it doesn't exist
+      const { data: newUserWallet, error: createError } = await supabase
+        .from("user_wallets")
+        .insert({
+          user_id: userId,
+          balance: 0.0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        return res.status(500).json({
+          success: false,
+          error: createError.message,
+        });
+      }
+      userWallet = newUserWallet;
+    } else if (userError) {
+      return res.status(500).json({
+        success: false,
+        error: userError.message,
+      });
+    }
+
+    // Check if user wallet is frozen
+    if (userWallet.is_frozen) {
+      return res.status(400).json({
+        success: false,
+        error: "Cannot transfer money to frozen wallet",
+      });
+    }
+
+    // Start transaction
+    const newAdminBalance =
+      parseFloat(adminWallet.balance) - parseFloat(amount);
+    const newUserBalance = parseFloat(userWallet.balance) + parseFloat(amount);
+
+    // Update admin wallet
+    const { error: updateAdminError } = await supabase
+      .from("admin_wallets")
+      .update({
+        balance: newAdminBalance,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("admin_id", adminId);
+
+    if (updateAdminError) {
+      return res.status(500).json({
+        success: false,
+        error: updateAdminError.message,
+      });
+    }
+
+    // Update user wallet
+    const { error: updateUserError } = await supabase
+      .from("user_wallets")
+      .update({
+        balance: newUserBalance,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (updateUserError) {
+      // Rollback admin wallet update
+      await supabase
+        .from("admin_wallets")
+        .update({
+          balance: adminWallet.balance,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("admin_id", adminId);
+
+      return res.status(500).json({
+        success: false,
+        error: updateUserError.message,
+      });
+    }
+
+    // Record admin transaction (debit)
+    await supabase.from("admin_wallet_transactions").insert({
+      admin_id: adminId,
+      transaction_type: "debit",
+      amount: parseFloat(amount),
+      balance_before: parseFloat(adminWallet.balance),
+      balance_after: newAdminBalance,
+      description: reason || `Transfer to user ${userId}`,
+      reference_type: "user_transfer",
+      reference_id: userId,
+      status: "completed",
+      created_at: new Date().toISOString(),
+    });
+
+    // Record user transaction (credit)
+    await supabase.from("wallet_transactions").insert({
+      user_id: userId,
+      transaction_type: "credit",
+      amount: parseFloat(amount),
+      balance_before: parseFloat(userWallet.balance),
+      balance_after: newUserBalance,
+      description: reason || `Transfer from admin wallet`,
+      reference_type: "admin_transfer",
+      admin_id: adminId,
+      status: "completed",
+      created_at: new Date().toISOString(),
+    });
+
+    // Get user details for notification
+    const { data: userData } = await supabase
+      .from("users")
+      .select("name, email")
+      .eq("id", userId)
+      .single();
+
+    // Create notification for user
+    await supabase.from("notifications").insert({
+      user_id: userId,
+      type: "wallet",
+      title: "Money Received",
+      message: `₹${amount} has been added to your wallet by admin. ${
+        reason ? `Reason: ${reason}` : ""
+      }`,
+      read: false,
+      created_at: new Date().toISOString(),
+    });
+
+    res.json({
+      success: true,
+      message: "Money transferred successfully",
+      adminBalance: newAdminBalance,
+      userBalance: newUserBalance,
+      user: userData?.name || "Unknown User",
+    });
+  } catch (error) {
+    console.error("Transfer money to user error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
     });
   }
 };

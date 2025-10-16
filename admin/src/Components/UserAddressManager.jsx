@@ -224,7 +224,7 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
           Addresses ({addresses.length})
         </Text>
         <Button 
-          leftIcon={<FaPlus size={14} />} 
+          leftSection={<FaPlus size={14} />} 
           onClick={() => setAddAddressModalOpen(true)}
           size="sm"
         >

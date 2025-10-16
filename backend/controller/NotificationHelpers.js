@@ -19,18 +19,25 @@ export const createNotificationHelper = async (
   notification_type = "user"
 ) => {
   try {
-    // Add user ID to description for user-specific notifications
-    const finalDescription = notification_type === "user" 
-      ? `[USER:${user_id}] ${description}`
-      : description;
+    // Add user ID to description for user-specific notifications (for backward compatibility)
+    const finalDescription =
+      notification_type === "user"
+        ? `[USER:${user_id}] ${description}`
+        : description;
 
     const { data, error } = await supabase
       .from("notifications")
       .insert([
         {
+          user_id: notification_type === "user" ? user_id : null,
           heading,
           description: finalDescription,
-          expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          related_id,
+          related_type,
+          notification_type,
+          expiry_date: new Date(
+            Date.now() + 30 * 24 * 60 * 60 * 1000
+          ).toISOString(),
           created_at: new Date().toISOString(),
         },
       ])

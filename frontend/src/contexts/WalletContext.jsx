@@ -27,11 +27,23 @@ export const WalletProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://ecommerce-8342.onrender.com/api";
+    (import.meta.env.VITE_API_BASE_URL
+      ? `${import.meta.env.VITE_API_BASE_URL}/api`
+      : null) ||
+    (import.meta.env.VITE_API_URL
+      ? `${import.meta.env.VITE_API_URL}/api`
+      : null) ||
+    "http://localhost:8000/api";
 
   // Get auth headers
   const getAuthHeaders = useCallback(() => {
+    console.log(
+      "Getting auth headers, currentUser:",
+      !!currentUser,
+      "access_token:",
+      !!currentUser?.access_token
+    );
+
     if (currentUser?.access_token) {
       return {
         Authorization: `Bearer ${currentUser.access_token}`,
@@ -39,20 +51,32 @@ export const WalletProvider = ({ children }) => {
       };
     }
 
-    // If no access token, throw an error
-    console.error("No access token available. User might not be logged in.");
-    throw new Error("Authentication required. Please login again.");
-  }, [currentUser?.access_token]);
+    // For development, return basic headers if no token
+    console.warn(
+      "No access token available. Using basic headers for development."
+    );
+    return {
+      "Content-Type": "application/json",
+    };
+  }, [currentUser]);
 
   // Fetch wallet details
   const fetchWalletDetails = useCallback(async () => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || !currentUser?.access_token) {
+      console.log("Skipping wallet fetch - user not fully loaded:", {
+        hasUser: !!currentUser?.id,
+        hasToken: !!currentUser?.access_token,
+      });
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
       const headers = getAuthHeaders();
+      console.log("Wallet API URL:", `${API_BASE_URL}/wallet/details`);
+      console.log("Headers:", headers);
       const response = await axios.get(`${API_BASE_URL}/wallet/details`, {
         headers,
         timeout: 15000, // 15 second timeout
@@ -79,12 +103,17 @@ export const WalletProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser?.id, API_BASE_URL, getAuthHeaders]);
+  }, [
+    currentUser?.id,
+    currentUser?.access_token,
+    API_BASE_URL,
+    getAuthHeaders,
+  ]);
 
   // Fetch transaction history
   const fetchTransactionHistory = useCallback(
     async (page = 1, limit = 20, filters = {}) => {
-      if (!currentUser?.id) return;
+      if (!currentUser?.id || !currentUser?.access_token) return;
 
       setLoading(true);
       setError(null);
@@ -136,7 +165,7 @@ export const WalletProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [currentUser?.id, API_BASE_URL, getAuthHeaders]
+    [currentUser?.id, currentUser?.access_token, API_BASE_URL, getAuthHeaders]
   );
 
   // Create recharge request
@@ -184,7 +213,7 @@ export const WalletProvider = ({ children }) => {
 
     try {
       console.log("Creating Razorpay order:", { amount, rechargeRequestId });
-      
+
       const response = await axios.post(
         `${API_BASE_URL}/wallet/recharge/create-order`,
         { amount, rechargeRequestId },
@@ -203,7 +232,7 @@ export const WalletProvider = ({ children }) => {
     } catch (error) {
       console.error("Error creating payment order:", error);
       console.error("Error response:", error.response?.data);
-      
+
       // Get detailed error message
       let errorMessage = "Failed to create payment order";
       if (error.response?.data?.error) {
@@ -214,7 +243,7 @@ export const WalletProvider = ({ children }) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

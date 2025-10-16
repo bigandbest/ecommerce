@@ -929,7 +929,7 @@ const CategoriesPage = () => {
           <Title order={2}>Categories & Subcategories Management</Title>
           <Group>
             <Button
-              leftIcon={<FaPlus />}
+              leftSection={<FaPlus />}
               color="blue"
               variant="filled"
               onClick={openAddModal}
@@ -937,7 +937,7 @@ const CategoriesPage = () => {
               Add Category
             </Button>
             <Button
-              leftIcon={<FaLayerGroup />}
+              leftSection={<FaLayerGroup />}
               color="green"
               variant="filled"
               onClick={() => openAddSubcategoryModal()}
@@ -945,7 +945,7 @@ const CategoriesPage = () => {
               Add Subcategory
             </Button>
             <Button
-              leftIcon={<FaLayerGroup />}
+              leftSection={<FaLayerGroup />}
               color="orange"
               variant="filled"
               onClick={() => openAddGroupModal()}
@@ -1765,7 +1765,7 @@ const CategoriesPage = () => {
                           <Button
                             size="xs"
                             color="green"
-                            leftIcon={<FaPlus />}
+                            leftSection={<FaPlus />}
                             onClick={() => openAddSubcategoryModal(category.id)}
                           >
                             Add Subcategory
@@ -1826,7 +1826,7 @@ const CategoriesPage = () => {
                                           <Button
                                             size="xs"
                                             color="teal"
-                                            leftIcon={<FaPlus />}
+                                            leftSection={<FaPlus />}
                                             onClick={() =>
                                               openAddGroupModal(subcategory.id)
                                             }
