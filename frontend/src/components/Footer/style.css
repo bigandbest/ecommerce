@@ -19,6 +19,26 @@
   background-color: #3b82f6; /* blue-500 */
 }
 
+/* Compact Footer Styles */
+.footer-title-compact {
+  position: relative;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  color: #fff;
+}
+
+.footer-title-compact::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 30px;
+  height: 2px;
+  background-color: #3b82f6;
+}
+
 .footer-links {
   list-style: none;
   padding: 0;
@@ -27,6 +47,16 @@
 
 .footer-links li {
   margin-bottom: 10px;
+}
+
+.footer-links-compact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links-compact li {
+  margin-bottom: 6px;
 }
 
 .footer-link {
@@ -40,6 +70,25 @@
 .footer-link:hover {
   color: #fff;
   transform: translateX(3px);
+}
+
+.footer-link-compact {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.3s ease;
+  display: inline-block;
+}
+
+.footer-link-compact:hover {
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.footer-contact-compact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .social-icon {
@@ -60,19 +109,43 @@
   transform: translateY(-3px);
 }
 
+.social-icon-compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #9ca3af;
+  transition: all 0.3s ease;
+  font-size: 12px;
+}
+
+.social-icon-compact:hover {
+  background-color: #3b82f6;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .footer-column {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
   
   .social-icons {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
   
   .footer-title {
     font-size: 15px;
     margin-bottom: 15px;
+  }
+  
+  .footer-title-compact {
+    font-size: 13px;
+    margin-bottom: 10px;
   }
 }
 
@@ -85,8 +158,19 @@
     align-items: center;
   }
   
+  .footer-link-compact {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  
   .social-icon {
     width: 40px;
     height: 40px;
+  }
+  
+  .social-icon-compact {
+    width: 32px;
+    height: 32px;
   }
 }

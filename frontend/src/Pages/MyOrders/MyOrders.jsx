@@ -898,20 +898,20 @@ const NotificationsSection = ({ currentUser }) => {
       return "🔄";
     }
     if (notification.related_type === "order") return "📦";
+    if (notification.heading?.toLowerCase().includes("cancellation")) return "❌";
+    if (notification.heading?.toLowerCase().includes("completed")) return "✅";
     return "🔔";
   };
 
   if (loading) {
     return (
-      <div>
-        <h2>Notifications</h2>
-        <div className="loading-container">
-          <div className="modern-loader">
-            <div className="loader-circle"></div>
-            <div className="loader-circle"></div>
-            <div className="loader-circle"></div>
+      <div className="space-y-4">
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Notifications</h2>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600">Loading notifications...</p>
           </div>
-          <p>Loading notifications...</p>
         </div>
       </div>
     );
@@ -950,76 +950,86 @@ const NotificationsSection = ({ currentUser }) => {
   };
 
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-        }}
-      >
-        <h2>Notifications</h2>
-        <button
-          onClick={createTestNotifications}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "14px",
-          }}
-        >
-          Create Test Notifications
-        </button>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+         
+        </div>
       </div>
+
+      {/* Notifications Content */}
       {notifications.length === 0 ? (
-        <div className="no-orders">
-          <div className="no-orders-icon">🔔</div>
-          <h3>No Notifications</h3>
-          <p>Your order and return notifications will appear here.</p>
-          <p style={{ fontSize: "14px", color: "#666", marginTop: "10px" }}>
-            Try clicking "Create Test Notifications" to see sample data.
+        <div className="bg-white rounded-lg p-8 text-center shadow-sm border border-gray-200">
+          <div className="text-4xl mb-4">🔔</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Notifications</h3>
+          <p className="text-gray-600 mb-2">Your order and return notifications will appear here.</p>
+          <p className="text-sm text-gray-500">
+            Try clicking "Create Test" to see sample data.
           </p>
         </div>
       ) : (
-        <div className="notifications-list">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`notification-card ${
-                !notification.is_read ? "unread" : ""
-              }`}
-            >
-              <div className="notification-header">
-                <div className="notification-icon">
-                  {getNotificationIcon(notification)}
+        <div className="space-y-3">
+          {notifications.map((notification) => {
+            const isUnread = !notification.is_read;
+            return (
+              <div
+                key={notification.id}
+                className={`bg-white rounded-lg shadow-sm border transition-all hover:shadow-md ${
+                  isUnread 
+                    ? "border-l-4 border-l-orange-400 bg-orange-50" 
+                    : "border-gray-200"
+                }`}
+              >
+                <div className="p-4">
+                  <div className="flex items-start gap-3">
+                    {/* Notification Icon */}
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-lg">
+                        {getNotificationIcon(notification)}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h4 className={`text-sm font-semibold leading-tight ${
+                          isUnread ? "text-gray-900" : "text-gray-700"
+                        }`}>
+                          {notification.heading}
+                        </h4>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-xs text-gray-500">
+                            {new Date(notification.created_at).toLocaleDateString()}
+                          </span>
+                          {isUnread && (
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                        {notification.description}
+                      </p>
+
+                      {/* Footer with badges */}
+                      {notification.related_id && (
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                            #{notification.related_id.slice(0, 8)}
+                          </span>
+                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full capitalize">
+                            {notification.related_type}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="notification-content">
-                  <h4>{notification.heading}</h4>
-                  <span className="notification-time">
-                    {new Date(notification.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                {!notification.is_read && <div className="unread-dot"></div>}
               </div>
-              <p className="notification-description">
-                {notification.description}
-              </p>
-              {notification.related_id && (
-                <div className="notification-footer">
-                  <span className="related-id">
-                    #{notification.related_id.slice(0, 8)}
-                  </span>
-                  <span className="notification-type">
-                    {notification.related_type}
-                  </span>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
