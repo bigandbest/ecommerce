@@ -178,6 +178,150 @@
   z-index: 1;
 }
 
+/* Frozen Wallet Styles */
+.wallet-frozen-banner {
+  background: rgba(239, 68, 68, 0.95);
+  border: 2px solid rgba(220, 38, 38, 0.8);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+  animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.frozen-icon-wrapper {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.frozen-icon {
+  font-size: 20px;
+  color: white;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.frozen-content {
+  flex: 1;
+}
+
+.frozen-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.frozen-message {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+}
+
+.frozen-reason {
+  font-size: 13px;
+  margin: 8px 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  color: white;
+  border-left: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.frozen-date {
+  font-size: 12px;
+  margin: 6px 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-style: italic;
+}
+
+.frozen-info {
+  font-size: 12px;
+  margin: 8px 0 0 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.wallet-icon.frozen {
+  color: #fca5a5;
+  opacity: 0.8;
+}
+
+.frozen-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(220, 38, 38, 0.8);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.recharge-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(107, 114, 128, 0.3);
+  border-color: rgba(107, 114, 128, 0.4);
+}
+
+.recharge-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(107, 114, 128, 0.3);
+}
+
 /* Loading states */
 .wallet-balance-card.loading {
   background: #f8f9fa;

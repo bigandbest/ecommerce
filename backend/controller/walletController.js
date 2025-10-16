@@ -217,7 +217,7 @@ export const createRechargeRequest = async (req, res) => {
     // Get user wallet
     const { data: wallet, error: walletError } = await supabase
       .from("user_wallets")
-      .select("id")
+      .select("*")
       .eq("user_id", userId)
       .single();
 
@@ -225,6 +225,15 @@ export const createRechargeRequest = async (req, res) => {
       return res
         .status(500)
         .json({ success: false, error: "Wallet not found" });
+    }
+
+    // Check if wallet is frozen
+    if (wallet.is_frozen) {
+      return res.status(403).json({
+        success: false,
+        error: "Your wallet is frozen. Recharge is not allowed at this time.",
+        frozen_reason: wallet.frozen_reason,
+      });
     }
 
     // Create recharge request
@@ -274,6 +283,15 @@ export const processWalletPayment = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, error: "Wallet not found" });
+    }
+
+    // Check if wallet is frozen
+    if (wallet.is_frozen) {
+      return res.status(403).json({
+        success: false,
+        error: "Your wallet is frozen. Payment cannot be processed.",
+        frozen_reason: wallet.frozen_reason,
+      });
     }
 
     if (wallet.balance < amount) {
@@ -465,6 +483,12 @@ export const getWalletStatistics = async (req, res) => {
       .from("user_wallets")
       .select("*", { count: "exact", head: true });
 
+    // Get frozen wallets count
+    const { count: frozenWallets } = await supabase
+      .from("user_wallets")
+      .select("*", { count: "exact", head: true })
+      .eq("is_frozen", true);
+
     // Get total balance across all wallets
     const { data: balanceData } = await supabase
       .from("user_wallets")
@@ -498,6 +522,8 @@ export const getWalletStatistics = async (req, res) => {
       success: true,
       statistics: {
         totalWallets,
+        frozenWallets,
+        activeWallets: totalWallets - frozenWallets,
         totalBalance,
         totalTransactions,
         recentTransactions,
