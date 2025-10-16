@@ -18,15 +18,18 @@ const WalletPaymentOption = ({
   const [hasBalance, setHasBalance] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Check if wallet is frozen
+  const isFrozen = wallet?.is_frozen;
+
   useEffect(() => {
     const checkBalance = async () => {
-      if (orderAmount && wallet) {
+      if (orderAmount && wallet && !isFrozen) {
         const hasEnoughBalance = await checkWalletBalance(orderAmount);
         setHasBalance(hasEnoughBalance);
       }
     };
     checkBalance();
-  }, [orderAmount, wallet, checkWalletBalance]);
+  }, [orderAmount, wallet, checkWalletBalance, isFrozen]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
@@ -37,6 +40,11 @@ const WalletPaymentOption = ({
   };
 
   const handleWalletPayment = async (orderId) => {
+    if (isFrozen) {
+      toast.error("Your wallet is frozen. Payment cannot be processed.");
+      return;
+    }
+
     if (!hasBalance) {
       toast.error("Insufficient wallet balance");
       return;
@@ -76,10 +84,13 @@ const WalletPaymentOption = ({
   return (
     <div
       className={`wallet-payment-option ${isSelected ? "selected" : ""} ${
-        disabled ? "disabled" : ""
+        disabled || isFrozen ? "disabled" : ""
       }`}
     >
-      <div className="payment-option-header" onClick={onSelect}>
+      <div
+        className="payment-option-header"
+        onClick={!isFrozen ? onSelect : undefined}
+      >
         <div className="option-radio">
           <input
             type="radio"
@@ -87,25 +98,37 @@ const WalletPaymentOption = ({
             value="wallet"
             checked={isSelected}
             onChange={onSelect}
-            disabled={disabled}
+            disabled={disabled || isFrozen}
           />
           <span className="radio-checkmark"></span>
         </div>
 
         <div className="option-icon">
-          <FaWallet className="wallet-icon" />
+          <FaWallet className={`wallet-icon ${isFrozen ? "frozen" : ""}`} />
         </div>
 
         <div className="option-details">
-          <h3>Pay with Wallet</h3>
-          <p>Use your wallet balance to pay instantly</p>
+          <h3>
+            Pay with Wallet
+            {isFrozen && (
+              <span className="frozen-badge">
+                <FaExclamationTriangle style={{ marginRight: "4px" }} />
+                Frozen
+              </span>
+            )}
+          </h3>
+          <p>
+            {isFrozen
+              ? "Wallet is currently frozen"
+              : "Use your wallet balance to pay instantly"}
+          </p>
         </div>
 
         <div className="wallet-balance-info">
           <span className="balance-label">Available:</span>
           <span
             className={`balance-amount ${
-              hasBalance ? "sufficient" : "insufficient"
+              isFrozen ? "frozen" : hasBalance ? "sufficient" : "insufficient"
             }`}
           >
             {formatCurrency(wallet?.balance || 0)}
@@ -113,7 +136,28 @@ const WalletPaymentOption = ({
         </div>
       </div>
 
-      {isSelected && (
+      {isSelected && isFrozen && (
+        <div className="payment-option-details">
+          <div className="frozen-wallet-warning">
+            <FaExclamationTriangle className="warning-icon large" />
+            <div className="warning-content">
+              <h4>Wallet Frozen</h4>
+              <p>Your wallet has been frozen by the administrator.</p>
+              {wallet?.frozen_reason && (
+                <p className="frozen-reason">
+                  <strong>Reason:</strong> {wallet.frozen_reason}
+                </p>
+              )}
+              <p className="frozen-info">
+                You cannot make payments using your wallet until it is unfrozen.
+                Please contact support for assistance.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSelected && !isFrozen && (
         <div className="payment-option-details">
           <div className="payment-breakdown">
             <div className="breakdown-row">
@@ -161,7 +205,7 @@ const WalletPaymentOption = ({
           <div className="payment-action" style={{ display: "none" }}>
             <button
               onClick={() => handleWalletPayment("ORDER_ID_FROM_PARENT")}
-              disabled={!hasBalance || isProcessing || loading}
+              disabled={!hasBalance || isProcessing || loading || isFrozen}
               className="wallet-pay-button"
             >
               {isProcessing || loading ? (

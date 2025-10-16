@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { useWallet } from "../../contexts/WalletContext";
-import { FaWallet, FaSync, FaPlus } from "react-icons/fa";
+import { FaWallet, FaSync, FaPlus, FaLock } from "react-icons/fa";
 import "./WalletBalance.css";
 
 const WalletBalance = ({ showRechargeButton = true, onRechargeClick }) => {
@@ -56,10 +56,53 @@ const WalletBalance = ({ showRechargeButton = true, onRechargeClick }) => {
   return (
     <div className="wallet-balance-container">
       <div className="wallet-balance-card">
+        {/* Frozen Wallet Warning */}
+        {wallet?.is_frozen && (
+          <div className="wallet-frozen-banner">
+            <div className="frozen-icon-wrapper">
+              <FaLock className="frozen-icon" />
+            </div>
+            <div className="frozen-content">
+              <h4 className="frozen-title">Wallet Frozen</h4>
+              <p className="frozen-message">
+                Your wallet has been temporarily frozen by the administrator.
+              </p>
+              {wallet.frozen_reason && (
+                <p className="frozen-reason">
+                  <strong>Reason:</strong> {wallet.frozen_reason}
+                </p>
+              )}
+              {wallet.frozen_at && (
+                <p className="frozen-date">
+                  <strong>Frozen on:</strong>{" "}
+                  {new Date(wallet.frozen_at).toLocaleDateString("en-IN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              )}
+              <p className="frozen-info">
+                You cannot make payments or add money until your wallet is
+                unfrozen. Please contact support for assistance.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="wallet-header">
           <div className="wallet-icon-title">
-            <FaWallet className="wallet-icon" />
+            <FaWallet
+              className={`wallet-icon ${wallet?.is_frozen ? "frozen" : ""}`}
+            />
             <span className="wallet-title">Wallet Balance</span>
+            {wallet?.is_frozen && (
+              <span className="frozen-badge">
+                <FaLock /> Frozen
+              </span>
+            )}
           </div>
           <button
             onClick={handleRefresh}
@@ -90,9 +133,18 @@ const WalletBalance = ({ showRechargeButton = true, onRechargeClick }) => {
         )}
 
         {showRechargeButton && (
-          <button onClick={onRechargeClick} className="recharge-button">
+          <button
+            onClick={onRechargeClick}
+            className="recharge-button"
+            disabled={wallet?.is_frozen}
+            title={
+              wallet?.is_frozen
+                ? "Cannot add money to frozen wallet"
+                : "Add Money"
+            }
+          >
             <FaPlus className="plus-icon" />
-            Add Money
+            {wallet?.is_frozen ? "Wallet Frozen" : "Add Money"}
           </button>
         )}
 

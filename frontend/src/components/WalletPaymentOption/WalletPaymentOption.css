@@ -276,6 +276,86 @@
   }
 }
 
+/* Frozen Wallet Styles */
+.wallet-icon.frozen {
+  opacity: 0.6;
+}
+
+.frozen-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+  border: 1px solid #fbbf24;
+}
+
+.balance-amount.frozen {
+  color: #9ca3af;
+  opacity: 0.7;
+}
+
+.frozen-wallet-warning {
+  padding: 20px;
+  background: #fef3c7;
+  border: 2px solid #fbbf24;
+  border-radius: 12px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.frozen-wallet-warning .warning-icon.large {
+  font-size: 32px;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.frozen-wallet-warning .warning-content {
+  flex: 1;
+}
+
+.frozen-wallet-warning .warning-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.frozen-wallet-warning .warning-content p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #78350f;
+  line-height: 1.5;
+}
+
+.frozen-wallet-warning .frozen-reason {
+  margin: 12px 0;
+  padding: 10px;
+  background: rgba(251, 191, 36, 0.2);
+  border-radius: 6px;
+  border-left: 3px solid #f59e0b;
+  font-size: 13px;
+}
+
+.frozen-wallet-warning .frozen-info {
+  margin: 12px 0 0 0;
+  padding: 10px;
+  background: rgba(251, 191, 36, 0.15);
+  border-radius: 6px;
+  border: 1px dashed #f59e0b;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.wallet-payment-option.disabled .option-icon {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .payment-option-header {

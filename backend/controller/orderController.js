@@ -242,7 +242,7 @@ export const cancelOrder = async (req, res) => {
     // Get order details first
     const { data: order, error: fetchError } = await supabase
       .from("orders")
-      .select("user_id, status, payment_method, total, payment_id")
+      .select("user_id, status, payment_method, total, razorpay_payment_id")
       .eq("id", id)
       .single();
 
@@ -314,7 +314,7 @@ export const cancelOrder = async (req, res) => {
           refund_amount: parseFloat(order.total),
           refund_type: "order_cancellation",
           payment_method: order.payment_method,
-          original_payment_id: order.payment_id,
+          original_payment_id: order.razorpay_payment_id,
           refund_mode: "wallet", // Default to wallet refund for auto-created requests
           status: "pending",
         };

@@ -311,14 +311,40 @@ const AdminWalletManagement = () => {
         );
         setShowFreezeModal(false);
         setFreezeForm({ reason: "", userId: "", action: "freeze" });
-        fetchUsersWithWallets();
+        setSelectedUser(null);
+        // Refresh both user list and statistics
+        await Promise.all([fetchUsersWithWallets(), fetchWalletStatistics()]);
       }
     } catch (error) {
       console.error(`Error ${freezeForm.action}ing wallet:`, error);
-      showNotification(
-        "error",
-        error.response?.data?.error || `Failed to ${freezeForm.action} wallet`
-      );
+
+      // Handle specific error cases
+      if (error.response?.data?.error === "Wallet is already frozen") {
+        showNotification(
+          "warning",
+          "This wallet is already frozen. Refreshing data..."
+        );
+        setShowFreezeModal(false);
+        setFreezeForm({ reason: "", userId: "", action: "freeze" });
+        setSelectedUser(null);
+        // Refresh data to show correct status
+        await Promise.all([fetchUsersWithWallets(), fetchWalletStatistics()]);
+      } else if (error.response?.data?.error === "Wallet is not frozen") {
+        showNotification(
+          "warning",
+          "This wallet is not frozen. Refreshing data..."
+        );
+        setShowFreezeModal(false);
+        setFreezeForm({ reason: "", userId: "", action: "freeze" });
+        setSelectedUser(null);
+        // Refresh data to show correct status
+        await Promise.all([fetchUsersWithWallets(), fetchWalletStatistics()]);
+      } else {
+        showNotification(
+          "error",
+          error.response?.data?.error || `Failed to ${freezeForm.action} wallet`
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -641,6 +667,12 @@ const AdminWalletManagement = () => {
                   walletStats?.totalWallets || 0
                 )}
               </Text>
+              {walletStats && (
+                <Text size="xs" color="dimmed">
+                  Active: {walletStats?.activeWallets || 0} | Frozen:{" "}
+                  {walletStats?.frozenWallets || 0}
+                </Text>
+              )}
             </Stack>
           </Card>
         </Grid.Col>
@@ -680,31 +712,52 @@ const AdminWalletManagement = () => {
           <Card withBorder padding="lg">
             <Stack spacing="xs">
               <Text size="sm" color="dimmed">
-                Admin Wallet Balance
+                Frozen Wallets
               </Text>
-              <Text size="xl" weight={700} color="blue">
-                {adminWallet ? formatCurrency(adminWallet.balance) : "₹0.00"}
+              <Text size="xl" weight={700} color="red">
+                {statsLoading ? (
+                  <Loader size="sm" />
+                ) : (
+                  walletStats?.frozenWallets || 0
+                )}
               </Text>
-              <Group spacing="xs">
-                <Button
-                  size="xs"
-                  leftSection={<FaPlus />}
-                  onClick={() => setShowAdminRechargeModal(true)}
-                >
-                  Recharge
-                </Button>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  onClick={() => setShowTransferModal(true)}
-                >
-                  Transfer
-                </Button>
-              </Group>
+              <Text size="xs" color="dimmed">
+                Click filter to view
+              </Text>
             </Stack>
           </Card>
         </Grid.Col>
       </Grid>
+
+      {/* Admin Wallet Card - Below Statistics */}
+      {adminWallet && (
+        <Card withBorder padding="lg" mb="xl">
+          <Stack spacing="xs">
+            <Text size="sm" color="dimmed">
+              Admin Wallet Balance
+            </Text>
+            <Text size="xl" weight={700} color="blue">
+              {formatCurrency(adminWallet.balance)}
+            </Text>
+            <Group spacing="xs">
+              <Button
+                size="xs"
+                leftSection={<FaPlus />}
+                onClick={() => setShowAdminRechargeModal(true)}
+              >
+                Recharge
+              </Button>
+              <Button
+                size="xs"
+                variant="outline"
+                onClick={() => setShowTransferModal(true)}
+              >
+                Transfer
+              </Button>
+            </Group>
+          </Stack>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <Group mb="md">
@@ -714,18 +767,32 @@ const AdminWalletManagement = () => {
         >
           Add Money to User
         </Button>
-        <ActionIcon
-          size="lg"
+        <Button
+          leftSection={<FaSyncAlt />}
           variant="light"
-          onClick={() => {
-            fetchWalletStatistics();
-            fetchAdminWalletDetails();
-            fetchUsersWithWallets();
+          onClick={async () => {
+            setStatsLoading(true);
+            setLoading(true);
+            try {
+              await Promise.all([
+                fetchWalletStatistics(),
+                fetchAdminWalletDetails(),
+                fetchUsersWithWallets(),
+              ]);
+              showNotification("success", "Data refreshed successfully");
+            } catch (err) {
+              console.error("Error refreshing data:", err);
+              showNotification("error", "Failed to refresh data");
+            } finally {
+              setStatsLoading(false);
+              setLoading(false);
+            }
           }}
-          loading={statsLoading}
+          loading={statsLoading || loading}
+          disabled={statsLoading || loading}
         >
-          <FaSyncAlt />
-        </ActionIcon>
+          Refresh Data
+        </Button>
       </Group>
 
       {/* User Wallets Table */}
@@ -748,11 +815,11 @@ const AdminWalletManagement = () => {
             onChange={setStatusFilter}
             data={[
               { value: "", label: "All Status" },
-              { value: "active", label: "Active" },
-              { value: "suspended", label: "Suspended" },
+              { value: "active", label: "Active (Not Frozen)" },
               { value: "frozen", label: "Frozen" },
             ]}
             style={{ minWidth: 150 }}
+            clearable
           />
         </Group>
 
