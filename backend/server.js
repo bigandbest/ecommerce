@@ -20,9 +20,12 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import bnbRoutes from "./routes/b&bRoutes.js";
 import bnbGroupRoutes from "./routes/b&bGroupRoutes.js";
 import bnbGroupProductRoutes from "./routes/b&bGroupProductRoutes.js";
+import dailyDealsRoutes from "./routes/dailyDealsRoutes.js";
+import dailyDealsProductRoutes from "./routes/dailyDealsProductRoutes.js";
 import brandRoutes from "./routes/brandRoutes.js";
 import brandProductsRoutes from "./routes/brandProducts.js";
 import recommendedStoreRoutes from "./routes/recommendedStoreRoutes.js";
+
 import productRecommendedStoreRoutes from "./routes/productRecommendedStoreRoutes.js";
 import quickPickRoutes from "./routes/quickPickRoutes.js";
 import quickPickGroupRoutes from "./routes/quickPickGroupRoutes.js";
@@ -44,31 +47,59 @@ import walletRoutes from "./routes/walletRoutes.js";
 import refundRoutes from "./routes/refundRoutes.js";
 import debugRoutes from "./routes/debugRoutes.js";
 import quickFixRoutes from "./routes/quickFixRoutes.js";
+import trackingRoutes from "./routes/trackingRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import bulkOrderRoutes from "./routes/bulkOrderRoutes.js";
+import bulkProductRoutes from "./routes/bulkProductRoutes.js";
+import productVariantsRoutes from "./routes/productVariantsRoutes.js";
+import locationRoutes from "./routes/locationRoutes.js";
+import variantRoutes from "./routes/variantRoutes.js";
+import inventoryRoutes from "./routes/inventoryRoutes.js";
+import videoCardRoutes from "./routes/videoCardRoutes.js";
+import shopByStoreRoutes from "./routes/shopByStoreRoutes.js";
+import productSectionRoutes from "./routes/productSectionRoutes.js";
+import promoBannerRoutes from "./routes/promoBannerRoutes.js";
+import storeSectionMappingRoutes from "./routes/storeSectionMappingRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 const allowedOrigins = [
+  "http://localhost:3000", // Next.js frontend
+  "http://localhost:3001", // Next.js frontend (alternative port)
   "http://localhost:5173",
   "http://localhost:5174",
+  "https://big-best-admin.vercel.app", // Admin panel (without trailing slash)
+  "https://big-best-admin.vercel.app/", // Admin panel (with trailing slash)
   "https://ecommerce-umber-five-95.vercel.app",
   "https://admin-eight-flax.vercel.app",
   "https://ecommerce-six-brown-12.vercel.app",
   "https://www.bigbestmart.com",
   "https://admin-eight-ruddy.vercel.app",
+  "https://big-best-frontend.vercel.app", // New deployed frontend
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      // Allow requests with no origin (like curl, etc.)
-      callback(null, true);
+    // allow requests with no origin like mobile apps or curl
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      return callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   exposedHeaders: ["Authorization"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+    "Cache-Control",
+    "X-File-Name",
+  ],
 };
 /* app.use(cors({
    origin: function (origin, callback) {
@@ -87,6 +118,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/business", authRoutes);
@@ -104,6 +136,8 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/bnb", bnbRoutes);
 app.use("/api/b&b-group", bnbGroupRoutes);
 app.use("/api/b&b-group-product", bnbGroupProductRoutes);
+app.use("/api/daily-deals", dailyDealsRoutes);
+app.use("/api/daily-deals-product", dailyDealsProductRoutes);
 app.use("/api/brand", brandRoutes);
 app.use("/api/product-brand", brandProductsRoutes);
 app.use("/api/recommended-stores", recommendedStoreRoutes);
@@ -127,7 +161,52 @@ app.use("/api/return-orders", returnOrderRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/refund", refundRoutes);
 app.use("/api/debug", debugRoutes);
-app.use("/api/quick", quickFixRoutes);
+app.use("/api/quick-fix", quickFixRoutes);
+app.use("/api/tracking", trackingRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/bulk-orders", bulkOrderRoutes);
+app.use("/api/bulk-products", bulkProductRoutes);
+app.use("/api/product-variants", productVariantsRoutes);
+app.use("/api/location", locationRoutes);
+app.use("/api/variants", variantRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/video-cards", videoCardRoutes);
+app.use("/api/shop-by-stores", shopByStoreRoutes);
+app.use("/api/product-sections", productSectionRoutes);
+app.use("/api/promo-banner", promoBannerRoutes);
+app.use("/api/store-section-mappings", storeSectionMappingRoutes);
+
+// Health check route
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Server is healthy",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// Debug helper: show mounted routes (development only)
+app.get("/__routes", (req, res) => {
+  try {
+    const routes = [];
+    app._router.stack.forEach((middleware) => {
+      if (middleware.route) {
+        // routes registered directly on the app
+        routes.push(middleware.route.path);
+      } else if (middleware.name === "router") {
+        // router middleware
+        middleware.handle.stack.forEach(function (handler) {
+          const route = handler.route;
+          route && routes.push(route.path);
+        });
+      }
+    });
+    res.json({ success: true, routes });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // Validate critical environment variables
 const requiredEnvVars = [
@@ -136,6 +215,9 @@ const requiredEnvVars = [
   "SUPABASE_SERVICE_ROLE_KEY",
   "RAZORPAY_KEY_ID",
   "RAZORPAY_KEY_SECRET",
+  "CLOUDINARY_CLOUD_NAME",
+  "CLOUDINARY_API_KEY",
+  "CLOUDINARY_API_SECRET",
 ];
 
 const missingEnvVars = requiredEnvVars.filter(
@@ -152,12 +234,18 @@ if (missingEnvVars.length > 0) {
   console.log("✅ All required environment variables are set");
 }
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(
-    `💳 Razorpay Mode: ${
-      process.env.RAZORPAY_KEY_ID?.startsWith("rzp_test_") ? "TEST" : "LIVE"
-    }`
-  );
-});
+// Export the app for Vercel
+export default app;
+
+// Only listen if not in production (for local development)
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(
+      `💳 Razorpay Mode: ${
+        process.env.RAZORPAY_KEY_ID?.startsWith("rzp_test_") ? "TEST" : "LIVE"
+      }`
+    );
+  });
+}

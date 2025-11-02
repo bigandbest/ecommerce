@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../utils/api";
 
 const ReturnOrdersAdmin = () => {
   const [returnOrders, setReturnOrders] = useState([]);
@@ -14,10 +14,7 @@ const ReturnOrdersAdmin = () => {
       const params = {};
       if (statusFilter) params.status = statusFilter;
 
-      const res = await axios.get(
-        "http://localhost:8000/api/return-orders/admin/all",
-        { params }
-      );
+      const res = await api.get("/return-orders/admin/all", { params });
       setReturnOrders(res.data.return_requests || []);
     } catch (error) {
       console.error("Error fetching return orders:", error);
@@ -29,14 +26,11 @@ const ReturnOrdersAdmin = () => {
 
   const updateReturnStatus = async (returnId, status, adminNotes = "") => {
     try {
-      await axios.put(
-        `http://localhost:8000/api/return-orders/admin/status/${returnId}`,
-        {
-          status,
-          admin_notes: adminNotes,
-          // admin_id will be handled by the backend - omitting for now
-        }
-      );
+      await api.put(`/return-orders/admin/status/${returnId}`, {
+        status,
+        admin_notes: adminNotes,
+        // admin_id will be handled by the backend - omitting for now
+      });
 
       fetchReturnOrders(); // Refresh the list
       alert("Return request status updated successfully!");
@@ -51,9 +45,7 @@ const ReturnOrdersAdmin = () => {
       return;
 
     try {
-      await axios.delete(
-        `http://localhost:8000/api/return-orders/admin/delete/${returnId}`
-      );
+      await api.delete(`/return-orders/admin/delete/${returnId}`);
       fetchReturnOrders(); // Refresh the list
       alert("Return request deleted successfully!");
     } catch (error) {
@@ -339,14 +331,11 @@ const ReturnOrderDetails = ({ returnOrder, onUpdate, onDelete }) => {
 
   const handleStatusUpdate = async () => {
     try {
-      await axios.put(
-        `http://localhost:8000/api/return-orders/admin/status/${returnOrder.id}`,
-        {
-          status: newStatus,
-          admin_notes: adminNotes,
-          // admin_id will be handled by the backend - omitting for now
-        }
-      );
+      await api.put(`/return-orders/admin/status/${returnOrder.id}`, {
+        status: newStatus,
+        admin_notes: adminNotes,
+        // admin_id will be handled by the backend - omitting for now
+      });
 
       onUpdate();
       alert("Return request updated successfully!");

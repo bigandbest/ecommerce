@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -13,44 +13,53 @@ const BrandProducts = () => {
   const [loading, setLoading] = useState(true);
 
   // Fetch Brand info
-  const fetchBrand = async () => {
+  const fetchBrand = useCallback(async () => {
     try {
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/brand/${id}`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/brand/${id}`
+      );
       setBrand(res.data.brand);
     } catch (err) {
       console.error("Failed to fetch Brand details:", err);
     }
-  };
+  }, [id]);
 
   // Fetch products mapped to this Brand
-  const fetchBrandProducts = async () => {
+  const fetchBrandProducts = useCallback(async () => {
     try {
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/product-brand/${id}`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/product-brand/${id}`
+      );
       const mapped = res.data.map((item) => item.products);
       setProductsInBrand(mapped);
     } catch (err) {
       console.error("Failed to fetch products for Brand:", err);
     }
-  };
+  }, [id]);
 
   // Fetch all available products
-  const fetchAllProducts = async () => {
+  const fetchAllProducts = useCallback(async () => {
     try {
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/productsroute/allproducts`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/productsroute/allproducts`
+      );
       setAllProducts(res.data);
     } catch (err) {
       console.error("Failed to fetch all products:", err);
     }
-  };
+  }, []);
 
   const handleAddProduct = async () => {
     if (!selectedProductId) return;
 
     try {
-      await axios.post("https://ecommerce-8342.onrender.com/api/product-brand/map", {
-        product_id: selectedProductId,
-        brand_id: id,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/product-brand/map`,
+        {
+          product_id: selectedProductId,
+          brand_id: id,
+        }
+      );
       setSelectedProductId("");
       await fetchBrandProducts();
     } catch (err) {
@@ -61,10 +70,13 @@ const BrandProducts = () => {
 
   const handleRemoveProduct = async (product_id) => {
     try {
-      await axios.post("https://ecommerce-8342.onrender.com/api/product-brand/remove", {
-        product_id,
-        brand_id: id,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/product-brand/remove`,
+        {
+          product_id,
+          brand_id: id,
+        }
+      );
       await fetchBrandProducts();
     } catch (err) {
       alert("Failed to remove product");
@@ -83,11 +95,11 @@ const BrandProducts = () => {
       setLoading(false);
     };
     load();
-  }, [id]);
+  }, [id, fetchBrand, fetchBrandProducts, fetchAllProducts]);
 
   if (loading || !brand) return <p className="p-4">Loading...</p>;
 
-  const mappedProductIds = productsInBrand.map(p => p.id);
+  const mappedProductIds = productsInBrand.map((p) => p.id);
 
   return (
     <div className="p-6 max-w-screen-lg mx-auto">

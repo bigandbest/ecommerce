@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -13,21 +13,27 @@ const WarehouseProducts = () => {
   const [loading, setLoading] = useState(true);
 
   // Fetch warehouse info
-  const fetchWarehouse = async () => {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/warehouse/listsingle/${id}`);
+  const fetchWarehouse = useCallback(async () => {
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/warehouse/listsingle/${id}`
+    );
     setWarehouse(res.data);
-  };
+  }, [id]);
 
   // Fetch products mapped to this warehouse
-  const fetchWarehouseProducts = async () => {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/productwarehouse/warehouse/${id}`);
+  const fetchWarehouseProducts = useCallback(async () => {
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/productwarehouse/warehouse/${id}`
+    );
     const mapped = res.data.map((item) => item.products);
     setProducts(mapped);
-  };
+  }, [id]);
 
   // Fetch all available products
   const fetchAllProducts = async () => {
-    const res = await axios.get(`https://ecommerce-8342.onrender.com/api/productsroute/allproducts`);
+    const res = await axios.get(
+      `https://ecommerce-8342.onrender.com/api/productsroute/allproducts`
+    );
     setAllProducts(res.data);
   };
 
@@ -35,10 +41,13 @@ const WarehouseProducts = () => {
     if (!selectedProductId) return;
 
     try {
-      await axios.post("https://ecommerce-8342.onrender.com/api/productwarehouse/map", {
-        product_id: selectedProductId,
-        warehouse_id: parseInt(id),
-      });
+      await axios.post(
+        "https://ecommerce-8342.onrender.com/api/productwarehouse/map",
+        {
+          product_id: selectedProductId,
+          warehouse_id: parseInt(id),
+        }
+      );
       setSelectedProductId("");
       await fetchWarehouseProducts();
     } catch (err) {
@@ -49,10 +58,13 @@ const WarehouseProducts = () => {
 
   const handleRemoveProduct = async (product_id) => {
     try {
-      await axios.post("https://ecommerce-8342.onrender.com/api/productwarehouse/remove", {
-        product_id,
-        warehouse_id: parseInt(id),
-      });
+      await axios.post(
+        "https://ecommerce-8342.onrender.com/api/productwarehouse/remove",
+        {
+          product_id,
+          warehouse_id: parseInt(id),
+        }
+      );
       await fetchWarehouseProducts();
     } catch (err) {
       alert("Failed to remove product");
@@ -82,11 +94,12 @@ const WarehouseProducts = () => {
         >
           ← Back to Warehouses
         </button>
-        <h2 className="text-xl font-bold">Manage Products for the Warehouse:</h2>
+        <h2 className="text-xl font-bold">
+          Manage Products for the Warehouse:
+        </h2>
         <p className="text-lg">Warehouse Name: {warehouse.name}</p>
         <p className="text-sm text-gray-500">
-            Warehouse Details:- 
-           Pincode: {warehouse.pincode} • {warehouse.address}
+          Warehouse Details:- Pincode: {warehouse.pincode} • {warehouse.address}
         </p>
       </div>
 

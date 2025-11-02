@@ -18,7 +18,7 @@ const Brand = () => {
   const fetchBrands = async () => {
     try {
       const res = await axios.get(
-        "https://ecommerce-8342.onrender.com/api/brand/list"
+        `${import.meta.env.VITE_API_BASE_URL}/brand/list`
       );
       setBrands(res.data.brands);
     } catch (err) {
@@ -36,7 +36,7 @@ const Brand = () => {
 
     try {
       await axios.delete(
-        `https://ecommerce-8342.onrender.com/api/brand/delete/${id}`
+        `${import.meta.env.VITE_API_BASE_URL}/brand/delete/${id}`
       );
       await fetchBrands();
     } catch (err) {
@@ -58,12 +58,14 @@ const Brand = () => {
     try {
       if (editingBrand) {
         await axios.put(
-          `https://ecommerce-8342.onrender.com/api/brand/update/${editingBrand.id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/brand/update/${
+            editingBrand.id
+          }`,
           formData
         );
       } else {
         await axios.post(
-          "https://ecommerce-8342.onrender.com/api/brand/add",
+          `${import.meta.env.VITE_API_BASE_URL}/brand/add`,
           formData
         );
       }
@@ -113,8 +115,13 @@ const Brand = () => {
         </button>
 
         {showForm && (
-          <form onSubmit={handleSubmit} className="mt-4 p-4 bg-gray-100 rounded shadow">
-            <h2 className="text-lg font-bold mb-4">{editingBrand ? "Edit Brand" : "Add Brand"}</h2>
+          <form
+            onSubmit={handleSubmit}
+            className="mt-4 p-4 bg-gray-100 rounded shadow"
+          >
+            <h2 className="text-lg font-bold mb-4">
+              {editingBrand ? "Edit Brand" : "Add Brand"}
+            </h2>
             <div className="space-y-4">
               <input
                 type="text"
@@ -135,7 +142,11 @@ const Brand = () => {
                 className="w-full border px-3 py-2 rounded text-sm"
               />
               {preview && (
-                <img src={preview} alt="Image Preview" className="w-32 h-32 object-cover rounded" />
+                <img
+                  src={preview}
+                  alt="Image Preview"
+                  className="w-32 h-32 object-cover rounded"
+                />
               )}
             </div>
             <div className="mt-4 flex justify-end">
@@ -144,7 +155,11 @@ const Brand = () => {
                 disabled={submitting}
                 className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {submitting ? "Saving..." : editingBrand ? "Save Changes" : "Add"}
+                {submitting
+                  ? "Saving..."
+                  : editingBrand
+                  ? "Save Changes"
+                  : "Add"}
               </button>
             </div>
           </form>

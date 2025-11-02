@@ -16,7 +16,9 @@ const RecommendedStoreProducts = () => {
   const fetchRecommendedStore = async () => {
     try {
       // CORRECT: Use the route you defined in bbmPicksRoute.js
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/recommended-stores/${id}`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/recommended-stores/${id}`
+      );
       // CORRECT: Access the 'bbmPick' property from the response data
       setRecommendedStore(res.data.recommendedStore);
     } catch (err) {
@@ -27,7 +29,9 @@ const RecommendedStoreProducts = () => {
   // Fetch products mapped to this Recommended Store
   const fetchRecommendedStoreProducts = async () => {
     try {
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/product-recommended-stores/${id}`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/product-recommended-stores/${id}`
+      );
       const mapped = res.data.map((item) => item.products);
       setProductsInStore(mapped);
     } catch (err) {
@@ -38,7 +42,9 @@ const RecommendedStoreProducts = () => {
   // Fetch all available products
   const fetchAllProducts = async () => {
     try {
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/productsroute/allproducts`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/productsroute/allproducts`
+      );
       setAllProducts(res.data);
     } catch (err) {
       console.error("Failed to fetch all products:", err);
@@ -49,10 +55,13 @@ const RecommendedStoreProducts = () => {
     if (!selectedProductId) return;
 
     try {
-      await axios.post("https://ecommerce-8342.onrender.com/api/product-recommended-stores/map", {
-        product_id: selectedProductId,
-        recommended_store_id: id,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/product-recommended-stores/map`,
+        {
+          product_id: selectedProductId,
+          recommended_store_id: id,
+        }
+      );
       setSelectedProductId("");
       await fetchRecommendedStoreProducts();
     } catch (err) {
@@ -63,10 +72,15 @@ const RecommendedStoreProducts = () => {
 
   const handleRemoveProduct = async (product_id) => {
     try {
-      await axios.post("https://ecommerce-8342.onrender.com/api/product-recommended-stores/remove", {
-        product_id,
-        recommended_store_id: id,
-      });
+      await axios.post(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/product-recommended-stores/remove`,
+        {
+          product_id,
+          recommended_store_id: id,
+        }
+      );
       await fetchRecommendedStoreProducts();
     } catch (err) {
       alert("Failed to remove product");
@@ -89,7 +103,7 @@ const RecommendedStoreProducts = () => {
 
   if (loading || !recommendedStore) return <p className="p-4">Loading...</p>;
 
-  const mappedProductIds = productsInStore.map(p => p.id);
+  const mappedProductIds = productsInStore.map((p) => p.id);
 
   return (
     <div className="p-6 max-w-screen-lg mx-auto">
@@ -100,8 +114,12 @@ const RecommendedStoreProducts = () => {
         >
           ← Back to Recommended Stores
         </button>
-        <h2 className="text-xl font-bold">Manage Products for the Recommended Store:</h2>
-        <p className="text-lg">Recommended Store Name: {recommendedStore.name}</p>
+        <h2 className="text-xl font-bold">
+          Manage Products for the Recommended Store:
+        </h2>
+        <p className="text-lg">
+          Recommended Store Name: {recommendedStore.name}
+        </p>
       </div>
 
       <div className="bg-white p-4 rounded shadow mb-6">
@@ -135,7 +153,9 @@ const RecommendedStoreProducts = () => {
       <div className="bg-white p-4 rounded shadow">
         <h3 className="font-semibold mb-4">📦 Products in Recommended Store</h3>
         {productsInStore.length === 0 ? (
-          <p className="text-gray-500">No products mapped to this Recommended Store.</p>
+          <p className="text-gray-500">
+            No products mapped to this Recommended Store.
+          </p>
         ) : (
           <table className="min-w-full text-sm">
             <thead>

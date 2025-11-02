@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Token Issue</title>
+</head>
+<body>
+    <h1>Fix Token Issue</h1>
+    <p>This page will help clear any problematic tokens from localStorage.</p>
+    
+    <div id="status"></div>
+    <button onclick="clearTokens()">Clear All Tokens</button>
+    <button onclick="checkTokens()">Check Current Tokens</button>
+    
+    <script>
+        function checkTokens() {
+            const status = document.getElementById('status');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            status.innerHTML = `
+                <h3>Current Storage:</h3>
+                <p><strong>Token:</strong> ${token || 'None'}</p>
+                <p><strong>Token Length:</strong> ${token ? token.length : 0}</p>
+                <p><strong>User:</strong> ${user || 'None'}</p>
+            `;
+        }
+        
+        function clearTokens() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('authToken');
+            
+            document.getElementById('status').innerHTML = '<p style="color: green;">✅ All tokens cleared!</p>';
+        }
+        
+        // Auto-check on load
+        checkTokens();
+    </script>
+</body>
+</html>

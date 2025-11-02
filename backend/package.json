@@ -9,7 +9,13 @@
     "server": "nodemon server.js",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "echo \"No build step required\""
+    "build": "echo \"No build step required\"",
+    "seed": "node seed-database.js",
+    "seed:product-sections": "node scripts/seed-product-sections.js",
+    "verify:product-sections": "node scripts/verify-product-sections.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "author": "rudraksh",
   "license": "ISC",

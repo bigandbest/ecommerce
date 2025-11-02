@@ -1,5 +1,5 @@
 // src/pages/UniqueSectionProducts.jsx
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -19,35 +19,41 @@ const UniqueSectionProducts = () => {
   }, [productsInSection]);
 
   // Fetch Section info
-  const fetchSection = async () => {
+  const fetchSection = useCallback(async () => {
     try {
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/unique-sections/${id}`);
+      const res = await axios.get(
+        `https://ecommerce-8342.onrender.com/api/unique-sections/${id}`
+      );
       // Some APIs return { unique_section: {...} }, others return the row directly.
       const data = res.data?.unique_section ?? res.data;
       setSection(data);
     } catch (err) {
       console.error("Failed to fetch Section details:", err);
     }
-  };
+  }, [id]);
 
   // Fetch products mapped to this Section
-  const fetchSectionProducts = async () => {
+  const fetchSectionProducts = useCallback(async () => {
     try {
       const res = await axios.get(
         `https://ecommerce-8342.onrender.com/api/unique-sections-products/section/${id}`
       );
       // API returns [{ product_id, products: {...} }]
-      const mapped = (res.data || []).map((item) => item.products).filter(Boolean);
+      const mapped = (res.data || [])
+        .map((item) => item.products)
+        .filter(Boolean);
       setProductsInSection(mapped);
     } catch (err) {
       console.error("Failed to fetch products for Section:", err);
     }
-  };
+  }, [id]);
 
   // Fetch all available products
   const fetchAllProducts = async () => {
     try {
-      const res = await axios.get(`https://ecommerce-8342.onrender.com/api/productsroute/allproducts`);
+      const res = await axios.get(
+        `https://ecommerce-8342.onrender.com/api/productsroute/allproducts`
+      );
       setAllProducts(res.data || []);
     } catch (err) {
       console.error("Failed to fetch all products:", err);
@@ -58,10 +64,13 @@ const UniqueSectionProducts = () => {
     if (!selectedProductId) return;
 
     try {
-      await axios.post(`https://ecommerce-8342.onrender.com/api/unique-sections-products/map`, {
-        product_id: selectedProductId,
-        unique_section_id: id,
-      });
+      await axios.post(
+        `https://ecommerce-8342.onrender.com/api/unique-sections-products/map`,
+        {
+          product_id: selectedProductId,
+          unique_section_id: id,
+        }
+      );
       setSelectedProductId("");
       await fetchSectionProducts();
     } catch (err) {
@@ -73,12 +82,15 @@ const UniqueSectionProducts = () => {
   const handleRemoveProduct = async (product_id) => {
     try {
       // MUST be DELETE to match your router.delete('/remove', ...)
-      await axios.delete(`https://ecommerce-8342.onrender.com/api/unique-sections-products/remove`, {
-        data: {
-          product_id,
-          unique_section_id: id,
-        },
-      });
+      await axios.delete(
+        `https://ecommerce-8342.onrender.com/api/unique-sections-products/remove`,
+        {
+          data: {
+            product_id,
+            unique_section_id: id,
+          },
+        }
+      );
       await fetchSectionProducts();
     } catch (err) {
       alert("Failed to remove product");
@@ -89,7 +101,11 @@ const UniqueSectionProducts = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      await Promise.all([fetchSection(), fetchSectionProducts(), fetchAllProducts()]);
+      await Promise.all([
+        fetchSection(),
+        fetchSectionProducts(),
+        fetchAllProducts(),
+      ]);
       setLoading(false);
     };
     load();

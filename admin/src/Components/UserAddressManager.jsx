@@ -1,35 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { 
+import { useState, useEffect, useCallback } from "react";
+import PropTypes from "prop-types";
+import {
   Box,
-  Card, 
-  Text, 
-  Group, 
-  Button, 
+  Card,
+  Text,
+  Group,
+  Button,
   Stack,
   ActionIcon,
   Badge,
   Modal,
   LoadingOverlay,
   Tooltip,
-  Divider
+  Divider,
 } from "@mantine/core";
-import { 
-  FaEdit, 
-  FaTrash, 
-  FaStar, 
+import {
+  FaEdit,
+  FaTrash,
+  FaStar,
   FaPlus,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 
 import AddressForm from "./AddressForm";
-import { 
-  getUserAddresses, 
-  addUserAddress, 
-  updateUserAddress, 
+import {
+  getUserAddresses,
+  addUserAddress,
+  updateUserAddress,
   deleteUserAddress,
-  setAddressAsDefault
+  setAddressAsDefault,
 } from "../utils/supabaseApi";
-import supabase, { supabaseAdmin } from "../utils/supabase";
+import { supabaseAdmin } from "../utils/supabase";
 
 /**
  * Component to manage a user's multiple addresses
@@ -59,23 +60,23 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
       address.state,
       address.postal_code,
       address.country,
-      address.landmark
-    ].filter(part => part && part.trim() !== '');
-    
-    return parts.join(', ');
+      address.landmark,
+    ].filter((part) => part && part.trim() !== "");
+
+    return parts.join(", ");
   };
 
   // Load user addresses
-  const loadAddresses = async () => {
+  const loadAddresses = useCallback(async () => {
     if (!userId) {
       setError("No user ID provided");
       setAddresses([]);
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       // Try admin client first (bypasses RLS)
       const { data: adminData, error: adminError } = await supabaseAdmin
@@ -83,15 +84,15 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
         .select("*")
         .eq("user_id", userId)
         .order("is_default", { ascending: false });
-        
+
       if (!adminError) {
         setAddresses(adminData || []);
         return;
       }
-      
+
       // Fallback to API function
       const result = await getUserAddresses(userId);
-      
+
       if (result.success) {
         setAddresses(result.addresses || []);
       } else {
@@ -102,7 +103,7 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   // Load addresses on component mount and when userId changes
   useEffect(() => {
@@ -114,15 +115,15 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
     } else {
       setAddresses([]);
     }
-  }, [userId]);
+  }, [userId, loadAddresses]);
 
   // Handle adding a new address
   const handleAddAddress = async (addressData) => {
     setActionLoading(true);
-    
+
     try {
       const result = await addUserAddress(userId, addressData);
-      
+
       if (result.success) {
         await loadAddresses();
         setAddAddressModalOpen(false);
@@ -130,7 +131,7 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
       } else {
         setError(result.error);
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setActionLoading(false);
@@ -143,12 +144,12 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
       setError("No address selected for update");
       return;
     }
-    
+
     setActionLoading(true);
-    
+
     try {
       const result = await updateUserAddress(currentAddress.id, addressData);
-      
+
       if (result.success) {
         await loadAddresses();
         setEditAddressModalOpen(false);
@@ -157,7 +158,7 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
       } else {
         setError(result.error);
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setActionLoading(false);
@@ -167,12 +168,12 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
   // Handle deleting an address
   const handleDeleteAddress = async () => {
     if (!currentAddress) return;
-    
+
     setActionLoading(true);
-    
+
     try {
       const result = await deleteUserAddress(currentAddress.id);
-      
+
       if (result.success) {
         await loadAddresses();
         setDeleteAddressModalOpen(false);
@@ -180,7 +181,7 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
       } else {
         setError(result.error);
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setActionLoading(false);
@@ -190,29 +191,27 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
   // Handle setting an address as default
   const handleSetDefault = async (addressId) => {
     setLoading(true);
-    
+
     try {
       const result = await setAddressAsDefault(userId, addressId);
-      
+
       if (result.success) {
         await loadAddresses();
         if (onAddressChange) onAddressChange();
       } else {
         setError(result.error);
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
-  
-
 
   return (
     <Box pos="relative" pb="md">
       <LoadingOverlay visible={loading} />
-      
+
       {error && (
         <Text color="red" mb="md">
           Error: {error}
@@ -223,8 +222,8 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
         <Text weight={500} size="lg">
           Addresses ({addresses.length})
         </Text>
-        <Button 
-          leftSection={<FaPlus size={14} />} 
+        <Button
+          leftSection={<FaPlus size={14} />}
           onClick={() => setAddAddressModalOpen(true)}
           size="sm"
         >
@@ -235,7 +234,7 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
       {addresses.length === 0 ? (
         <Card p="xl" withBorder mb="md">
           <Text align="center" color="dimmed" mb="md">
-            No addresses found. Click "Add New Address" to add one.
+            No addresses found. Click &quot;Add New Address&quot; to add one.
           </Text>
         </Card>
       ) : (
@@ -246,15 +245,13 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
                 <Group>
                   <FaMapMarkerAlt />
                   <Text weight={500}>{address.address_name}</Text>
-                  {address.is_default && (
-                    <Badge color="blue">Default</Badge>
-                  )}
+                  {address.is_default && <Badge color="blue">Default</Badge>}
                 </Group>
                 <Group spacing="xs">
                   {!address.is_default && (
                     <Tooltip label="Set as default">
-                      <ActionIcon 
-                        color="blue" 
+                      <ActionIcon
+                        color="blue"
                         onClick={() => handleSetDefault(address.id)}
                       >
                         <FaStar size={16} />
@@ -262,8 +259,8 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
                     </Tooltip>
                   )}
                   <Tooltip label="Edit address">
-                    <ActionIcon 
-                      color="blue" 
+                    <ActionIcon
+                      color="blue"
                       onClick={() => {
                         setCurrentAddress(address);
                         setEditAddressModalOpen(true);
@@ -273,8 +270,8 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
                     </ActionIcon>
                   </Tooltip>
                   <Tooltip label="Delete address">
-                    <ActionIcon 
-                      color="red" 
+                    <ActionIcon
+                      color="red"
                       onClick={() => {
                         setCurrentAddress(address);
                         setDeleteAddressModalOpen(true);
@@ -286,9 +283,9 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
                   </Tooltip>
                 </Group>
               </Group>
-              
+
               <Divider my="sm" />
-              
+
               <Text size="sm">{formatAddress(address)}</Text>
             </Card>
           ))}
@@ -350,10 +347,13 @@ const UserAddressManager = ({ userId, onAddressChange }) => {
           </Button>
         </Group>
       </Modal>
-
-
     </Box>
   );
+};
+
+UserAddressManager.propTypes = {
+  userId: PropTypes.string.isRequired,
+  onAddressChange: PropTypes.func,
 };
 
 export default UserAddressManager;

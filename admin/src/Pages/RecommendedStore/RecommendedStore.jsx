@@ -18,7 +18,7 @@ const RecommendedStore = () => {
   const fetchRecommendedStores = async () => {
     try {
       const res = await axios.get(
-        "https://ecommerce-8342.onrender.com/api/recommended-stores/list"
+        `${import.meta.env.VITE_API_BASE_URL}/recommended-stores/list`
       );
       setRecommendedStores(res.data.recommendedStores);
     } catch (err) {
@@ -36,7 +36,7 @@ const RecommendedStore = () => {
 
     try {
       await axios.delete(
-        `https://ecommerce-8342.onrender.com/api/recommended-stores/delete/${id}`
+        `${import.meta.env.VITE_API_BASE_URL}/recommended-stores/delete/${id}`
       );
       await fetchRecommendedStores();
     } catch (err) {
@@ -48,23 +48,25 @@ const RecommendedStore = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    
+
     // Create FormData object to send file
     const formData = new FormData();
     formData.append("name", form.name);
     if (form.imageFile) {
-        formData.append("image_url", form.imageFile); // Use "image_url" to match your backend's Multer middleware
+      formData.append("image_url", form.imageFile); // Use "image_url" to match your backend's Multer middleware
     }
 
     try {
       if (editingRecommendedStore) {
         await axios.put(
-          `https://ecommerce-8342.onrender.com/api/recommended-stores/update/${editingBbmPick.id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/recommended-stores/update/${
+            editingRecommendedStore.id
+          }`,
           formData
         );
       } else {
         await axios.post(
-          "https://ecommerce-8342.onrender.com/api/recommended-stores/add",
+          `${import.meta.env.VITE_API_BASE_URL}/recommended-stores/add`,
           formData
         );
       }
@@ -80,7 +82,7 @@ const RecommendedStore = () => {
       setSubmitting(false);
     }
   };
-  
+
   const handleEdit = (pick) => {
     setEditingRecommendedStore(pick);
     setForm({
@@ -98,7 +100,7 @@ const RecommendedStore = () => {
   return (
     <div className="p-4 sm:p-6 max-w-screen-xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Recommended Stores</h1>
-      
+
       {/* Form for Add/Edit */}
       <div className="mb-6">
         <button
@@ -114,8 +116,15 @@ const RecommendedStore = () => {
         </button>
 
         {showForm && (
-          <form onSubmit={handleSubmit} className="mt-4 p-4 bg-gray-100 rounded shadow">
-            <h2 className="text-lg font-bold mb-4">{editingRecommendedStore ? "Edit Recommended Store" : "Add Recommended Store"}</h2>
+          <form
+            onSubmit={handleSubmit}
+            className="mt-4 p-4 bg-gray-100 rounded shadow"
+          >
+            <h2 className="text-lg font-bold mb-4">
+              {editingRecommendedStore
+                ? "Edit Recommended Store"
+                : "Add Recommended Store"}
+            </h2>
             <div className="space-y-4">
               <input
                 type="text"
@@ -129,14 +138,18 @@ const RecommendedStore = () => {
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
-                    const file = e.target.files[0];
-                    setForm({ ...form, imageFile: file });
-                    setPreview(URL.createObjectURL(file));
+                  const file = e.target.files[0];
+                  setForm({ ...form, imageFile: file });
+                  setPreview(URL.createObjectURL(file));
                 }}
                 className="w-full border px-3 py-2 rounded text-sm"
               />
               {preview && (
-                  <img src={preview} alt="Image Preview" className="w-32 h-32 object-cover rounded" />
+                <img
+                  src={preview}
+                  alt="Image Preview"
+                  className="w-32 h-32 object-cover rounded"
+                />
               )}
             </div>
             <div className="mt-4 flex justify-end">
@@ -145,7 +158,11 @@ const RecommendedStore = () => {
                 disabled={submitting}
                 className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {submitting ? "Saving..." : editingRecommendedStore ? "Save Changes" : "Add"}
+                {submitting
+                  ? "Saving..."
+                  : editingRecommendedStore
+                  ? "Save Changes"
+                  : "Add"}
               </button>
             </div>
           </form>
@@ -194,7 +211,9 @@ const RecommendedStore = () => {
                     </button>
                     <button
                       className="bg-green-600 text-white px-3 py-1 rounded"
-                      onClick={() => navigate(`/recommendedstoreproducts/${pick.id}`)}
+                      onClick={() =>
+                        navigate(`/recommendedstoreproducts/${pick.id}`)
+                      }
                     >
                       📦 Products
                     </button>

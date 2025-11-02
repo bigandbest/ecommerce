@@ -1,241 +1,208 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
-import supabase from "../utils/supabase.ts";
-import { createUserProfileWithAddress } from "../utils/supabaseApi.js";
-import { useLocationContext } from "./LocationContext.jsx";
+// src/contexts/AuthContext.jsx
+"use client";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import supabase from "../services/supabase";
+import { getUserProfile } from "../api/userApi";
 
-// Create the auth context
+// Create context
 const AuthContext = createContext();
 
 // Custom hook to use the auth context
 export const useAuth = () => useContext(AuthContext);
-
-// Session timeout in milliseconds (30 minutes)
-const SESSION_TIMEOUT = 30 * 60 * 1000;
 
 // Provider component
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userRole, setUserRole] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (data?.session) {
-        // Always merge user_metadata into user and ensure email is preserved
-        const user = data.session.user;
-        const name = user?.user_metadata?.name;
-        /* console.log('Initial session user data:', user);
-        console.log('User email from session:', user.email); */
-        setCurrentUser({
-          ...user,
-          name,
-          email: user.email, // Explicitly ensure email is available
-          avatar: user.user_metadata?.avatar || null,
-          access_token: data.session.access_token, // Add access token
-          refresh_token: data.session.refresh_token, // Add refresh token
-        });
-        setLoading(false);
-      } else {
+    setIsHydrated(true);
+    
+    if (!supabase) {
+      console.warn("Supabase client not initialized");
+      setLoading(false);
+      return;
+    }
+
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        console.log("Starting auth session check...");
+        
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session error:", error);
+        } else {
+          console.log("Session check complete:", !!session?.user);
+          setCurrentUser(session?.user || null);
+
+          // Store session for consistency (only on client-side)
+          if (session?.user && typeof window !== 'undefined') {
+            try {
+              localStorage.setItem(
+                "user_session",
+                JSON.stringify({
+                  user: session.user,
+                  access_token: session.access_token,
+                  expires_at: session.expires_at,
+                })
+              );
+            } catch (storageError) {
+              console.warn("localStorage error:", storageError);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Auth initialization error:", err);
         setCurrentUser(null);
+      } finally {
         setLoading(false);
       }
     };
-    getSession();
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session?.user) {
-          const user = session.user;
-          const name = user?.user_metadata?.name;
-          /* console.log('Auth state change user data:', user);
-        console.log('User email from auth state change:', user.email); */
-          setCurrentUser({
-            ...user,
-            name,
-            email: user.email, // Explicitly ensure email is available
-            avatar: user.user_metadata?.avatar || null,
-            access_token: session.access_token, // Add access token
-            refresh_token: session.refresh_token, // Add refresh token
-          });
-        } else {
-          setCurrentUser(null);
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      try {
+        console.log("Auth state change:", event, !!session?.user);
+        setCurrentUser(session?.user || null);
+        setLoading(false);
+
+        // Update localStorage for session consistency (only on client-side)
+        if (typeof window !== 'undefined') {
+          if (session?.user) {
+            try {
+              localStorage.setItem(
+                "user_session",
+                JSON.stringify({
+                  user: session.user,
+                  access_token: session.access_token,
+                  expires_at: session.expires_at,
+                })
+              );
+              // Fetch user profile data when user is authenticated
+              await fetchUserProfile(session.user.id);
+            } catch (storageError) {
+              console.warn("localStorage error in auth change:", storageError);
+            }
+          } else {
+            try {
+              localStorage.removeItem("user_session");
+            } catch (storageError) {
+              console.warn("localStorage remove error:", storageError);
+            }
+            setUserProfile(null);
+          }
         }
+      } catch (error) {
+        console.error("Auth state change error:", error);
+        setLoading(false);
       }
-    );
+    });
+
     return () => {
-      listener?.subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, []);
 
-  // Supabase login
-  const loginUser = async (email, password) => {
+  // Authentication functions
+  const login = async (email, password) => {
+    if (!supabase) {
+      const error = "Supabase client not initialized";
+      setError(error);
+      return { success: false, error };
+    }
+
     try {
       setError(null);
+      setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (error) throw error;
-      // Merge user_metadata for name and ensure email is available
-      const user = data.user;
-      const name = user?.user_metadata?.name;
-      const userWithToken = {
-        ...user,
-        name,
-        email: user.email, // Explicitly ensure email is available
-        avatar: user.user_metadata?.avatar || null,
-        access_token: data.session?.access_token, // Add access token
-        refresh_token: data.session?.refresh_token, // Add refresh token
-      };
-      setCurrentUser(userWithToken);
-      return { success: true, user: userWithToken };
+      if (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
+      }
+      setCurrentUser(data.user);
+      return { success: true, user: data.user };
     } catch (err) {
       setError(err.message);
       return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Supabase register
-  const registerUser = async (
-    name,
-    email,
-    password,
-    phone = "",
-    accountType = "individual",
-    companyName = "",
-    gstin = "",
-    detailedAddress = {}
-  ) => {
+  const register = async (userData) => {
+    if (!supabase) {
+      const error = "Supabase client not initialized";
+      setError(error);
+      return { success: false, error };
+    }
+
     try {
       setError(null);
-      // 1. Register with Supabase Auth
+      setLoading(true);
+      const { email, password, ...metadata } = userData;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            name,
-            phone,
-            companyName,
-            accountType,
-            gstin,
-            role: "customer",
-          },
+          data: metadata,
         },
       });
-      if (error) throw error;
-      const authUser = data.user;
-      if (!authUser) throw new Error("No user returned from Auth");
-
-      // 2. Insert into users table using createUserProfileWithAddress, passing Auth id
-      const userProfile = {
-        id: authUser.id,
-        email,
-        name,
-        phone,
-        account_type: accountType,
-        // Add detailed address fields using frontend naming
-        houseNumber: detailedAddress.houseNumber || "",
-        streetAddress: detailedAddress.streetAddress || "",
-        suiteUnitFloor: detailedAddress.suiteUnitFloor || "",
-        locality: detailedAddress.locality || "",
-        area: detailedAddress.area || "",
-        city: detailedAddress.city || "",
-        state: detailedAddress.state || "",
-        postalCode: detailedAddress.postalCode || "",
-        country: detailedAddress.country || "India",
-        landmark: detailedAddress.landmark || "",
-        company_name: accountType === "company" ? companyName : null,
-        gstin: accountType === "company" ? gstin : null,
-        role: "customer",
-        is_active: true,
-        avatar: null,
-        photo_url: null,
-      };
-
-      const addResult = await createUserProfileWithAddress(userProfile);
-      if (!addResult.success) {
-        setError(addResult.error);
-        return { success: false, error: addResult.error };
+      if (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
       }
-
-      // Set currentUser directly from authUser after successful signup and DB insert
-      const userName = authUser.user_metadata?.name || name;
-      setCurrentUser({ ...authUser, name: userName });
-      return { success: true, user: { ...authUser, name: userName } };
+      setCurrentUser(data.user);
+      return { success: true, user: data.user };
     } catch (err) {
       setError(err.message);
       return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Supabase logout
-  const logoutUser = async () => {
-    try {
-      await supabase.auth.signOut();
-      setCurrentUser(null);
-      clearLocationData();
-      return { success: true };
-    } catch (err) {
-      setError(err.message);
-      return { success: false, error: err.message };
+  const logout = async () => {
+    if (!supabase) {
+      const error = "Supabase client not initialized";
+      setError(error);
+      return { success: false, error };
     }
-  };
 
-  // Supabase reset password
-  const resetPassword = async (email) => {
-    try {
-      console.log("Reset password called with email:", email);
-      if (!email || email.trim() === "") {
-        throw new Error("Email is required for password reset");
-      }
-
-      // Determine the correct redirect URL based on environment
-      let redirectUrl;
-      if (window.location.hostname === "shop.psetu.com") {
-        redirectUrl = "https://shop.psetu.com/reset-password";
-      } else if (
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1"
-      ) {
-        redirectUrl = `${window.location.origin}/reset-password`;
-      } else {
-        // For any other domain, use the current origin
-        redirectUrl = `${window.location.origin}/reset-password`;
-      }
-
-      console.log("Redirect URL:", redirectUrl);
-      console.log("Current hostname:", window.location.hostname);
-      console.log("Current origin:", window.location.origin);
-
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
-      });
-      console.log("Supabase reset response:", { data, error });
-      if (error) throw error;
-      return { success: true };
-    } catch (err) {
-      console.error("Reset password error:", err);
-      setError(err.message);
-      return { success: false, error: err.message };
-    }
-  };
-
-  // Supabase update password (for logged-in users)
-  const updatePassword = async (newPassword) => {
     try {
       setError(null);
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      if (error) throw error;
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
+      }
+      // Clear any locally stored session info for immediate UI update (only on client-side)
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem("user_session");
+          // Also remove the supabase stored token key if present
+          localStorage.removeItem("customer-supabase-auth-token");
+        } catch (storageError) {
+          console.warn("localStorage remove error on logout:", storageError);
+        }
+      }
+
+      setCurrentUser(null);
+      setUserProfile(null);
+      setLoading(false);
       return { success: true };
     } catch (err) {
       setError(err.message);
@@ -243,50 +210,96 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Refresh user profile from database
-  const refreshUserProfile = async () => {
-    if (!currentUser?.id) return;
+  const resetPassword = async (email) => {
+    if (!supabase) {
+      const error = "Supabase client not initialized";
+      setError(error);
+      return { success: false, error };
+    }
 
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", currentUser.id)
-        .single();
-
-      if (data && !error) {
-        setCurrentUser((prev) => ({
-          ...prev,
-          ...data,
-          photo_url: data.photo_url,
-        }));
+      setError(null);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
       }
-    } catch (error) {
-      console.error("Error refreshing user profile:", error);
+      return { success: true };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
     }
   };
 
+  // Fetch user profile data
+  const fetchUserProfile = async (userId) => {
+    if (!userId) return;
+
+    try {
+      const result = await getUserProfile();
+      if (result.success) {
+        setUserProfile(result.user);
+      } else {
+        console.warn("Failed to fetch user profile:", result);
+      }
+    } catch (error) {
+      console.warn("Error fetching user profile:", error);
+    }
+  };
+
+  // Get access token from current session
+  const getAccessToken = async () => {
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error getting session:", error);
+        return null;
+      }
+      return session?.access_token || null;
+    } catch (error) {
+      console.error("Error getting access token:", error);
+      return null;
+    }
+  };
+
+  // Check if session is valid (only on client-side)
+  const isSessionValid = () => {
+    if (typeof window === 'undefined') return false;
+    
+    const storedSession = localStorage.getItem("user_session");
+    if (!storedSession) return false;
+
+    try {
+      const session = JSON.parse(storedSession);
+      const now = Date.now() / 1000;
+      return session.expires_at > now;
+    } catch {
+      return false;
+    }
+  };
+
+  // Context value
   const value = {
     currentUser,
-    userRole,
-    isAdmin: userRole === "admin",
+    userProfile,
     isAuthenticated: !!currentUser,
     loading,
     error,
-    login: loginUser,
-    register: registerUser,
-    logout: logoutUser,
+    login,
+    register,
+    logout,
     resetPassword,
-    updatePassword,
-    setCurrentUser,
-    refreshUserProfile,
+    getAccessToken,
+    isSessionValid,
+    setUserProfile,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;

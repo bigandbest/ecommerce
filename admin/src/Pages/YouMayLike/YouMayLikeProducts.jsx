@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = "https://ecommerce-8342.onrender.com/api/you-may-like-products";
-const API_URL_ALL_PRODUCTS = "https://ecommerce-8342.onrender.com/api/productsroute";
+const API_URL_ALL_PRODUCTS =
+  "https://ecommerce-8342.onrender.com/api/productsroute";
 
 const YouMayLikeProducts = () => {
-  const navigate = useNavigate();
-
   const [youMayLikeProducts, setYouMayLikeProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -63,10 +61,7 @@ const YouMayLikeProducts = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchYouMayLikeProducts(),
-        fetchAllProducts(),
-      ]);
+      await Promise.all([fetchYouMayLikeProducts(), fetchAllProducts()]);
       setLoading(false);
     };
     loadData();
@@ -74,11 +69,13 @@ const YouMayLikeProducts = () => {
 
   if (loading) return <p className="p-4">Loading...</p>;
 
-  const mappedProductIds = youMayLikeProducts.map(p => p.product_id);
+  const mappedProductIds = youMayLikeProducts.map((p) => p.product_id);
 
   return (
     <div className="p-6 max-w-screen-lg mx-auto">
-      <h2 className="text-xl font-bold mb-4">Manage "You May Like" Products</h2>
+      <h2 className="text-xl font-bold mb-4">
+        Manage &quot;You May Like&quot; Products
+      </h2>
 
       {/* Add Product Section */}
       <div className="bg-white p-4 rounded shadow mb-6">
@@ -111,7 +108,9 @@ const YouMayLikeProducts = () => {
 
       {/* Product List Table */}
       <div className="bg-white p-4 rounded shadow">
-        <h3 className="font-semibold mb-4">📦 Current "You May Like" Products</h3>
+        <h3 className="font-semibold mb-4">
+          📦 Current &quot;You May Like&quot; Products
+        </h3>
         {youMayLikeProducts.length === 0 ? (
           <p className="text-gray-500">No products in this section.</p>
         ) : (
@@ -129,12 +128,18 @@ const YouMayLikeProducts = () => {
               {youMayLikeProducts.map((item) => (
                 <tr key={item.product_id} className="border-t">
                   <td className="py-2 px-4">
-                    <img src={item.products.image} alt={item.products.name} className="h-12 w-12 object-contain" />
+                    <img
+                      src={item.products.image}
+                      alt={item.products.name}
+                      className="h-12 w-12 object-contain"
+                    />
                   </td>
                   <td className="py-2 px-4">{item.products.name}</td>
                   <td className="py-2 px-4">₹{item.products.price}</td>
                   {/* Assuming 'in_stock' is a boolean or number in your products table */}
-                  <td className="py-2 px-4">{item.products.in_stock ? "Yes" : "No"}</td>
+                  <td className="py-2 px-4">
+                    {item.products.in_stock ? "Yes" : "No"}
+                  </td>
                   <td className="py-2 px-4">
                     <button
                       onClick={() => handleRemoveProduct(item.product_id)}

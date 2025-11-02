@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { AdminAuthProvider, useAdminAuth } from "./contexts/AdminAuthContext";
 import {
   createBrowserRouter,
@@ -12,7 +12,7 @@ import "@mantine/notifications/styles.css";
 import "@mantine/spotlight/styles.css";
 import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
-import { Spotlight, spotlight } from "@mantine/spotlight";
+import { Spotlight } from "@mantine/spotlight";
 import {
   FaSearch,
   FaHome,
@@ -25,6 +25,7 @@ import {
 import Sidebar from "./Components/Sidebar";
 import Header from "./Components/Header";
 import AuthenticationForm from "./Components/AuthenticationForm";
+import ErrorBoundary from "./Components/ErrorBoundary";
 
 // Pages
 import Dashboard from "./Pages/Dashboard";
@@ -60,6 +61,7 @@ import QuickPickGroupPage from "./Pages/QuickPicks/QuickPickGroup.jsx";
 import QuickPickGroupProducts from "./Pages/QuickPicks/QuickPickGroupProducts.jsx";
 import RecommendedStore from "./Pages/RecommendedStore/RecommendedStore.jsx";
 import RecommendedStoreProducts from "./Pages/RecommendedStore/RecommendedStoreProducts.jsx";
+import ShopByStore from "./Pages/ShopByStore/ShopByStore.jsx";
 import SavingZone from "./Pages/SavingZone/SavingZone.jsx";
 import SavingZoneGroupPage from "./Pages/SavingZone/SavingZoneGroup.jsx";
 import SavingZoneGroupProducts from "./Pages/SavingZone/SavingZoneGroupProducts.jsx";
@@ -72,8 +74,14 @@ import AddBannerGroup from "./Pages/AddBanners/AddBannerGroup.jsx";
 import AddBannerGroupProducts from "./Pages/AddBanners/AddBannerGroupProducts.jsx";
 import UniqueSection from "./Pages/UniqueSection/UniqueSection.jsx";
 import UniqueSectionProducts from "./Pages/UniqueSection/UniqueSectionProduct.jsx";
+import VideoCards from "./Pages/VideoCards/VideoCards.jsx";
 import BbmDost from "./Pages/BbmDost/BbmDost.jsx";
 import ReturnOrdersAdmin from "./Pages/ReturnOrders/index.jsx";
+import BulkOrderEnquiries from "./Components/BulkOrders/BulkOrderEnquiries.jsx";
+import WholesaleBulkOrders from "./Components/BulkOrders/WholesaleBulkOrders.jsx";
+import BulkProductSettings from "./Components/BulkProducts/BulkProductSettings.jsx";
+import ProductSectionsManagement from "./Pages/ProductSections/index.jsx";
+import StoreSectionMapping from "./Pages/StoreSectionMapping/StoreSectionMapping.jsx";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -87,7 +95,7 @@ const MainLayout = () => {
       <Sidebar isOpen={sidebarOpen} />
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
-          sidebarOpen ? "ml-[240px]" : "ml-[70px]"
+          sidebarOpen ? "ml-60" : "ml-[70px]"
         }`}
       >
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
@@ -286,6 +294,10 @@ function App() {
           element: <AddBannerGroupProducts />,
         },
         {
+          path: "/video-cards",
+          element: <VideoCards />,
+        },
+        {
           path: "/brands",
           element: <Brand />,
         },
@@ -312,6 +324,14 @@ function App() {
         {
           path: "/recommendedstoreproducts/:id",
           element: <RecommendedStoreProducts />,
+        },
+        {
+          path: "/shop-by-stores",
+          element: <ShopByStore />,
+        },
+        {
+          path: "/store-section-mapping",
+          element: <StoreSectionMapping />,
         },
         {
           path: "/saving-zone",
@@ -341,12 +361,28 @@ function App() {
           path: "/bbm-dost",
           element: <BbmDost />,
         },
+        {
+          path: "/bulk-order-enquiries",
+          element: <BulkOrderEnquiries />,
+        },
+        {
+          path: "/wholesale-bulk-orders",
+          element: <WholesaleBulkOrders />,
+        },
+        {
+          path: "/bulk-product-settings",
+          element: <BulkProductSettings />,
+        },
+        {
+          path: "/product-sections",
+          element: <ProductSectionsManagement />,
+        },
       ],
     },
   ]);
 
   return (
-    <>
+    <ErrorBoundary>
       <AdminAuthProvider>
         <ModalsProvider>
           <Notifications position="top-right" zIndex={1000} />
@@ -361,7 +397,7 @@ function App() {
           <RouterProvider router={router} />
         </ModalsProvider>
       </AdminAuthProvider>
-    </>
+    </ErrorBoundary>
   );
 }
 
@@ -369,12 +405,29 @@ function App() {
 import PropTypes from "prop-types";
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAdminAuth();
+  const { isAuthenticated, loading, error } = useAdminAuth();
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen mantine-bg">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+        <p className="ml-4 text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen mantine-bg">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Authentication Error: {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

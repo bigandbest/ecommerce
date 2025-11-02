@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../contexts/AdminAuthContext";
-import { getAllUsers, getAllOrders } from "../../utils/supabaseApi";
-import supabase from "../../utils/supabase";
-import React, { useState, useEffect } from "react";
+import { getAllUsers } from "../../utils/supabaseApi";
+import { supabase } from "../../utils/supabase";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RiDashboardFill,
@@ -20,12 +20,13 @@ import {
   FaTrademark,
   FaDatabase,
   FaWallet,
+  FaVideo,
 } from "react-icons/fa";
-import { IoLogOut } from "react-icons/io5";
 import { HiArchive } from "react-icons/hi";
 import { MdCategory } from "react-icons/md";
 import { GiTargetPoster } from "react-icons/gi";
 import { Tooltip } from "@mantine/core";
+import PropTypes from "prop-types";
 
 const menuAnimation = {
   hidden: { opacity: 0, height: 0 },
@@ -40,18 +41,12 @@ const Sidebar = ({ isOpen = true }) => {
   const [submenuIndex, setSubmenuIndex] = useState(null);
   // Sidebar counts
   const [userCount, setUserCount] = useState(0);
-  const [orderCount, setOrderCount] = useState(0);
-  const [productCount, setProductCount] = useState(0);
   const [enquiryCount, setEnquiryCount] = useState(0);
 
   useEffect(() => {
     async function fetchCounts() {
       const usersRes = await getAllUsers();
       setUserCount(usersRes.users?.length || 0);
-      const ordersRes = await getAllOrders();
-      setOrderCount(ordersRes.orders?.length || 0);
-      const { data: products } = await supabase.from("products").select();
-      setProductCount(products?.length || 0);
       // Only count enquiries where status is 'pending' and type is not 'custom_printing'
       const { data: enquiries } = await supabase
         .from("enquiries")
@@ -111,9 +106,20 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/categories",
     },
     {
+      title: "Product Sections",
+      icon: <FaList />,
+      path: "/product-sections",
+      description: "Manage homepage product sections",
+    },
+    {
       title: "Banners",
       icon: <GiTargetPoster />,
       path: "/banners",
+    },
+    {
+      title: "Video Cards",
+      icon: <FaVideo />,
+      path: "/video-cards",
     },
     {
       title: "Promotions",
@@ -128,7 +134,7 @@ const Sidebar = ({ isOpen = true }) => {
       description: "Manage storage usage and files",
     },
     {
-      title: "B&B",
+      title: "Daily Deals",
       icon: <FaList />,
       path: "/b&b",
     },
@@ -193,6 +199,27 @@ const Sidebar = ({ isOpen = true }) => {
       path: "/return-orders",
     },
     {
+      title: "Bulk Orders",
+      icon: <FaList />,
+      submenu: [
+        {
+          title: "B2B Enquiries",
+          icon: <RiQuestionnaireFill />,
+          path: "/bulk-order-enquiries",
+        },
+        {
+          title: "Wholesale Orders",
+          icon: <HiArchive />,
+          path: "/wholesale-bulk-orders",
+        },
+        {
+          title: "Bulk Product Settings",
+          icon: <RiSettings4Fill />,
+          path: "/bulk-product-settings",
+        },
+      ],
+    },
+    {
       title: "Warehouses",
       icon: <FaList />,
       path: "/warehouselist",
@@ -200,7 +227,13 @@ const Sidebar = ({ isOpen = true }) => {
     {
       title: "Shop By Stores",
       icon: <FaList />,
-      path: "/recommended-stores",
+      path: "/shop-by-stores",
+    },
+    {
+      title: "Store-Section Mapping",
+      icon: <RiSettings4Fill />,
+      path: "/store-section-mapping",
+      description: "Map stores to sections and manage product assignments",
     },
     {
       title: "Corporate Celebration",
@@ -236,7 +269,7 @@ const Sidebar = ({ isOpen = true }) => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 h-screen bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg z-20"
+      className="fixed top-0 left-0 h-screen bg-linear-to-br from-slate-800 to-slate-900 text-white shadow-lg z-20"
       animate={{
         width: isOpen ? "240px" : "70px",
         transition: { duration: 0.3, type: "spring", stiffness: 120 },
@@ -248,7 +281,7 @@ const Sidebar = ({ isOpen = true }) => {
           className="p-4 flex items-center"
           animate={{ justifyContent: isOpen ? "flex-start" : "center" }}
         >
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500 shadow-lg">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-linear-to-r from-red-500 to-pink-500 shadow-lg">
             <motion.span
               className="text-white font-bold text-xl"
               animate={{ opacity: 1 }}
@@ -382,7 +415,7 @@ const Sidebar = ({ isOpen = true }) => {
                       to={item.path}
                       className={`flex items-center p-2.5 text-sm rounded-md transition-colors ${
                         isActive(item.path)
-                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white"
+                          ? "bg-linear-to-r from-red-500 to-pink-500 text-white"
                           : "text-gray-300 hover:bg-slate-700/50 hover:text-white"
                       }`}
                     >
@@ -443,6 +476,10 @@ const Sidebar = ({ isOpen = true }) => {
       </div>
     </motion.div>
   );
+};
+
+Sidebar.propTypes = {
+  isOpen: PropTypes.bool,
 };
 
 export default Sidebar;

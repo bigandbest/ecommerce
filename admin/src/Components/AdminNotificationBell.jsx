@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ActionIcon, Group, Indicator } from "@mantine/core";
 import { IconBell } from "@tabler/icons-react";
-import { supabase } from "../../../config/supabaseClient";
+import { supabase } from "../utils/supabase";
 
 const AdminNotificationBell = ({ onClick }) => {
   const [unreadCount, setUnreadCount] = useState(0);
