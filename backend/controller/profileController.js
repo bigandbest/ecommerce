@@ -43,33 +43,44 @@ export const uploadProfileImage = async (req, res) => {
       });
     }
 
-    // Upload image to Cloudinary
-    const uploadResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            resource_type: "image",
-            folder: "profile-images",
-            public_id: `user_${userId}_${Date.now()}`,
-            transformation: [
-              { width: 300, height: 300, crop: "fill", gravity: "face" },
-              { quality: "auto", fetch_format: "auto" },
-            ],
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        )
-        .end(req.file.buffer);
-    });
+    // Try to create bucket first, then upload
+    const fileName = `profile_${userId}_${Date.now()}.${req.file.originalname.split('.').pop()}`;
+    
+    // Try to create bucket if it doesn't exist
+    try {
+      await supabase.storage.createBucket('profile-images', { public: true });
+    } catch (bucketError) {
+      // Bucket might already exist, continue
+    }
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('profile-images')
+      .upload(fileName, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to upload image: " + uploadError.message,
+      });
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('profile-images')
+      .getPublicUrl(fileName);
+
+    const imageUrl = urlData.publicUrl;
 
     // Update user profile with new image URL
     const { data, error } = await supabase
       .from("users")
       .update({
-        photo_url: uploadResult.secure_url,
-        avatar: uploadResult.secure_url, // Keep both fields for compatibility
+        photo_url: imageUrl,
+        avatar: imageUrl,
       })
       .eq("id", userId)
       .select("*")
@@ -86,7 +97,7 @@ export const uploadProfileImage = async (req, res) => {
     res.json({
       success: true,
       message: "Profile image uploaded successfully",
-      imageUrl: uploadResult.secure_url,
+      imageUrl: imageUrl,
       user: data,
     });
   } catch (error) {
@@ -123,18 +134,15 @@ export const deleteProfileImage = async (req, res) => {
       });
     }
 
-    // Extract public_id from Cloudinary URL if it exists
+    // Delete from Supabase storage if image exists
     if (userData?.photo_url) {
       try {
-        const urlParts = userData.photo_url.split("/");
-        const publicIdWithExt = urlParts[urlParts.length - 1];
-        const publicId = `profile-images/${publicIdWithExt.split(".")[0]}`;
-
-        // Delete from Cloudinary
-        await cloudinary.uploader.destroy(publicId);
-      } catch (cloudinaryError) {
-        console.error("Cloudinary deletion error:", cloudinaryError);
-        // Continue with database update even if Cloudinary deletion fails
+        const fileName = userData.photo_url.split('/').pop();
+        await supabase.storage
+          .from('profile-images')
+          .remove([fileName]);
+      } catch (storageError) {
+        console.error("Storage deletion error:", storageError);
       }
     }
 
@@ -207,5 +215,16 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-// Export multer middleware
-export const uploadMiddleware = upload.single("profileImage");
+// Export multer middleware with error handling
+export const uploadMiddleware = (req, res, next) => {
+  upload.single("profileImage")(req, res, (err) => {
+    if (err) {
+      console.error("Multer error:", err);
+      return res.status(400).json({
+        success: false,
+        error: err.message || "File upload error",
+      });
+    }
+    next();
+  });
+};

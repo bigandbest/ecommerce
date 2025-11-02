@@ -1,17 +1,22 @@
-import React from 'react';
-import { useMantineColorScheme, SegmentedControl, Group, Center, Box } from '@mantine/core';
-import { IconSun, IconMoon, IconDevices } from '@tabler/icons-react';
+import {
+  useMantineColorScheme,
+  SegmentedControl,
+  Group,
+  Center,
+  Box,
+} from "@mantine/core";
+import { IconSun, IconMoon, IconDevices } from "@tabler/icons-react";
 
 export default function ColorModeSelect(props) {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
-  
+
   if (!colorScheme) {
     return null;
   }
-  
+
   const data = [
     {
-      value: 'light',
+      value: "light",
       label: (
         <Center>
           <IconSun size="1rem" stroke={1.5} />
@@ -20,7 +25,7 @@ export default function ColorModeSelect(props) {
       ),
     },
     {
-      value: 'dark',
+      value: "dark",
       label: (
         <Center>
           <IconMoon size="1rem" stroke={1.5} />
@@ -29,7 +34,7 @@ export default function ColorModeSelect(props) {
       ),
     },
     {
-      value: 'auto',
+      value: "auto",
       label: (
         <Center>
           <IconDevices size="1rem" stroke={1.5} />

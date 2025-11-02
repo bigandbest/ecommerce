@@ -1,4 +1,4 @@
-import supabase, { supabaseAdmin } from "./supabase";
+import { supabase, supabaseAdmin } from "./supabase";
 import { formatDateOnlyIST } from "./dateUtils";
 
 //Video Banner
@@ -219,7 +219,7 @@ export async function addBanner(banner, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("banners")
       .upload(fileName, imageFile);
     if (uploadError) {
@@ -249,7 +249,7 @@ export async function updateBanner(id, banner, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("banners")
       .upload(fileName, imageFile);
     if (uploadError) return { success: false, error: uploadError.message };
@@ -306,7 +306,7 @@ export async function addAdsBanner(banner, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("banners")
       .upload(fileName, imageFile);
     if (uploadError) return { success: false, error: uploadError.message };
@@ -338,7 +338,7 @@ export async function updateAdsBanner(id, banner, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("banners")
       .upload(fileName, imageFile);
     if (uploadError) return { success: false, error: uploadError.message };
@@ -399,7 +399,7 @@ export async function addCategory(category, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("categories")
       .upload(fileName, imageFile);
     if (uploadError) {
@@ -427,7 +427,7 @@ export async function updateCategory(id, category, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("categories")
       .upload(fileName, imageFile);
     if (uploadError) {
@@ -611,7 +611,7 @@ export async function addSubcategory(subcategory, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("subcategories")
       .upload(fileName, imageFile);
     if (uploadError) {
@@ -639,7 +639,7 @@ export async function updateSubcategory(id, subcategory, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("subcategories")
       .upload(fileName, imageFile);
     if (uploadError) {
@@ -697,7 +697,7 @@ export async function addGroup(group, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("groups")
       .upload(fileName, imageFile);
     if (uploadError) {
@@ -725,7 +725,7 @@ export async function updateGroup(id, group, imageFile) {
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("groups")
       .upload(fileName, imageFile);
     if (uploadError) {
@@ -828,6 +828,20 @@ export async function addProduct(
       .from("products")
       .getPublicUrl(videoName);
     videoUrl = videoUrlData.publicUrl;
+  } else if (
+    typeof product.video === "string" &&
+    product.video.trim() !== "" &&
+    (() => {
+      try {
+        new URL(product.video);
+        return true;
+      } catch {
+        return false;
+      }
+    })()
+  ) {
+    // Use YouTube URL or other video URL from product.video if valid
+    videoUrl = product.video;
   }
 
   // Only send valid DB fields
@@ -836,6 +850,7 @@ export async function addProduct(
     .insert([
       {
         ...product,
+        specifications: product.specifications || null,
         image: displayImageUrl,
         images: imageUrls,
         video: videoUrl,
@@ -930,6 +945,7 @@ export async function updateProduct(
     .from("products")
     .update({
       ...dbProduct,
+      specifications: product.specifications || null,
       image: imageUrl,
       images: imageUrls,
       video: videoUrl,
@@ -1322,12 +1338,10 @@ export async function deleteUser(id) {
 
 export async function toggleUserStatus(id, isActive) {
   // 1. Update status in users table
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("users")
     .update({ is_active: isActive })
-    .eq("id", id)
-    .select()
-    .single();
+    .eq("id", id);
   if (error) return { success: false, error: error.message };
 
   // 2. Ban or unban in Supabase Auth (admin)
@@ -1694,7 +1708,7 @@ export async function uploadWebsiteImage(imageFile, folder = "website") {
     .toString(36)
     .substr(2, 9)}.${fileExt}`;
 
-  const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+  const { error: uploadError } = await supabaseAdmin.storage
     .from("uploads")
     .upload(fileName, imageFile);
 
@@ -2402,7 +2416,7 @@ export async function getStorageAnalytics() {
     };
 
     // Get largest files across all buckets
-    for (const [bucketName, bucketInfo] of Object.entries(analytics.buckets)) {
+    for (const bucketName of Object.keys(analytics.buckets)) {
       const filesResult = await listBucketFiles(bucketName);
       if (filesResult.success) {
         const bucketFiles = filesResult.data;

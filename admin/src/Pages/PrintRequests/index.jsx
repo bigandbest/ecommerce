@@ -22,7 +22,15 @@ import {
   Divider,
   Tooltip,
 } from "@mantine/core";
-import { FaUser, FaPaperPlane, FaTrash, FaUserCircle, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import {
+  FaUser,
+  FaPaperPlane,
+  FaTrash,
+  FaUserCircle,
+  FaEnvelope,
+  FaPhone,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
 import {
@@ -39,13 +47,13 @@ const statusColors = {
   rejected: "red",
 };
 
-import supabase from "../../utils/supabase";
+import { supabase } from "../../utils/supabase";
 import { formatDateIST } from "../../utils/dateUtils";
 
 // Helper function to construct full address from enhanced address fields
 const constructFullAddress = (user) => {
   if (!user) return "N/A";
-  
+
   const addressParts = [
     user.house_number,
     user.street_address,
@@ -56,9 +64,9 @@ const constructFullAddress = (user) => {
     user.state,
     user.postal_code,
     user.country,
-    user.landmark
-  ].filter(part => part && part.trim() !== "");
-  
+    user.landmark,
+  ].filter((part) => part && part.trim() !== "");
+
   return addressParts.length > 0 ? addressParts.join(", ") : "N/A";
 };
 
@@ -98,14 +106,16 @@ export default function PrintRequests() {
       // Fetch print_requests joined with users with enhanced address structure
       const { data: printRequests, error } = await supabase
         .from("print_requests")
-        .select(`
+        .select(
+          `
           *, 
           users:user_id (
             id, email, name, avatar, phone,
             house_number, street_address, suite_unit_floor,
             locality, area, city, state, postal_code, country, landmark
           )
-        `)
+        `
+        )
         .order("created_at", { ascending: false });
       if (error) {
         setError(error.message);
@@ -236,12 +246,14 @@ export default function PrintRequests() {
 
   const confirmDeleteRequest = async () => {
     if (!requestToDelete) return;
-    
+
     setDeleteLoading(true);
     try {
       const result = await deletePrintRequest(requestToDelete.id);
       if (result.success) {
-        setPrintRequests(prev => prev.filter(req => req.id !== requestToDelete.id));
+        setPrintRequests((prev) =>
+          prev.filter((req) => req.id !== requestToDelete.id)
+        );
         setDeleteModalOpen(false);
         setRequestToDelete(null);
       } else {
@@ -257,14 +269,14 @@ export default function PrintRequests() {
   // Handle user details
   const handleUserClick = async (userId) => {
     if (!userId) return;
-    
+
     setLoadingUserDetails(true);
     setUserDetailsModalOpen(true);
-    
+
     try {
       const result = await getAllUsersWithDetailedAddress();
       if (result.success) {
-        const user = result.users.find(u => u.id === userId);
+        const user = result.users.find((u) => u.id === userId);
         if (user) {
           setSelectedUserDetails(user);
         } else {
@@ -296,7 +308,11 @@ export default function PrintRequests() {
   }
 
   return (
-    <Container size="xl" py="xl" style={{ maxWidth: '100%', overflowX: 'hidden' }}>
+    <Container
+      size="xl"
+      py="xl"
+      style={{ maxWidth: "100%", overflowX: "hidden" }}
+    >
       <Title mb="lg">Print Requests</Title>
 
       {error && (
@@ -310,166 +326,228 @@ export default function PrintRequests() {
           <Text align="center">No printing requests found.</Text>
         </Paper>
       ) : (
-        <div style={{ overflowX: 'auto', width: '100%' }}>
+        <div style={{ overflowX: "auto", width: "100%" }}>
           <Paper p="xs" withBorder>
-            <Table striped highlightOnHover withTableBorder style={{ tableLayout: 'fixed', minWidth: '1300px' }}>
+            <Table
+              striped
+              highlightOnHover
+              withTableBorder
+              style={{ tableLayout: "fixed", minWidth: "1300px" }}
+            >
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th style={{ width: '250px' }}>Customer</Table.Th>
-                  <Table.Th style={{ width: '180px' }}>Product</Table.Th>
-                  <Table.Th style={{ width: '200px' }}>Details</Table.Th>
-                  <Table.Th style={{ width: '150px' }}>Price</Table.Th>
-                  <Table.Th style={{ width: '140px' }}>Date</Table.Th>
-                  <Table.Th style={{ width: '120px' }}>Status</Table.Th>
-                  <Table.Th style={{ width: '260px' }}>Actions</Table.Th>
+                  <Table.Th style={{ width: "250px" }}>Customer</Table.Th>
+                  <Table.Th style={{ width: "180px" }}>Product</Table.Th>
+                  <Table.Th style={{ width: "200px" }}>Details</Table.Th>
+                  <Table.Th style={{ width: "150px" }}>Price</Table.Th>
+                  <Table.Th style={{ width: "140px" }}>Date</Table.Th>
+                  <Table.Th style={{ width: "120px" }}>Status</Table.Th>
+                  <Table.Th style={{ width: "260px" }}>Actions</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {printRequests.map((request) => (
                   <Table.Tr key={request.id}>
-                    <Table.Td style={{ width: '250px' }}>
+                    <Table.Td style={{ width: "250px" }}>
                       <Group spacing="sm">
                         <Tooltip label="View user details">
-                          <Avatar 
-                            src={request.users?.avatar || `https://i.pravatar.cc/150?u=${request.users?.email}`} 
-                            size="md" 
+                          <Avatar
+                            src={
+                              request.users?.avatar ||
+                              `https://i.pravatar.cc/150?u=${request.users?.email}`
+                            }
+                            size="md"
                             radius="xl"
-                            style={{ cursor: 'pointer' }}
+                            style={{ cursor: "pointer" }}
                             onClick={() => handleUserClick(request.users?.id)}
                           />
                         </Tooltip>
-                        <div style={{ overflow: 'hidden' }}>
-                          <Text 
-                            weight={500} 
+                        <div style={{ overflow: "hidden" }}>
+                          <Text
+                            weight={500}
                             size="sm"
-                            style={{ 
-                              whiteSpace: 'nowrap', 
-                              overflow: 'hidden', 
-                              textOverflow: 'ellipsis',
-                              maxWidth: '140px'
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              maxWidth: "140px",
                             }}
                           >
                             {request.users?.name ||
                               request.users?.email ||
                               "Unknown"}
                           </Text>
-                        <Text size="xs" color="dimmed" style={{ 
-                          whiteSpace: 'nowrap', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis',
-                          maxWidth: '180px'
-                        }}>
-                          {request.users?.email || "N/A"}
-                        </Text>
-                        <Text size="xs" color="dimmed" style={{ 
-                          whiteSpace: 'nowrap', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis',
-                          maxWidth: '180px'
-                        }}>
-                          Phone: {request.users?.phone || "N/A"}
-                        </Text>
-                        <Text size="xs" color="dimmed" title={constructFullAddress(request.users)} style={{ 
-                          whiteSpace: 'nowrap', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis',
-                          maxWidth: '180px'
-                        }}>
-                          Address: {constructFullAddress(request.users).length > 20 
-                            ? `${constructFullAddress(request.users).substring(0, 20)}...` 
-                            : constructFullAddress(request.users)
-                          }
-                        </Text>
-                      </div>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td style={{ width: '180px', verticalAlign: 'top', padding: '12px 8px' }}>
-                    <Text size="sm" style={{ 
-                      whiteSpace: 'nowrap', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis' 
-                    }}>
-                      {request.product_type || "Custom Product"}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td style={{ width: '200px', verticalAlign: 'top', padding: '12px 8px' }}>
-                    <Stack spacing={2}>
-                      <Text size="sm">Size: {request.size || "N/A"}</Text>
-                      <Text size="sm">Color: {request.color || "N/A"}</Text>
-                      <Text size="sm">Qty: {request.quantity || 1}</Text>
-                      <Text size="sm">
-                        Position: {request.position || "N/A"}
+                          <Text
+                            size="xs"
+                            color="dimmed"
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              maxWidth: "180px",
+                            }}
+                          >
+                            {request.users?.email || "N/A"}
+                          </Text>
+                          <Text
+                            size="xs"
+                            color="dimmed"
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              maxWidth: "180px",
+                            }}
+                          >
+                            Phone: {request.users?.phone || "N/A"}
+                          </Text>
+                          <Text
+                            size="xs"
+                            color="dimmed"
+                            title={constructFullAddress(request.users)}
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              maxWidth: "180px",
+                            }}
+                          >
+                            Address:{" "}
+                            {constructFullAddress(request.users).length > 20
+                              ? `${constructFullAddress(
+                                  request.users
+                                ).substring(0, 20)}...`
+                              : constructFullAddress(request.users)}
+                          </Text>
+                        </div>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td
+                      style={{
+                        width: "180px",
+                        verticalAlign: "top",
+                        padding: "12px 8px",
+                      }}
+                    >
+                      <Text
+                        size="sm"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {request.product_type || "Custom Product"}
                       </Text>
-                    </Stack>
-                  </Table.Td>
-                  <Table.Td style={{ width: '150px', verticalAlign: 'top', padding: '12px 8px' }}>
-                    <Stack spacing={2}>
-                      {request.estimated_price > 0 && (
-                        <Text size="sm" weight={500} color="green">
-                          Est: ₹{request.estimated_price}
+                    </Table.Td>
+                    <Table.Td
+                      style={{
+                        width: "200px",
+                        verticalAlign: "top",
+                        padding: "12px 8px",
+                      }}
+                    >
+                      <Stack spacing={2}>
+                        <Text size="sm">Size: {request.size || "N/A"}</Text>
+                        <Text size="sm">Color: {request.color || "N/A"}</Text>
+                        <Text size="sm">Qty: {request.quantity || 1}</Text>
+                        <Text size="sm">
+                          Position: {request.position || "N/A"}
                         </Text>
-                      )}
-                      {request.final_price > 0 && (
-                        <Text size="sm" weight={600} color="blue">
-                          Final: ₹{request.final_price}
-                        </Text>
-                      )}
-                      {!request.estimated_price && !request.final_price && (
-                        <Text size="xs" color="dimmed">
-                          No price set
-                        </Text>
-                      )}
-                    </Stack>
-                  </Table.Td>
-                  <Table.Td style={{ width: '140px', verticalAlign: 'top', padding: '12px 8px' }}>
-                    <Text size="xs" style={{ whiteSpace: 'nowrap' }}>
-                      {formatDateIST(request.created_at)}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td style={{ width: '120px', verticalAlign: 'top', padding: '12px 8px' }}>
-                    <Badge color={statusColors[request.status] || "gray"}>
-                      {request.status}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td style={{ width: '260px', verticalAlign: 'top', padding: '12px 8px' }}>
-                    <Group spacing="xs" justify="center">
-                      <Button
-                        size="xs"
-                        variant="subtle"
-                        onClick={() => handleViewRequest(request)}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        size="xs"
-                        onClick={() => handleUpdateStatus(request)}
-                      >
-                        Update
-                      </Button>
-                      {request.enquiry_id && (
+                      </Stack>
+                    </Table.Td>
+                    <Table.Td
+                      style={{
+                        width: "150px",
+                        verticalAlign: "top",
+                        padding: "12px 8px",
+                      }}
+                    >
+                      <Stack spacing={2}>
+                        {request.estimated_price > 0 && (
+                          <Text size="sm" weight={500} color="green">
+                            Est: ₹{request.estimated_price}
+                          </Text>
+                        )}
+                        {request.final_price > 0 && (
+                          <Text size="sm" weight={600} color="blue">
+                            Final: ₹{request.final_price}
+                          </Text>
+                        )}
+                        {!request.estimated_price && !request.final_price && (
+                          <Text size="xs" color="dimmed">
+                            No price set
+                          </Text>
+                        )}
+                      </Stack>
+                    </Table.Td>
+                    <Table.Td
+                      style={{
+                        width: "140px",
+                        verticalAlign: "top",
+                        padding: "12px 8px",
+                      }}
+                    >
+                      <Text size="xs" style={{ whiteSpace: "nowrap" }}>
+                        {formatDateIST(request.created_at)}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td
+                      style={{
+                        width: "120px",
+                        verticalAlign: "top",
+                        padding: "12px 8px",
+                      }}
+                    >
+                      <Badge color={statusColors[request.status] || "gray"}>
+                        {request.status}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td
+                      style={{
+                        width: "260px",
+                        verticalAlign: "top",
+                        padding: "12px 8px",
+                      }}
+                    >
+                      <Group spacing="xs" justify="center">
                         <Button
                           size="xs"
-                          color="green"
-                          onClick={() => openChatModal(request.enquiry_id)}
+                          variant="subtle"
+                          onClick={() => handleViewRequest(request)}
                         >
-                          Chat
+                          View
                         </Button>
-                      )}
-                      <Button
-                        size="xs"
-                        color="red"
-                        variant="light"
-                        onClick={() => handleDeleteRequest(request)}
-                        leftSection={<FaTrash size={12} />}
-                      >
-                        Delete
-                      </Button>
-                    </Group>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+                        <Button
+                          size="xs"
+                          onClick={() => handleUpdateStatus(request)}
+                        >
+                          Update
+                        </Button>
+                        {request.enquiry_id && (
+                          <Button
+                            size="xs"
+                            color="green"
+                            onClick={() => openChatModal(request.enquiry_id)}
+                          >
+                            Chat
+                          </Button>
+                        )}
+                        <Button
+                          size="xs"
+                          color="red"
+                          variant="light"
+                          onClick={() => handleDeleteRequest(request)}
+                          leftSection={<FaTrash size={12} />}
+                        >
+                          Delete
+                        </Button>
+                      </Group>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
           </Paper>
         </div>
       )}
@@ -784,9 +862,20 @@ export default function PrintRequests() {
                 </Paper>
               )}
             <ScrollArea h={400}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                  <Paper p="md" radius="lg" withBorder style={{ maxWidth: '400px' }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "16px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                  <Paper
+                    p="md"
+                    radius="lg"
+                    withBorder
+                    style={{ maxWidth: "400px" }}
+                  >
                     <Text size="sm" color="dimmed" mb="xs">
                       {formatDateIST(currentEnquiry.created_at)} - Customer
                     </Text>
@@ -797,17 +886,21 @@ export default function PrintRequests() {
                   <div
                     key={reply.id}
                     style={{
-                      display: 'flex',
-                      justifyContent: reply.is_admin ? 'flex-end' : 'flex-start'
+                      display: "flex",
+                      justifyContent: reply.is_admin
+                        ? "flex-end"
+                        : "flex-start",
                     }}
                   >
                     <Paper
                       p="md"
                       radius="lg"
                       withBorder
-                      style={{ 
-                        maxWidth: '400px',
-                        backgroundColor: reply.is_admin ? 'var(--mantine-color-green-light)' : undefined
+                      style={{
+                        maxWidth: "400px",
+                        backgroundColor: reply.is_admin
+                          ? "var(--mantine-color-green-light)"
+                          : undefined,
                       }}
                     >
                       <Text size="sm" color="dimmed" mb="xs">
@@ -821,7 +914,9 @@ export default function PrintRequests() {
               </div>
             </ScrollArea>
             <Divider />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
               <Text weight={500}>Send Reply</Text>
               <Textarea
                 placeholder="Type your reply here..."
@@ -865,7 +960,8 @@ export default function PrintRequests() {
         centered
       >
         <Text mb="md">
-          Are you sure you want to delete this print request? This action cannot be undone and will also delete all associated replies.
+          Are you sure you want to delete this print request? This action cannot
+          be undone and will also delete all associated replies.
         </Text>
         {requestToDelete && (
           <Text size="sm" color="dimmed" mb="lg">
@@ -899,28 +995,39 @@ export default function PrintRequests() {
         size="md"
       >
         {loadingUserDetails ? (
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
             <Loader size="lg" />
             <Text mt="md">Loading user details...</Text>
           </div>
         ) : selectedUserDetails ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+          >
             {/* Header with avatar and basic info */}
             <Paper p="lg" radius="md" withBorder>
               <Group spacing="md">
-                <Avatar 
-                  src={selectedUserDetails.avatar} 
-                  size="xl" 
+                <Avatar
+                  src={selectedUserDetails.avatar}
+                  size="xl"
                   radius="xl"
                   color="blue"
                 >
                   <FaUserCircle size={40} />
                 </Avatar>
                 <div>
-                  <Text size="xl" weight={600}>{selectedUserDetails.name}</Text>
-                  <Text size="sm" color="dimmed">{selectedUserDetails.role === 'admin' ? 'Administrator' : 'Customer'}</Text>
-                  <Text size="sm" color={selectedUserDetails.active ? 'green' : 'red'}>
-                    {selectedUserDetails.active ? 'Active' : 'Inactive'}
+                  <Text size="xl" weight={600}>
+                    {selectedUserDetails.name}
+                  </Text>
+                  <Text size="sm" color="dimmed">
+                    {selectedUserDetails.role === "admin"
+                      ? "Administrator"
+                      : "Customer"}
+                  </Text>
+                  <Text
+                    size="sm"
+                    color={selectedUserDetails.active ? "green" : "red"}
+                  >
+                    {selectedUserDetails.active ? "Active" : "Inactive"}
                   </Text>
                 </div>
               </Group>
@@ -928,17 +1035,33 @@ export default function PrintRequests() {
 
             {/* Contact Information */}
             <div>
-              <Text weight={500} mb="sm" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Text
+                weight={500}
+                mb="sm"
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
                 <FaEnvelope /> Contact Information
               </Text>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                }}
+              >
                 <div>
-                  <Text size="xs" color="dimmed">Email</Text>
+                  <Text size="xs" color="dimmed">
+                    Email
+                  </Text>
                   <Text size="sm">{selectedUserDetails.email}</Text>
                 </div>
                 <div>
-                  <Text size="xs" color="dimmed">Phone</Text>
-                  <Text size="sm">{selectedUserDetails.phone || 'Not provided'}</Text>
+                  <Text size="xs" color="dimmed">
+                    Phone
+                  </Text>
+                  <Text size="sm">
+                    {selectedUserDetails.phone || "Not provided"}
+                  </Text>
                 </div>
               </div>
             </div>
@@ -946,7 +1069,11 @@ export default function PrintRequests() {
             {/* Address Information */}
             {selectedUserDetails.fullAddress && (
               <div>
-                <Text weight={500} mb="sm" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Text
+                  weight={500}
+                  mb="sm"
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
                   <FaMapMarkerAlt /> Address
                 </Text>
                 <Paper p="md" radius="md" withBorder>
@@ -957,42 +1084,65 @@ export default function PrintRequests() {
 
             {/* Account Details */}
             <div>
-              <Text weight={500} mb="sm">Account Details</Text>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <Text weight={500} mb="sm">
+                Account Details
+              </Text>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                }}
+              >
                 <div>
-                  <Text size="xs" color="dimmed">Account Type</Text>
-                  <Text size="sm">{selectedUserDetails.account_type || 'Standard'}</Text>
+                  <Text size="xs" color="dimmed">
+                    Account Type
+                  </Text>
+                  <Text size="sm">
+                    {selectedUserDetails.account_type || "Standard"}
+                  </Text>
                 </div>
                 <div>
-                  <Text size="xs" color="dimmed">Joined Date</Text>
-                  <Text size="sm">{selectedUserDetails.joined || 'N/A'}</Text>
+                  <Text size="xs" color="dimmed">
+                    Joined Date
+                  </Text>
+                  <Text size="sm">{selectedUserDetails.joined || "N/A"}</Text>
                 </div>
               </div>
               {selectedUserDetails.company_name && (
-                <div style={{ marginTop: '12px' }}>
-                  <Text size="xs" color="dimmed">Company</Text>
+                <div style={{ marginTop: "12px" }}>
+                  <Text size="xs" color="dimmed">
+                    Company
+                  </Text>
                   <Text size="sm">{selectedUserDetails.company_name}</Text>
                 </div>
               )}
             </div>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+                marginTop: "20px",
+              }}
+            >
               <Button
                 variant="outline"
-                onClick={() => navigate(`/users?userId=${selectedUserDetails.id}`)}
+                onClick={() =>
+                  navigate(`/users?userId=${selectedUserDetails.id}`)
+                }
               >
                 Go to User Management
               </Button>
-              <Button
-                onClick={() => setUserDetailsModalOpen(false)}
-              >
+              <Button onClick={() => setUserDetailsModalOpen(false)}>
                 Close
               </Button>
             </div>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
             <Text color="red">User details not found</Text>
           </div>
         )}

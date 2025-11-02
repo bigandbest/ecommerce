@@ -30,7 +30,7 @@ import {
   FaHistory,
 } from "react-icons/fa";
 import axios from "axios";
-import supabase from "../../utils/supabase";
+import { supabase } from "../../utils/supabase";
 
 const AdminWalletManagement = () => {
   const [walletStats, setWalletStats] = useState(null);
@@ -87,7 +87,7 @@ const AdminWalletManagement = () => {
   });
 
   const API_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
   // Get auth headers using Supabase session
   const getAuthHeaders = useCallback(async () => {

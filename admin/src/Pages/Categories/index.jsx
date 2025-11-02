@@ -21,7 +21,7 @@ import {
   Tooltip,
   Loader,
   Center,
-  HoverCard,
+  
 } from "@mantine/core";
 import {
   FaEdit,
@@ -32,7 +32,7 @@ import {
   FaLayerGroup,
   FaChevronDown,
   FaChevronRight,
-  FaSpinner,
+  
 } from "react-icons/fa";
 import { showNotification } from "@mantine/notifications";
 

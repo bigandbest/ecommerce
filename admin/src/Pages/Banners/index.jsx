@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Card, 
-  Title, 
-  Text, 
-  Table, 
-  ActionIcon, 
-  Group, 
-  Button, 
-  TextInput, 
+import {
+  Card,
+  Title,
+  Text,
+  Table,
+  ActionIcon,
+  Group,
+  Button,
+  TextInput,
   Switch,
   Modal,
   Image,
@@ -16,18 +16,17 @@ import {
   FileInput,
   Textarea,
   Loader,
-  Notification
+  Notification,
 } from "@mantine/core";
-import { 
-  FaEdit, 
-  FaTrash, 
-  FaPlus, 
+import {
+  FaEdit,
+  FaTrash,
+  FaPlus,
   FaSearch,
   FaLink,
   FaEye,
-  FaUpload
+  FaUpload,
 } from "react-icons/fa";
-
 
 // Banner positions options
 const BANNER_POSITIONS = [
@@ -35,12 +34,19 @@ const BANNER_POSITIONS = [
   { value: "featured", label: "Featured Section" },
   { value: "sidebar", label: "Sidebar" },
   { value: "promo", label: "Promotional Banner" },
-  { value: "category", label: "Category Banner" }
+  { value: "category", label: "Category Banner" },
 ];
 
-import {Link} from "react-router-dom";
-import { getAllBanners, addBanner, updateBanner, deleteBanner, toggleBannerStatus, toggleMobileBannerStatus } from '../../utils/supabaseApi'
-import supabase from '../../utils/supabase'
+import { Link } from "react-router-dom";
+import {
+  getAllBanners,
+  addBanner,
+  updateBanner,
+  deleteBanner,
+  toggleBannerStatus,
+  toggleMobileBannerStatus,
+} from "../../utils/supabaseApi";
+import { supabase } from "../../utils/supabase";
 
 const BannersPage = () => {
   const [banners, setBanners] = useState([]);
@@ -48,10 +54,10 @@ const BannersPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(null);
-  const [newBanner, setNewBanner] = useState({ 
-    title: "", 
+  const [newBanner, setNewBanner] = useState({
+    title: "",
     description: "",
-    link: "", 
+    link: "",
     active: true,
     position: "hero",
     is_mobile: false,
@@ -59,16 +65,24 @@ const BannersPage = () => {
   const [activePage, setActivePage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [notification, setNotification] = useState({ visible: false, message: "", color: "" });
+  const [notification, setNotification] = useState({
+    visible: false,
+    message: "",
+    color: "",
+  });
   const itemsPerPage = 5;
 
   useEffect(() => {
     async function getBanners() {
       setLoading(true);
-      const { data: banners, error } = await supabase.from('banners').select();
-      console.log(banners)
+      const { data: banners, error } = await supabase.from("banners").select();
+      console.log(banners);
       if (error) {
-        setNotification({ visible: true, message: error.message, color: 'red' });
+        setNotification({
+          visible: true,
+          message: error.message,
+          color: "red",
+        });
       } else if (banners && banners.length > 0) {
         setBanners(banners);
       }
@@ -98,11 +112,14 @@ const BannersPage = () => {
   // Show notification helper
   const showNotification = (message, color = "blue") => {
     setNotification({ visible: true, message, color });
-    setTimeout(() => setNotification({ visible: false, message: "", color: "" }), 4000);
+    setTimeout(
+      () => setNotification({ visible: false, message: "", color: "" }),
+      4000
+    );
   };
 
   // Filter banners based on search
-  const filteredBanners = banners.filter(banner => 
+  const filteredBanners = banners.filter((banner) =>
     banner.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -115,10 +132,10 @@ const BannersPage = () => {
 
   const openAddModal = () => {
     setCurrentBanner(null);
-    setNewBanner({ 
-      title: "", 
+    setNewBanner({
+      title: "",
       description: "",
-      link: "", 
+      link: "",
       active: true,
       position: "hero",
       is_mobile: false,
@@ -148,12 +165,16 @@ const BannersPage = () => {
       showNotification("Banner image is required", "red");
       return;
     }
-    
+
     setSaving(true);
     try {
       if (currentBanner) {
         // Update existing banner
-        const result = await updateBanner(currentBanner.id, newBanner, newBanner.image instanceof File ? newBanner.image : null);
+        const result = await updateBanner(
+          currentBanner.id,
+          newBanner,
+          newBanner.image instanceof File ? newBanner.image : null
+        );
         if (result.success) {
           // Refresh banner list
           const updatedBanners = await getAllBanners();
@@ -166,7 +187,10 @@ const BannersPage = () => {
         }
       } else {
         // Add new banner
-        const result = await addBanner(newBanner, newBanner.image instanceof File ? newBanner.image : null);
+        const result = await addBanner(
+          newBanner,
+          newBanner.image instanceof File ? newBanner.image : null
+        );
         if (result.success) {
           // Refresh banner list
           const updatedBanners = await getAllBanners();
@@ -193,7 +217,7 @@ const BannersPage = () => {
       try {
         const result = await deleteBanner(id);
         if (result.success) {
-          setBanners(banners.filter(banner => banner.id !== id));
+          setBanners(banners.filter((banner) => banner.id !== id));
           showNotification("Banner deleted successfully", "green");
         } else {
           showNotification("Error deleting banner: " + result.error, "red");
@@ -208,18 +232,26 @@ const BannersPage = () => {
   };
 
   const toggleActive = async (id) => {
-    const banner = banners.find(b => b.id === id);
+    const banner = banners.find((b) => b.id === id);
     if (!banner) return;
-    
+
     try {
       const result = await toggleBannerStatus(id, !banner.active);
       if (result.success) {
-        setBanners(banners.map(ban => 
-          ban.id === id ? { ...ban, active: !ban.active } : ban
-        ));
-        showNotification(`Banner ${!banner.active ? 'activated' : 'deactivated'} successfully`, "green");
+        setBanners(
+          banners.map((ban) =>
+            ban.id === id ? { ...ban, active: !ban.active } : ban
+          )
+        );
+        showNotification(
+          `Banner ${!banner.active ? "activated" : "deactivated"} successfully`,
+          "green"
+        );
       } else {
-        showNotification("Error updating banner status: " + result.error, "red");
+        showNotification(
+          "Error updating banner status: " + result.error,
+          "red"
+        );
       }
     } catch (error) {
       console.error("Error toggling banner status:", error);
@@ -227,18 +259,28 @@ const BannersPage = () => {
     }
   };
   const toggleMobile = async (id) => {
-    const banner = banners.find(b => b.id === id);
+    const banner = banners.find((b) => b.id === id);
     if (!banner) return;
-    
+
     try {
       const result = await toggleMobileBannerStatus(id, !banner.is_mobile);
       if (result.success) {
-        setBanners(banners.map(ban => 
-          ban.id === id ? { ...ban, is_mobile: !ban.is_mobile } : ban
-        ));
-        showNotification(`Banner ${!banner.is_mobile ? 'activated' : 'deactivated'} successfully`, "green");
+        setBanners(
+          banners.map((ban) =>
+            ban.id === id ? { ...ban, is_mobile: !ban.is_mobile } : ban
+          )
+        );
+        showNotification(
+          `Banner ${
+            !banner.is_mobile ? "activated" : "deactivated"
+          } successfully`,
+          "green"
+        );
       } else {
-        showNotification("Error updating banner status: " + result.error, "red");
+        showNotification(
+          "Error updating banner status: " + result.error,
+          "red"
+        );
       }
     } catch (error) {
       console.error("Error toggling banner status:", error);
@@ -251,19 +293,19 @@ const BannersPage = () => {
       <Card shadow="sm" p="lg" radius="md" className="mantine-card mb-6">
         <Group position="apart" className="mb-4">
           <Title order={2}>Banners Management</Title>
-          <Button 
-             icon={<FaPlus />} 
-             color="blue"
-             variant="filled"
-             onClick={openAddModal}
+          <Button
+            icon={<FaPlus />}
+            color="blue"
+            variant="filled"
+            onClick={openAddModal}
           >
             Add New Banner
           </Button>
-          <Link to={'/VideoBannerManagement'} className="underline">Go to Video Banner Management</Link>
-          <Link to={'/ShippingBanner'} className="underline">
-            <Button variant="outline">
-              Manage Shipping Banner
-            </Button>
+          <Link to={"/VideoBannerManagement"} className="underline">
+            Go to Video Banner Management
+          </Link>
+          <Link to={"/ShippingBanner"} className="underline">
+            <Button variant="outline">Manage Shipping Banner</Button>
           </Link>
         </Group>
 
@@ -280,11 +322,19 @@ const BannersPage = () => {
         <div className="overflow-x-auto">
           <Table striped highlightOnHover>
             <colgroup>
-              <col style={{ width: 200, textAlign: 'center' }} />
+              <col style={{ width: 200, textAlign: "center" }} />
             </colgroup>
             <thead>
               <tr>
-                <th style={{ width: 200, textAlign: 'center', verticalAlign: 'middle' }}>Banner</th>
+                <th
+                  style={{
+                    width: 200,
+                    textAlign: "center",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  Banner
+                </th>
                 <th>Title</th>
                 <th>Position</th>
                 <th>Status</th>
@@ -295,52 +345,77 @@ const BannersPage = () => {
             <tbody>
               {paginatedBanners.map((banner) => (
                 <tr key={banner.id}>
-                  <td style={{ width: 200, textAlign: 'center', verticalAlign: 'middle' }}>
-                  <div style={{ width: 200, height: 130, overflow: 'hidden', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', marginLeft: 'auto', marginRight: 'auto' }}>
+                  <td
+                    style={{
+                      width: 200,
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 200,
+                        height: 130,
+                        overflow: "hidden",
+                        borderRadius: 4,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "#f5f5f5",
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                      }}
+                    >
                       {banner.image ? (
                         <img
                           src={banner.image}
                           alt={banner.title}
-                          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                          style={{
+                            objectFit: "cover",
+                            width: "100%",
+                            height: "100%",
+                          }}
                         />
                       ) : (
                         <span className="text-gray-400">No Image</span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">#{String(banner.id).slice(-4)}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      #{String(banner.id).slice(-4)}
+                    </div>
                   </td>
                   <td>{banner.title}</td>
                   <td className="capitalize">{banner.position}</td>
                   <td>
-                    <Switch 
-                      checked={banner.active} 
+                    <Switch
+                      checked={banner.active}
                       onChange={() => toggleActive(banner.id)}
                       color="green"
                     />
                   </td>
                   <td>
-                    <Switch 
-                      checked={banner.is_mobile} 
+                    <Switch
+                      checked={banner.is_mobile}
                       onChange={() => toggleMobile(banner.id)}
                       color="green"
                     />
                   </td>
                   <td>
                     <Group spacing={8}>
-                      <ActionIcon 
+                      <ActionIcon
                         color="blue"
                         onClick={() => openEditModal(banner)}
                       >
                         <FaEdit size={16} />
                       </ActionIcon>
-                      <ActionIcon 
+                      <ActionIcon
                         color="teal"
                         onClick={() => openPreviewModal(banner)}
                       >
                         <FaEye size={16} />
                       </ActionIcon>
-                      <ActionIcon 
-                        color="red" 
+                      <ActionIcon
+                        color="red"
                         onClick={() => handleDeleteBanner(banner.id)}
                       >
                         <FaTrash size={16} />
@@ -379,7 +454,9 @@ const BannersPage = () => {
             placeholder="Enter banner title"
             required
             value={newBanner.title}
-            onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })}
+            onChange={(e) =>
+              setNewBanner({ ...newBanner, title: e.target.value })
+            }
           />
 
           <TextInput
@@ -387,7 +464,9 @@ const BannersPage = () => {
             placeholder="Enter redirect URL (e.g., /products/category)"
             leftSection={<FaLink size={14} />}
             value={newBanner.link}
-            onChange={(e) => setNewBanner({ ...newBanner, link: e.target.value })}
+            onChange={(e) =>
+              setNewBanner({ ...newBanner, link: e.target.value })
+            }
           />
 
           <Select
@@ -398,39 +477,47 @@ const BannersPage = () => {
               { value: "hero", label: "Hero Section" },
               { value: "featured", label: "Featured Section" },
               { value: "sidebar", label: "Sidebar" },
-              { value: "popup", label: "Popup" }
+              { value: "popup", label: "Popup" },
             ]}
             value={newBanner.position}
-            onChange={(value) => setNewBanner({ ...newBanner, position: value })}
+            onChange={(value) =>
+              setNewBanner({ ...newBanner, position: value })
+            }
           />
 
           <div className="flex items-center mb-2">
-            <Switch 
-              label="Active" 
-              checked={newBanner.active} 
-              onChange={(event) => setNewBanner({
-                ...newBanner,
-                active: event.currentTarget.checked
-              })}
+            <Switch
+              label="Active"
+              checked={newBanner.active}
+              onChange={(event) =>
+                setNewBanner({
+                  ...newBanner,
+                  active: event.currentTarget.checked,
+                })
+              }
               color="green"
             />
           </div>
 
           <div className="flex items-center mb-2">
-            <Switch 
-              label="Only Mobile" 
-              checked={newBanner.is_mobile} 
-              onChange={(event) => setNewBanner({
-                ...newBanner,
-                is_mobile: event.currentTarget.checked
-              })}
+            <Switch
+              label="Only Mobile"
+              checked={newBanner.is_mobile}
+              onChange={(event) =>
+                setNewBanner({
+                  ...newBanner,
+                  is_mobile: event.currentTarget.checked,
+                })
+              }
               color="green"
             />
           </div>
 
-          {typeof newBanner.image === 'string' && newBanner.image && (
+          {typeof newBanner.image === "string" && newBanner.image && (
             <div className="mb-4">
-              <Text weight={500} size="sm" className="mb-2">Current Image</Text>
+              <Text weight={500} size="sm" className="mb-2">
+                Current Image
+              </Text>
               <Image
                 src={newBanner.image}
                 alt={newBanner.title}
@@ -451,7 +538,9 @@ const BannersPage = () => {
 
           {newBanner.image instanceof File && (
             <div className="mb-4">
-              <Text weight={500} size="sm" className="mb-2">Preview Image</Text>
+              <Text weight={500} size="sm" className="mb-2">
+                Preview Image
+              </Text>
               <Image
                 src={URL.createObjectURL(newBanner.image)}
                 alt={newBanner.title}
@@ -490,25 +579,33 @@ const BannersPage = () => {
                 fit="cover"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Text weight={700} size="sm">Title</Text>
+                <Text weight={700} size="sm">
+                  Title
+                </Text>
                 <Text>{currentBanner.title}</Text>
               </div>
-              
+
               <div>
-                <Text weight={700} size="sm">Position</Text>
+                <Text weight={700} size="sm">
+                  Position
+                </Text>
                 <Text className="capitalize">{currentBanner.position}</Text>
               </div>
-              
+
               <div>
-                <Text weight={700} size="sm">Link</Text>
+                <Text weight={700} size="sm">
+                  Link
+                </Text>
                 <Text>{currentBanner.link}</Text>
               </div>
-              
+
               <div>
-                <Text weight={700} size="sm">Status</Text>
+                <Text weight={700} size="sm">
+                  Status
+                </Text>
                 <Text>{currentBanner.active ? "Active" : "Inactive"}</Text>
               </div>
             </div>

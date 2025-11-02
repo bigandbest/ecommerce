@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 
 // Create context
 const AdminAuthContext = createContext();
@@ -68,28 +68,60 @@ export const AdminAuthProvider = ({ children }) => {
   
   useEffect(() => {
     setLoading(true);
-    async function checkSession() {
-      const { data, error } = await supabase.auth.getSession();
-      const session = data?.session;
-      if (session && session.user) {
-        setCurrentUser(session.user);
-        setIsAdmin(session.user.user_metadata?.role === 'admin');
-      } else {
+    
+    const getInitialSession = async () => {
+      try {
+        // Add timeout to session check
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 10000)
+        );
+        
+        const { data, error } = await Promise.race([sessionPromise, timeoutPromise]);
+        
+        if (error) {
+          console.error('Session check error:', error);
+          setError(error.message);
+          setCurrentUser(null);
+          setIsAdmin(false);
+        } else {
+          const session = data?.session;
+          if (session && session.user) {
+            setCurrentUser(session.user);
+            setIsAdmin(session.user.user_metadata?.role === 'admin');
+          } else {
+            setCurrentUser(null);
+            setIsAdmin(false);
+          }
+        }
+      } catch (err) {
+        console.error('Auth initialization error:', err);
+        setError(err.message);
         setCurrentUser(null);
         setIsAdmin(false);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }
-    checkSession();
+    };
+    
+    getInitialSession();
+    
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session && session.user) {
-        setCurrentUser(session.user);
-        setIsAdmin(session.user.user_metadata?.role === 'admin');
-      } else {
-        setCurrentUser(null);
-        setIsAdmin(false);
+      try {
+        if (session && session.user) {
+          setCurrentUser(session.user);
+          setIsAdmin(session.user.user_metadata?.role === 'admin');
+          setError(null);
+        } else {
+          setCurrentUser(null);
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error('Auth state change error:', err);
+        setError(err.message);
       }
     });
+    
     return () => {
       listener.subscription.unsubscribe();
     };
@@ -157,6 +189,16 @@ export const AdminAuthProvider = ({ children }) => {
     }
   };
 
+  // Clear error after some time
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // Context value
   const value = {
     currentUser,
@@ -172,7 +214,7 @@ export const AdminAuthProvider = ({ children }) => {
 
   return (
     <AdminAuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AdminAuthContext.Provider>
   );
 };

@@ -1,47 +1,50 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Card, 
-  Title, 
-  Text, 
-  Tabs, 
-  Button, 
-  TextInput, 
-  Group, 
-  Notification, 
-  Divider, 
-  PasswordInput, 
-  Paper, 
-  Container, 
-  rem, 
+import {
+  Card,
+  Title,
+  Text,
+  Tabs,
+  Button,
+  TextInput,
+  Group,
+  Notification,
+  Divider,
+  PasswordInput,
+  Paper,
+  Container,
+  rem,
   Alert,
   Stack,
   Avatar,
   Badge,
   ActionIcon,
-  Tooltip
+  Tooltip,
 } from "@mantine/core";
-import { 
-  IconUser, 
-  IconLock, 
-  IconShield, 
+import {
+  IconUser,
+  IconLock,
+  IconShield,
   IconEdit,
   IconCheck,
   IconX,
   IconRefresh,
   IconPhone,
   IconMapPin,
-  IconHome
+  IconHome,
 } from "@tabler/icons-react";
 import { useAdminAuth } from "../contexts/AdminAuthContext";
-import supabase from "../utils/supabase";
-import { showNotification } from '@mantine/notifications';
+import { supabase } from "../utils/supabase";
+import { showNotification } from "@mantine/notifications";
 
 export default function Settings() {
   const { currentUser } = useAdminAuth();
-  
+
   // Profile state - enhanced with phone and address fields
   const [profile, setProfile] = useState({
-    name: currentUser?.user_metadata?.name || currentUser?.user_metadata?.displayName || "",
+    name:
+      currentUser?.user_metadata?.name ||
+      currentUser?.user_metadata?.displayName ||
+      "",
     email: currentUser?.email || "",
     phone: "",
     houseNumber: "",
@@ -53,28 +56,35 @@ export default function Settings() {
     state: "",
     postalCode: "",
     country: "India",
-    landmark: ""
+    landmark: "",
   });
   const [profileEdit, setProfileEdit] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
-  
+
   // Database profile details state
   const [dbProfile, setDbProfile] = useState(null);
   const [dbProfileLoading, setDbProfileLoading] = useState(true);
-  
+
   // Security state
-  const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
+  const [passwords, setPasswords] = useState({
+    current: "",
+    new: "",
+    confirm: "",
+  });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Update profile when currentUser changes
   useEffect(() => {
     if (currentUser) {
-      setProfile(prev => ({
+      setProfile((prev) => ({
         ...prev,
-        name: currentUser.user_metadata?.name || currentUser.user_metadata?.displayName || "",
-        email: currentUser.email || ""
+        name:
+          currentUser.user_metadata?.name ||
+          currentUser.user_metadata?.displayName ||
+          "",
+        email: currentUser.email || "",
       }));
-      
+
       // Fetch detailed profile from users table
       fetchDbProfile();
     }
@@ -83,7 +93,7 @@ export default function Settings() {
   // Fetch detailed profile from database
   const fetchDbProfile = async () => {
     if (!currentUser?.id) return;
-    
+
     setDbProfileLoading(true);
     try {
       const { data, error } = await supabase
@@ -91,13 +101,13 @@ export default function Settings() {
         .select("*")
         .eq("id", currentUser.id)
         .single();
-        
+
       if (error) {
-        setError('Failed to load profile data');
+        setError("Failed to load profile data");
       } else {
         setDbProfile(data);
         // Update profile state with database values for editing
-        setProfile(prev => ({
+        setProfile((prev) => ({
           ...prev,
           phone: data?.phone || "",
           houseNumber: data?.house_number || "",
@@ -109,11 +119,11 @@ export default function Settings() {
           state: data?.state || "",
           postalCode: data?.postal_code || "",
           country: data?.country || "India",
-          landmark: data?.landmark || ""
+          landmark: data?.landmark || "",
         }));
       }
     } catch (error) {
-      setError('Failed to load profile data');
+      setError("Failed to load profile data");
     } finally {
       setDbProfileLoading(false);
     }
@@ -125,16 +135,16 @@ export default function Settings() {
     try {
       // 1. Update auth user metadata
       const { error: authError } = await supabase.auth.updateUser({
-        data: { 
+        data: {
           name: profile.name,
-          displayName: profile.name
-        }
+          displayName: profile.name,
+        },
       });
-      
+
       if (authError) {
         showNotification({
           message: authError.message,
-          color: 'red'
+          color: "red",
         });
         return;
       }
@@ -153,21 +163,21 @@ export default function Settings() {
           city: profile.city || null,
           state: profile.state || null,
           postal_code: profile.postalCode || null,
-          country: profile.country || 'India',
+          country: profile.country || "India",
           landmark: profile.landmark || null,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", currentUser.id);
 
       if (dbError) {
         showNotification({
           message: dbError.message,
-          color: 'red'
+          color: "red",
         });
       } else {
         showNotification({
-          message: 'Profile updated successfully!',
-          color: 'green'
+          message: "Profile updated successfully!",
+          color: "green",
         });
         setProfileEdit(false);
         // Refresh the database profile
@@ -175,8 +185,8 @@ export default function Settings() {
       }
     } catch (error) {
       showNotification({
-        message: 'Failed to update profile.',
-        color: 'red'
+        message: "Failed to update profile.",
+        color: "red",
       });
     } finally {
       setProfileLoading(false);
@@ -187,24 +197,24 @@ export default function Settings() {
   const handlePasswordChange = async () => {
     if (!passwords.new || !passwords.confirm) {
       showNotification({
-        message: 'Please fill in all password fields.',
-        color: 'red'
+        message: "Please fill in all password fields.",
+        color: "red",
       });
       return;
     }
 
     if (passwords.new !== passwords.confirm) {
       showNotification({
-        message: 'New passwords do not match.',
-        color: 'red'
+        message: "New passwords do not match.",
+        color: "red",
       });
       return;
     }
 
     if (passwords.new.length < 6) {
       showNotification({
-        message: 'Password must be at least 6 characters long.',
-        color: 'red'
+        message: "Password must be at least 6 characters long.",
+        color: "red",
       });
       return;
     }
@@ -213,25 +223,25 @@ export default function Settings() {
     try {
       // Update password using Supabase
       const { error } = await supabase.auth.updateUser({
-        password: passwords.new
+        password: passwords.new,
       });
 
       if (error) {
         showNotification({
           message: error.message,
-          color: 'red'
+          color: "red",
         });
       } else {
         showNotification({
-          message: 'Password updated successfully!',
-          color: 'green'
+          message: "Password updated successfully!",
+          color: "green",
         });
         setPasswords({ current: "", new: "", confirm: "" });
       }
     } catch (error) {
       showNotification({
-        message: 'Failed to change password.',
-        color: 'red'
+        message: "Failed to change password.",
+        color: "red",
       });
     } finally {
       setPasswordLoading(false);
@@ -241,7 +251,10 @@ export default function Settings() {
   const resetProfileChanges = () => {
     if (dbProfile) {
       setProfile({
-        name: currentUser?.user_metadata?.name || currentUser?.user_metadata?.displayName || "",
+        name:
+          currentUser?.user_metadata?.name ||
+          currentUser?.user_metadata?.displayName ||
+          "",
         email: currentUser?.email || "",
         phone: dbProfile?.phone || "",
         houseNumber: dbProfile?.house_number || "",
@@ -253,11 +266,14 @@ export default function Settings() {
         state: dbProfile?.state || "",
         postalCode: dbProfile?.postal_code || "",
         country: dbProfile?.country || "India",
-        landmark: dbProfile?.landmark || ""
+        landmark: dbProfile?.landmark || "",
       });
     } else {
       setProfile({
-        name: currentUser?.user_metadata?.name || currentUser?.user_metadata?.displayName || "",
+        name:
+          currentUser?.user_metadata?.name ||
+          currentUser?.user_metadata?.displayName ||
+          "",
         email: currentUser?.email || "",
         phone: "",
         houseNumber: "",
@@ -269,7 +285,7 @@ export default function Settings() {
         state: "",
         postalCode: "",
         country: "India",
-        landmark: ""
+        landmark: "",
       });
     }
     setProfileEdit(false);
@@ -280,8 +296,12 @@ export default function Settings() {
       <Stack spacing={24}>
         {/* Header */}
         <div className="text-center">
-          <Title order={1} className="mb-2">Admin Settings</Title>
-          <Text color="dimmed" size="lg">Manage your account preferences and security</Text>
+          <Title order={1} className="mb-2">
+            Admin Settings
+          </Title>
+          <Text color="dimmed" size="lg">
+            Manage your account preferences and security
+          </Text>
         </div>
 
         <Tabs defaultValue="profile" variant="outline" radius="md">
@@ -309,39 +329,41 @@ export default function Settings() {
 
                 <div className="flex items-start gap-6">
                   <div className="flex-shrink-0">
-                    <Avatar 
-                      size={80} 
-                      radius="xl"
-                      color="blue"
-                    >
-                      {profile.name ? profile.name.charAt(0).toUpperCase() : 'A'}
+                    <Avatar size={80} radius="xl" color="blue">
+                      {profile.name
+                        ? profile.name.charAt(0).toUpperCase()
+                        : "A"}
                     </Avatar>
                   </div>
 
                   <div className="flex-1">
                     <Stack spacing="md">
-                      <TextInput 
-                        label="Display Name" 
-                        value={profile.name} 
-                        onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} 
+                      <TextInput
+                        label="Display Name"
+                        value={profile.name}
+                        onChange={(e) =>
+                          setProfile((p) => ({ ...p, name: e.target.value }))
+                        }
                         disabled={!profileEdit}
                         placeholder="Enter your display name"
                         leftSection={<IconUser size={16} />}
                       />
-                      
-                      <TextInput 
-                        label="Email Address" 
-                        value={profile.email} 
+
+                      <TextInput
+                        label="Email Address"
+                        value={profile.email}
                         disabled={true}
                         placeholder="Email cannot be changed"
                         leftSection={<IconUser size={16} />}
                         description="Email address cannot be modified for security reasons"
                       />
 
-                      <TextInput 
-                        label="Phone Number" 
-                        value={profile.phone} 
-                        onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} 
+                      <TextInput
+                        label="Phone Number"
+                        value={profile.phone}
+                        onChange={(e) =>
+                          setProfile((p) => ({ ...p, phone: e.target.value }))
+                        }
                         disabled={!profileEdit}
                         placeholder="Enter your phone number"
                         leftSection={<IconPhone size={16} />}
@@ -360,85 +382,117 @@ export default function Settings() {
 
                 <Stack spacing="md">
                   <Group grow>
-                    <TextInput 
-                      label="House Number" 
-                      value={profile.houseNumber} 
-                      onChange={e => setProfile(p => ({ ...p, houseNumber: e.target.value }))} 
+                    <TextInput
+                      label="House Number"
+                      value={profile.houseNumber}
+                      onChange={(e) =>
+                        setProfile((p) => ({
+                          ...p,
+                          houseNumber: e.target.value,
+                        }))
+                      }
                       disabled={!profileEdit}
                       placeholder="House/Building number"
                     />
-                    <TextInput 
-                      label="Suite/Unit/Floor" 
-                      value={profile.suiteUnitFloor} 
-                      onChange={e => setProfile(p => ({ ...p, suiteUnitFloor: e.target.value }))} 
+                    <TextInput
+                      label="Suite/Unit/Floor"
+                      value={profile.suiteUnitFloor}
+                      onChange={(e) =>
+                        setProfile((p) => ({
+                          ...p,
+                          suiteUnitFloor: e.target.value,
+                        }))
+                      }
                       disabled={!profileEdit}
                       placeholder="Suite, Unit, or Floor"
                     />
                   </Group>
 
-                  <TextInput 
-                    label="Street Address" 
-                    value={profile.streetAddress} 
-                    onChange={e => setProfile(p => ({ ...p, streetAddress: e.target.value }))} 
+                  <TextInput
+                    label="Street Address"
+                    value={profile.streetAddress}
+                    onChange={(e) =>
+                      setProfile((p) => ({
+                        ...p,
+                        streetAddress: e.target.value,
+                      }))
+                    }
                     disabled={!profileEdit}
                     placeholder="Street name and number"
                   />
 
                   <Group grow>
-                    <TextInput 
-                      label="Locality" 
-                      value={profile.locality} 
-                      onChange={e => setProfile(p => ({ ...p, locality: e.target.value }))} 
+                    <TextInput
+                      label="Locality"
+                      value={profile.locality}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, locality: e.target.value }))
+                      }
                       disabled={!profileEdit}
                       placeholder="Locality/Neighborhood"
                     />
-                    <TextInput 
-                      label="Area" 
-                      value={profile.area} 
-                      onChange={e => setProfile(p => ({ ...p, area: e.target.value }))} 
+                    <TextInput
+                      label="Area"
+                      value={profile.area}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, area: e.target.value }))
+                      }
                       disabled={!profileEdit}
                       placeholder="Area"
                     />
                   </Group>
 
                   <Group grow>
-                    <TextInput 
-                      label="City" 
-                      value={profile.city} 
-                      onChange={e => setProfile(p => ({ ...p, city: e.target.value }))} 
+                    <TextInput
+                      label="City"
+                      value={profile.city}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, city: e.target.value }))
+                      }
                       disabled={!profileEdit}
                       placeholder="City"
                     />
-                    <TextInput 
-                      label="State" 
-                      value={profile.state} 
-                      onChange={e => setProfile(p => ({ ...p, state: e.target.value }))} 
+                    <TextInput
+                      label="State"
+                      value={profile.state}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, state: e.target.value }))
+                      }
                       disabled={!profileEdit}
                       placeholder="State/Province"
                     />
                   </Group>
 
                   <Group grow>
-                    <TextInput 
-                      label="Postal Code" 
-                      value={profile.postalCode} 
-                      onChange={e => setProfile(p => ({ ...p, postalCode: e.target.value }))} 
+                    <TextInput
+                      label="Postal Code"
+                      value={profile.postalCode}
+                      onChange={(e) =>
+                        setProfile((p) => ({
+                          ...p,
+                          postalCode: e.target.value,
+                        }))
+                      }
                       disabled={!profileEdit}
                       placeholder="PIN/ZIP code"
                     />
-                    <TextInput 
-                      label="Country" 
-                      value={profile.country} 
-                      onChange={e => setProfile(p => ({ ...p, country: e.target.value }))} 
+                    <TextInput
+                      label="Country"
+                      value={profile.country}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, country: e.target.value }))
+                      }
                       disabled={!profileEdit}
                       placeholder="Country"
                     />
                   </Group>
 
-                  <TextInput 
-                    label="Landmark" 
-                    value={profile.landmark} 
-                    onChange={e => setProfile(p => ({ ...p, landmark: e.target.value }))} 
+                  <TextInput
+                    label="Landmark"
+                    value={profile.landmark}
+                    onChange={(e) =>
+                      setProfile((p) => ({ ...p, landmark: e.target.value }))
+                    }
                     disabled={!profileEdit}
                     placeholder="Nearby landmark (optional)"
                   />
@@ -456,19 +510,19 @@ export default function Settings() {
                       </Text>
                     )}
                   </div>
-                  
+
                   <Group>
                     {profileEdit ? (
                       <>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           onClick={resetProfileChanges}
                           leftSection={<IconX size={16} />}
                         >
                           Cancel
                         </Button>
-                        <Button 
-                          onClick={handleProfileSave} 
+                        <Button
+                          onClick={handleProfileSave}
                           loading={profileLoading}
                           leftSection={<IconCheck size={16} />}
                         >
@@ -476,12 +530,12 @@ export default function Settings() {
                         </Button>
                       </>
                     ) : (
-                      <Button 
+                      <Button
                         onClick={() => setProfileEdit(true)}
                         leftSection={<IconEdit size={16} />}
                         disabled={dbProfileLoading}
                       >
-                        {dbProfileLoading ? 'Loading...' : 'Edit Profile'}
+                        {dbProfileLoading ? "Loading..." : "Edit Profile"}
                       </Button>
                     )}
                   </Group>
@@ -497,29 +551,33 @@ export default function Settings() {
                 <IconLock size={24} />
                 <Title order={3}>Security Settings</Title>
               </Group>
-              
+
               <Stack spacing="lg">
                 <Divider label="Change Password" labelPosition="center" />
-                
-                <PasswordInput 
-                  label="New Password" 
-                  value={passwords.new} 
-                  onChange={e => setPasswords(p => ({ ...p, new: e.target.value }))}
+
+                <PasswordInput
+                  label="New Password"
+                  value={passwords.new}
+                  onChange={(e) =>
+                    setPasswords((p) => ({ ...p, new: e.target.value }))
+                  }
                   placeholder="Enter new password"
                   description="Password must be at least 6 characters long"
                   leftSection={<IconLock size={16} />}
                 />
-                
-                <PasswordInput 
-                  label="Confirm New Password" 
-                  value={passwords.confirm} 
-                  onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))}
+
+                <PasswordInput
+                  label="Confirm New Password"
+                  value={passwords.confirm}
+                  onChange={(e) =>
+                    setPasswords((p) => ({ ...p, confirm: e.target.value }))
+                  }
                   placeholder="Confirm your new password"
                   leftSection={<IconLock size={16} />}
                 />
-                
+
                 <Group justify="flex-end">
-                  <Button 
+                  <Button
                     onClick={handlePasswordChange}
                     loading={passwordLoading}
                     disabled={!passwords.new || !passwords.confirm}
@@ -548,48 +606,60 @@ export default function Settings() {
                         <Text fw={500}>User ID:</Text>
                         <Badge variant="light">{currentUser.id}</Badge>
                       </Group>
-                      
+
                       <Group justify="space-between">
                         <Text fw={500}>Email:</Text>
                         <Text>{currentUser.email}</Text>
                       </Group>
-                      
+
                       <Group justify="space-between">
                         <Text fw={500}>Role:</Text>
                         <Badge color="red" variant="filled">
-                          {currentUser.user_metadata?.role || 'Admin'}
+                          {currentUser.user_metadata?.role || "Admin"}
                         </Badge>
                       </Group>
-                      
+
                       <Group justify="space-between">
                         <Text fw={500}>Account Created:</Text>
-                        <Text>{new Date(currentUser.created_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}</Text>
+                        <Text>
+                          {new Date(currentUser.created_at).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )}
+                        </Text>
                       </Group>
-                      
+
                       <Group justify="space-between">
                         <Text fw={500}>Last Login:</Text>
                         <Text>
-                          {currentUser.last_sign_in_at 
-                            ? new Date(currentUser.last_sign_in_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
+                          {currentUser.last_sign_in_at
+                            ? new Date(
+                                currentUser.last_sign_in_at
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
                               })
-                            : 'N/A'
-                          }
+                            : "N/A"}
                         </Text>
                       </Group>
-                      
+
                       <Group justify="space-between">
                         <Text fw={500}>Email Verified:</Text>
-                        <Badge color={currentUser.email_confirmed_at ? "green" : "orange"}>
-                          {currentUser.email_confirmed_at ? "Verified" : "Pending"}
+                        <Badge
+                          color={
+                            currentUser.email_confirmed_at ? "green" : "orange"
+                          }
+                        >
+                          {currentUser.email_confirmed_at
+                            ? "Verified"
+                            : "Pending"}
                         </Badge>
                       </Group>
                     </Stack>
@@ -597,8 +667,9 @@ export default function Settings() {
 
                   <Alert color="yellow" title="Security Notice">
                     <Text size="sm">
-                      For security reasons, certain account details cannot be modified through this interface. 
-                      Contact system administrator for account-level changes.
+                      For security reasons, certain account details cannot be
+                      modified through this interface. Contact system
+                      administrator for account-level changes.
                     </Text>
                   </Alert>
                 </Stack>

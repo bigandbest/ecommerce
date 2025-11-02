@@ -9,14 +9,40 @@ import {
 
 /** Get all orders (admin usage) */
 export const getAllOrders = async (req, res) => {
-  const { data, error } = await supabase
+  const { page = 1, limit = 10 } = req.query;
+  const offset = (page - 1) * limit;
+
+  const { data, error, count } = await supabase
     .from("orders")
-    .select("*, users(name, email, phone)") // 👈 join users table
-    .order("created_at", { ascending: false });
+    .select(`
+      *,
+      users(name, email, phone),
+      order_items(
+        id,
+        product_id,
+        quantity,
+        price,
+        is_bulk_order,
+        bulk_range,
+        original_price
+      )
+    `, { count: 'exact' })
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error)
     return res.status(500).json({ success: false, error: error.message });
-  return res.json({ success: true, orders: data });
+  
+  return res.json({ 
+    success: true, 
+    orders: data,
+    pagination: {
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / limit)
+    }
+  });
 };
 
 /** Update an order’s status */
@@ -388,4 +414,103 @@ export const deleteOrderById = async (req, res) => {
     success: true,
     message: "Order and its items deleted successfully.",
   });
+};
+
+/** Get order tracking timeline */
+export const getOrderTracking = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    if (!orderId) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Order ID required" });
+    }
+
+    // Fetch order with related items
+    const { data: order, error } = await supabase
+      .from("orders")
+      .select(
+        `id, status, created_at, updated_at, order_items(id, quantity, price, products(id, name))`
+      )
+      .eq("id", orderId)
+      .single();
+
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    // Build a simple timeline. This is intentionally simple — it can be extended to use courier webhooks.
+    const timeline = [];
+
+    // Order placed
+    if (order.created_at) {
+      timeline.push({
+        key: "placed",
+        title: "Order Placed",
+        timestamp: order.created_at,
+        meta: null,
+      });
+    }
+
+    // Map status to steps
+    const status = order.status || "pending";
+
+    if (
+      status === "confirmed" ||
+      status === "shipped" ||
+      status === "delivered"
+    ) {
+      timeline.push({
+        key: "confirmed",
+        title: "Order Confirmed",
+        timestamp: order.updated_at || null,
+      });
+    }
+
+    if (status === "shipped" || status === "delivered") {
+      timeline.push({
+        key: "shipped",
+        title: "Shipped",
+        timestamp: order.updated_at || null,
+      });
+    }
+
+    if (status === "delivered") {
+      timeline.push({
+        key: "delivered",
+        title: "Delivered",
+        timestamp: order.updated_at || null,
+      });
+    }
+
+    if (status === "cancelled") {
+      timeline.push({
+        key: "cancelled",
+        title: "Cancelled",
+        timestamp: order.updated_at || null,
+      });
+    }
+
+    // Remove duplicates & keep order
+    const seen = new Set();
+    const deduped = [];
+    for (const item of timeline) {
+      const k = item.key + (item.timestamp || "");
+      if (!seen.has(k)) {
+        seen.add(k);
+        deduped.push(item);
+      }
+    }
+
+    return res.json({ success: true, orderId: order.id, tracking: deduped });
+  } catch (err) {
+    console.error("getOrderTracking error:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
+  }
 };
